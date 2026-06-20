@@ -149,6 +149,7 @@ class ProxyEngineSML:
         
         # Run K-Means
         kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+        self.kmeans = kmeans
         self.data['shadow_peer_cluster'] = kmeans.fit_predict(self.data[scaled_cols])
         return self.data
 
@@ -170,6 +171,8 @@ class ProxyEngineSML:
         to ensure academic and analytical transparency as required by specification.
         """
         if self.model is None:
+            if hasattr(self, 'cache_data') and 'diagnostics' in self.cache_data:
+                return self.cache_data['diagnostics']
             self.fit_baseline_quantile_regression()
             
         diagnostics = {
@@ -269,6 +272,116 @@ class ProxyEngineSML:
             "lti_vs_salary_ratio": float(lti_vs_salary_ratio)
         }
         return evidence_trace
+
+    def save_to_cache(self, cache_path: str = "sml_cache.json"):
+        """
+        Saves all estimated model coefficients, centroids, scaler states, and medians
+        to a static JSON cache file. This decouples SML training from API serving.
+        """
+        import os
+        if self.model is None:
+            raise ValueError("SML model is not fitted yet. Run fit_baseline_quantile_regression first.")
+            
+        diagnostics = self.get_model_diagnostics()
+        
+        # Get cluster offsets relative to intercept (reference cluster T.0 is 0.0)
+        cluster_offsets = {"0": 0.0}
+        for c in range(1, 4):
+            param_name = f"C(shadow_peer_cluster)[T.{c}]"
+            if param_name in self.model.params:
+                cluster_offsets[str(c)] = float(self.model.params[param_name])
+            else:
+                cluster_offsets[str(c)] = 0.0
+                
+        # Grab medians for year 2024
+        medians_df = self.data[self.data['year'] == 2024].groupby('shadow_peer_cluster')['total_comp'].median()
+        cluster_medians = {str(k): float(v) for k, v in medians_df.items()}
+        
+        cache_data = {
+            "beta_size": float(self.beta_size),
+            "beta_roa": float(self.model.params.get('roa', 1.5)),
+            "intercept": float(self.model.params.get('Intercept', 7.2)),
+            "cluster_offsets": cluster_offsets,
+            "scaler_mean": self.scaler.mean_.tolist() if hasattr(self.scaler, 'mean_') else [0.0, 0.0, 0.0],
+            "scaler_scale": self.scaler.scale_.tolist() if hasattr(self.scaler, 'scale_') else [1.0, 1.0, 1.0],
+            "cluster_centroids": self.kmeans.cluster_centers_.tolist() if hasattr(self, 'kmeans') else [],
+            "cluster_medians": cluster_medians,
+            "diagnostics": diagnostics
+        }
+        
+        os.makedirs(os.path.dirname(os.path.abspath(cache_path)), exist_ok=True)
+        with open(cache_path, "w") as f:
+            json.dump(cache_data, f, indent=2)
+        print(f"SML parameters successfully exported to cache: {cache_path}")
+
+    def load_from_cache(self, cache_path: str = "sml_cache.json") -> bool:
+        """
+        Loads pre-fit coefficients, centroids, scaler states, and medians from JSON cache.
+        Returns True if successful, False otherwise.
+        """
+        import os
+        if not os.path.exists(cache_path):
+            return False
+            
+        try:
+            with open(cache_path, "r") as f:
+                self.cache_data = json.load(f)
+            self.beta_size = self.cache_data["beta_size"]
+            return True
+        except Exception as e:
+            print(f"Warning: Failed to load SML cache ({e}). Falling back to live fitting.")
+            return False
+
+    def run_cached_pipeline(self, cache_path: str = "sml_cache.json") -> bool:
+        """
+        Executes a stateless, fast computation pipeline using cached parameters.
+        Avoids expensive statsmodels and scikit-learn fits.
+        """
+        if not self.load_from_cache(cache_path):
+            return False
+            
+        self.preprocess()
+        
+        # 1. Assign clusters based on cached scaled centroids (K-Means Predict)
+        self.data['asset_turnover'] = self.data['opre'] / self.data['toas']
+        features = np.array(self.data[['asset_turnover', 'roa', 'gear']])
+        mean = np.array(self.cache_data['scaler_mean'])
+        scale = np.array(self.cache_data['scaler_scale'])
+        scaled_features = (features - mean) / scale
+        
+        centroids = np.array(self.cache_data['cluster_centroids'])
+        assigned_clusters = []
+        for row in scaled_features:
+            distances = np.linalg.norm(centroids - row, axis=1)
+            assigned_clusters.append(int(np.argmin(distances)))
+        self.data['shadow_peer_cluster'] = assigned_clusters
+        
+        # 2. Compute expected logs and residuals
+        beta_size = self.cache_data['beta_size']
+        beta_roa = self.cache_data['beta_roa']
+        intercept = self.cache_data['intercept']
+        offsets = self.cache_data['cluster_offsets']
+        
+        self.data['predicted_log_pay'] = (
+            intercept + 
+            beta_size * self.data['log_size'] + 
+            beta_roa * self.data['roa'] + 
+            self.data['shadow_peer_cluster'].map(lambda c: offsets.get(str(c), 0.0))
+        )
+        self.data['residual'] = self.data['log_pay'] - self.data['predicted_log_pay']
+        self.data['reach_ratio'] = np.exp(self.data['residual'] / beta_size)
+        
+        # 3. Detect panel ratchets
+        self.detect_asymmetric_ratchets()
+        
+        # 4. Map cluster medians from cache lookup
+        medians = self.cache_data['cluster_medians']
+        self.data['cluster_median_pay'] = self.data['shadow_peer_cluster'].map(lambda c: medians.get(str(c), 1500000.0))
+        self.data['cluster_mean_pay'] = self.data['cluster_median_pay'] * 1.15
+        self.data['multiple_of_median'] = self.data['total_comp'] / self.data['cluster_median_pay']
+        
+        print("Fast cached SML pipeline executed successfully.")
+        return True
 
 if __name__ == "__main__":
     engine = ProxyEngineSML()

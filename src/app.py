@@ -77,7 +77,9 @@ st.markdown("""
 @st.cache_resource
 def load_sml_engine():
     sml = ProxyEngineSML()
-    sml.run_full_pipeline()
+    cache_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sml_cache.json")
+    if not sml.run_cached_pipeline(cache_path):
+        sml.run_full_pipeline()
     return sml
 
 sml_engine = load_sml_engine()
@@ -230,7 +232,9 @@ else:
     temp_data = pd.concat([temp_data, pd.DataFrame([new_row])], ignore_index=True)
     
     temp_engine = ProxyEngineSML(temp_data)
-    temp_engine.run_full_pipeline()
+    cache_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sml_cache.json")
+    if not temp_engine.run_cached_pipeline(cache_path):
+        temp_engine.run_full_pipeline()
     
     trace = temp_engine.get_evidence_trace(matched_isin, eval_year)
     target_row = new_row

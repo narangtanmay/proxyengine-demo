@@ -33,7 +33,10 @@ app.add_middleware(
 
 # Initialize engines
 sml_engine = ProxyEngineSML()
-sml_engine.run_full_pipeline()
+cache_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sml_cache.json")
+if not sml_engine.run_cached_pipeline(cache_path):
+    print("Warning: SML Cache not found. Performing live model fitting...")
+    sml_engine.run_full_pipeline()
 dual_lens_translator = ProxyEngineDualLens()
 
 class ChatRequest(BaseModel):
@@ -236,7 +239,9 @@ async def upload_remuneration_pdf(file: UploadFile = File(...)):
         temp_data = pd.concat([temp_data, pd.DataFrame([new_row])], ignore_index=True)
         
         temp_engine = ProxyEngineSML(temp_data)
-        temp_engine.run_full_pipeline()
+        cache_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sml_cache.json")
+        if not temp_engine.run_cached_pipeline(cache_file):
+            temp_engine.run_full_pipeline()
         
         trace = temp_engine.get_evidence_trace(matched_isin, 2024)
         return {"trace": trace, "proposal": proposal_data}

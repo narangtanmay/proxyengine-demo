@@ -27,6 +27,16 @@ export interface DashboardData {
   ratchet_triggered: boolean;
   secrecy_premium_flag: boolean;
   lti_vs_salary_ratio: number | null;
+  salary_benchmark?: number;
+  sti_benchmark?: number;
+  lti_benchmark?: number;
+  _traceability_map?: Record<string, {
+    origin: string;
+    equation: string;
+    file: string;
+    line: number;
+    description: string;
+  }>;
 }
 
 export interface ModelInfo {

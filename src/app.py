@@ -284,6 +284,55 @@ with col_m4:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
+# Second row of metric cards
+col_m5, col_m6, col_m7, col_m8 = st.columns(4)
+
+with col_m5:
+    stretch_pct = trace.get('hidden_stretch', 0.0) * 100.0
+    stretch_color = "#d32f2f" if stretch_pct > 15.0 else "#2e7d32"
+    st.markdown(f"""
+    <div class='metric-card' style='border-left: 5px solid {stretch_color}'>
+        <div class='metric-label'>Hidden Component Stretch</div>
+        <div class='metric-value' style='color: {stretch_color}'>{stretch_pct:.1f}%</div>
+        <div class='metric-sub'>Bucket skew vs headline premium</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_m6:
+    var_val = trace.get('hidden_stretch_variance', 0.0)
+    var_color = "#d32f2f" if var_val > 1.5 else "#2e7d32"
+    st.markdown(f"""
+    <div class='metric-card' style='border-left: 5px solid {var_color}'>
+        <div class='metric-label'>Component Reach Variance</div>
+        <div class='metric-value' style='color: {var_color}'>{var_val:.2f}</div>
+        <div class='metric-sub'>Variance of component premiums</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_m7:
+    conc_val = trace.get('internal_concentration_ratio', 1.0)
+    conc_color = "#d32f2f" if conc_val > 2.0 else "#2e7d32"
+    st.markdown(f"""
+    <div class='metric-card' style='border-left: 5px solid {conc_color}'>
+        <div class='metric-label'>CEO Concentration C_jt</div>
+        <div class='metric-value' style='color: {conc_color}'>{conc_val:.2f}x</div>
+        <div class='metric-sub'>CEO pay vs board median</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_m8:
+    r_trig = trace.get('concentration_ratchet_triggered', False)
+    r_color = "#d32f2f" if r_trig else "#2e7d32"
+    st.markdown(f"""
+    <div class='metric-card' style='border-left: 5px solid {r_color}'>
+        <div class='metric-label'>Concentration Ratchet</div>
+        <div class='metric-value' style='color: {r_color}'>{"ACTIVE" if r_trig else "INACTIVE"}</div>
+        <div class='metric-sub'>CEO share ratcheting upwards</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
 # Main layout cols
 col_left, col_right = st.columns([1.1, 1])
 
@@ -330,12 +379,16 @@ with col_left:
     # formula: log_pay ~ log_size + C(shadow_peer_cluster) + roa
     # We hold roa at the median of the cluster for the line projection
     median_roa = cluster_peers['roa'].median()
+    median_gear = cluster_peers['gear'].median()
+    line_year = int(target_row['year'])
     
     # Set up dummy df for prediction
     dummy_predict_df = pd.DataFrame({
         'log_size': sizes_range,
         'shadow_peer_cluster': [selected_cluster] * 100,
-        'roa': [median_roa] * 100
+        'roa': [median_roa] * 100,
+        'gear': [median_gear] * 100,
+        'year': [line_year] * 100
     })
     
     # Predict using the fitted model
@@ -371,7 +424,9 @@ with col_left:
     target_dummy_df = pd.DataFrame({
         'log_size': [np.log(target_size)],
         'shadow_peer_cluster': [selected_cluster],
-        'roa': [trace.get('roa', median_roa)]
+        'roa': [trace.get('roa', median_roa)],
+        'gear': [target_row.get('gear', median_gear)],
+        'year': [line_year]
     })
     expected_pay_at_target = np.exp(sml_engine.model.predict(target_dummy_df)[0])
     
@@ -452,6 +507,30 @@ with col_left:
             st.caption("Critical value threshold: > 1.96 (p < 0.05)")
             st.metric("p-Value of Size Influence", f"{diag['size_pvalue']:.4e}")
             st.caption("Close to 0.0000 = extremely high significance")
+            
+    with st.expander("📈 Oaxaca-Blinder Treadmill Decomposition"):
+        treadmill_df = sml_engine.get_treadmill()
+        if not treadmill_df.empty:
+            plot_treadmill = treadmill_df[treadmill_df['year'] > treadmill_df['year'].min()]
+            if not plot_treadmill.empty:
+                fig_t, ax_t = plt.subplots(figsize=(8, 4))
+                ind = np.arange(len(plot_treadmill))
+                width = 0.35
+                
+                ax_t.bar(ind - width/2, plot_treadmill['endowment_pct'], width, label='Endowment (Explained by scale/perf)', color='#1f4287')
+                ax_t.bar(ind + width/2, plot_treadmill['drift_pct'], width, label='Drift (Unearned market inflation)', color='#ff7600')
+                
+                ax_t.set_ylabel('Percentage Growth (%)')
+                ax_t.set_title('Oaxaca-Blinder Pay Growth Decomposition (vs Base Year)')
+                ax_t.set_xticks(ind)
+                ax_t.set_xticklabels(plot_treadmill['year'].astype(str))
+                ax_t.legend()
+                ax_t.grid(axis='y', linestyle='--', alpha=0.5)
+                
+                sns.despine()
+                st.pyplot(fig_t)
+            else:
+                st.info("Insufficient longitudinal data for decomposition.")
             
     with st.expander("🛡️ Data Quality & Integrity Audits"):
         col_q1, col_q2 = st.columns(2)

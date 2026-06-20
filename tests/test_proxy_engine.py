@@ -4,17 +4,13 @@ import numpy as np
 import sys
 import os
 
-# Ensure local src directory is in path for imports
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
-
 from sml_engine import ProxyEngineSML
 from pdf_parser_poc import PDFExtractorPOC
 from llm_wrapper import ProxyEngineDualLens
 
-def test_sml_engine_pipeline():
+def test_sml_engine_pipeline(shared_sml_engine):
     """Verify that SML pipeline runs fully and computes all expected fields."""
-    engine = ProxyEngineSML()
-    df = engine.run_full_pipeline()
+    df = shared_sml_engine.data
     
     # Assert expected columns are computed
     assert 'shadow_peer_cluster' in df.columns
@@ -25,10 +21,10 @@ def test_sml_engine_pipeline():
     assert 'multiple_of_median' in df.columns
 
     # The fair-pay line is fitted at the median, so the median premium sits at ~1.0x.
-    assert abs(df['pay_premium'].median() - 1.0) < 0.25  # Relaxed tolerance for the more robust scaled controls
+    assert abs(df['pay_premium'].median() - 1.0) < 0.25
 
     # Verify we can extract an evidence trace for a real company (latest year falls back).
-    trace = engine.get_evidence_trace("DE0007664005", 2024)
+    trace = shared_sml_engine.get_evidence_trace("DE0007664005", 2024)
     assert trace['company'] == "Volkswagen AG"
     assert trace['isin'] == "DE0007664005"
     assert trace['actual_pay'] > 0
@@ -36,6 +32,17 @@ def test_sml_engine_pipeline():
     assert trace['pay_premium'] > 0
     assert trace['reach_ratio'] > 0
     assert isinstance(trace['ratchet_triggered'], bool)
+    
+    # Assert runtime traceability map existence and well-formedness
+    assert '_traceability_map' in trace
+    t_map = trace['_traceability_map']
+    for metric in ['reach_ratio', 'ratchet_triggered', 'multiple_of_median', 'pay_premium', 'salary_benchmark']:
+        assert metric in t_map
+        assert 'origin' in t_map[metric]
+        assert 'equation' in t_map[metric]
+        assert 'file' in t_map[metric]
+        assert 'line' in t_map[metric]
+        assert 'description' in t_map[metric]
 
 def test_pdf_extractor_fallback():
     """Verify that PDFExtractorPOC processes successfully and falls back on error/mock."""
@@ -48,9 +55,9 @@ def test_pdf_extractor_fallback():
     assert data['proposed_lti'] == 4500000.0
     assert data['esg_linked'] is True
 
-def test_dual_lens_report_generation():
+@pytest.mark.allow_fallback_mock
+def test_dual_lens_report_generation(shared_dual_lens):
     """Verify that dual lens wrapper produces well-formatted reports."""
-    translator = ProxyEngineDualLens()
     trace = {
         "company": "Bayer AG",
         "exec_id": "Bill Anderson",
@@ -73,8 +80,8 @@ def test_dual_lens_report_generation():
         "agenda_item": "Agenda Item 5: Approval of the Remuneration Report"
     }
     
-    auditor_report = translator.generate_auditor_report(trace, proposal)
-    compliance_report = translator.generate_compliance_report(trace, proposal)
+    auditor_report = shared_dual_lens.generate_auditor_report(trace, proposal)
+    compliance_report = shared_dual_lens.generate_compliance_report(trace, proposal)
     
     assert "RECOMMENDATION: VOTE AGAINST" in auditor_report
     assert "Bayer AG" in auditor_report
@@ -85,7 +92,7 @@ def test_dual_lens_report_generation():
     assert "Bayer AG" in compliance_report
     assert "DCGK" in compliance_report
 
-def test_kmeans_shadow_peer_quality():
+def test_kmeans_shadow_peer_quality(shared_sml_engine):
     """
     Hardened Programmatic Quality Test: Shadow Peer Cohesion & Separation
     Validation:
@@ -93,8 +100,7 @@ def test_kmeans_shadow_peer_quality():
     2. Enforces the Balance Gate: no single cluster contains more than 40% of the total company-years.
     """
     from sklearn.metrics import silhouette_score
-    engine = ProxyEngineSML()
-    df = engine.run_full_pipeline()
+    df = shared_sml_engine.data
     
     features = ['employees_scaled', 'operating_revenue_scaled']
     score = silhouette_score(df[features], df['shadow_peer_cluster'])
@@ -187,3 +193,67 @@ def test_log_zero_robustness_safeguard():
         assert not df_result['sti_benchmark'].isnull().any()
     except Exception as e:
         pytest.fail(f"SML Parts-Combined pipeline crashed under log-zero inputs! Error: {e}")
+
+@pytest.mark.allow_fallback_mock
+def test_conversational_chat_api_call(shared_dual_lens):
+    """Verify that user queries can be passed without error to report generator methods."""
+    trace = {
+        "company": "Bayer AG",
+        "exec_id": "Bill Anderson",
+        "cluster_id": 1,
+        "actual_pay": 5000000.0,
+        "cluster_median_pay": 3500000.0,
+        "multiple_of_median": 1.43,
+        "reach_ratio": 1.8,
+        "ratchet_triggered": False,
+        "secrecy_premium_flag": False,
+        "lti_vs_salary_ratio": 2.5
+    }
+    proposal = {
+        "company_name": "Bayer AG",
+        "exec_id": "Bill Anderson",
+        "proposed_salary": 1400000.0,
+        "proposed_sti": 1800000.0,
+        "proposed_lti": 3800000.0,
+        "esg_linked": True,
+        "agenda_item": "Agenda Item 5: Approval of the Remuneration Report"
+    }
+    
+    auditor_report = shared_dual_lens.generate_auditor_report(trace, proposal, user_query="Focus strictly on high LTI ratio")
+    compliance_report = shared_dual_lens.generate_compliance_report(trace, proposal, user_query="Draft defensive ideas for high LTI ratio")
+    
+    assert len(auditor_report) > 0
+    assert len(compliance_report) > 0
+
+@pytest.mark.allow_fallback_mock
+def test_offline_keyword_fallback_routing(shared_dual_lens):
+    """Verify that offline chat falls back and routes intelligently based on query keywords."""
+    trace = {
+        "company": "Bayer AG",
+        "exec_id": "Bill Anderson",
+        "cluster_id": 1,
+        "actual_pay": 5000000.0,
+        "cluster_median_pay": 3500000.0,
+        "multiple_of_median": 1.43,
+        "reach_ratio": 1.8,
+        "ratchet_triggered": False,
+        "secrecy_premium_flag": False,
+        "lti_vs_salary_ratio": 2.5
+    }
+    proposal = {
+        "company_name": "Bayer AG",
+        "exec_id": "Bill Anderson",
+        "proposed_salary": 1400000.0,
+        "proposed_sti": 1800000.0,
+        "proposed_lti": 3800000.0,
+        "esg_linked": True,
+        "agenda_item": "Agenda Item 5: Approval of the Remuneration Report"
+    }
+    
+    # Test Reach keyword routing
+    response = shared_dual_lens._generate_fallback_chat_response("auditor", trace, proposal, "Explain the reach ratio")
+    assert "running a company" in response or "VOTE AGAINST" in response
+    
+    # Test LTI ratio keyword routing
+    response = shared_dual_lens._generate_fallback_chat_response("compliance", trace, proposal, "Suggest ideas for LTI")
+    assert "G.1" in response or "align" in response

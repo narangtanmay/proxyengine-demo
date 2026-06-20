@@ -19,9 +19,9 @@ const formatScale = (val: number) => {
 
 const renderStatusBadge = (status: "pass" | "fail" | "warning") => {
   const colors = {
-    pass: { bg: "#e6f4ea", text: "#137333", border: "#137333", char: "✓" },
-    fail: { bg: "#fce8e6", text: "#c5221f", border: "#c5221f", char: "✗" },
-    warning: { bg: "#fef7e0", text: "#b06000", border: "#b06000", char: "!" }
+    pass: { bg: "#e6f4ea", text: "#2e7d32", border: "#2e7d32", char: "✓" },
+    fail: { bg: "#fce8e6", text: "#d32f2f", border: "#d32f2f", char: "✕" },
+    warning: { bg: "#fef7e0", text: "#ff7600", border: "#ff7600", char: "!" }
   };
   const cfg = colors[status];
   return (
@@ -770,6 +770,16 @@ export default function App() {
               </button>
             </div>
 
+            {/* Full-width SML Metric Cards Header Grid */}
+            <div style={{ marginBottom: "1.5rem", width: "100%" }}>
+              <Dashboard
+                data={dashboardData}
+                chartUrl={chartUrl}
+                modelInfo={modelInfo}
+                layout="cards-only"
+              />
+            </div>
+
             {/* Split Screen Grid matching exactly wireframe Page 3 */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
               
@@ -777,21 +787,27 @@ export default function App() {
               <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 
                 {/* 1. Comparison Packages */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                   <div style={{ border: "1px solid #dee2e6", borderRadius: "6px", padding: "1rem", backgroundColor: "#ffffff" }}>
                     <h4 style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#6c757d", textTransform: "uppercase", margin: "0 0 0.5rem 0" }}>Recommended Package Baseline</h4>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", textAlign: "center" }}>
                       <div style={{ backgroundColor: "#f8f9fa", padding: "4px", borderRadius: "4px" }}>
-                        <span style={{ fontSize: "0.7rem", color: "#6c757d", display: "block" }}>Base</span>
-                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedBase * 0.9)}</strong>
+                        <span style={{ fontSize: "0.7rem", color: "#6c757d", display: "block" }}>Base Valu</span>
+                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>
+                          {dashboardData?.salary_benchmark ? formatCurrency(dashboardData.salary_benchmark) : formatCurrency(proposedBase * 0.9)}
+                        </strong>
                       </div>
                       <div style={{ backgroundColor: "#f8f9fa", padding: "4px", borderRadius: "4px" }}>
-                        <span style={{ fontSize: "0.7rem", color: "#6c757d", display: "block" }}>STV</span>
-                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedSti * 0.75)}</strong>
+                        <span style={{ fontSize: "0.7rem", color: "#6c757d", display: "block" }}>Var-Short-</span>
+                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>
+                          {dashboardData?.sti_benchmark ? formatCurrency(dashboardData.sti_benchmark) : formatCurrency(proposedSti * 0.75)}
+                        </strong>
                       </div>
                       <div style={{ backgroundColor: "#f8f9fa", padding: "4px", borderRadius: "4px" }}>
-                        <span style={{ fontSize: "0.7rem", color: "#6c757d", display: "block" }}>LTI</span>
-                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedLti * 0.65)}</strong>
+                        <span style={{ fontSize: "0.7rem", color: "#6c757d", display: "block" }}>Var-Long-</span>
+                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>
+                          {dashboardData?.lti_benchmark ? formatCurrency(dashboardData.lti_benchmark) : formatCurrency(proposedLti * 0.65)}
+                        </strong>
                       </div>
                     </div>
                   </div>
@@ -800,15 +816,15 @@ export default function App() {
                     <h4 style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#ff7600", textTransform: "uppercase", margin: "0 0 0.5rem 0" }}>Proposed Remuneration Package</h4>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", textAlign: "center" }}>
                       <div style={{ backgroundColor: "#fff5f0", padding: "4px", borderRadius: "4px" }}>
-                        <span style={{ fontSize: "0.7rem", color: "#ff7600", display: "block" }}>Base</span>
+                        <span style={{ fontSize: "0.7rem", color: "#ff7600", display: "block" }}>Base Valu</span>
                         <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedBase)}</strong>
                       </div>
                       <div style={{ backgroundColor: "#fff5f0", padding: "4px", borderRadius: "4px" }}>
-                        <span style={{ fontSize: "0.7rem", color: "#ff7600", display: "block" }}>STV</span>
+                        <span style={{ fontSize: "0.7rem", color: "#ff7600", display: "block" }}>Var-Short-</span>
                         <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedSti)}</strong>
                       </div>
                       <div style={{ backgroundColor: "#fff5f0", padding: "4px", borderRadius: "4px" }}>
-                        <span style={{ fontSize: "0.7rem", color: "#ff7600", display: "block" }}>LTI</span>
+                        <span style={{ fontSize: "0.7rem", color: "#ff7600", display: "block" }}>Var-Long-</span>
                         <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedLti)}</strong>
                       </div>
                     </div>
@@ -851,7 +867,33 @@ export default function App() {
                             borderLeft: `3px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}`,
                             paddingLeft: "0.75rem"
                           }}>
-                            {renderInsight("reach")}
+                            <div>
+                              {renderInsight("reach")}
+                            </div>
+                            <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px dashed #dee2e6" }}>
+                              <h5 style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#475569", textTransform: "uppercase", margin: "0 0 0.6rem 0" }}>
+                                📊 Methodological Evidence Trail
+                              </h5>
+                              <div style={{
+                                backgroundColor: "#f8fafc",
+                                border: "1px solid #e2e8f0",
+                                borderRadius: "4px",
+                                padding: "0.75rem",
+                                fontFamily: '"Times New Roman", Times, serif',
+                                fontSize: "0.9rem",
+                                color: "#1e293b",
+                                overflowX: "auto"
+                              }}>
+                                <div style={{ marginBottom: "0.5rem", fontWeight: "bold", fontSize: "0.95rem" }}>
+                                  log(Pay<sub style={{ fontSize: "0.6rem" }}>it</sub>) = α + β log(Size<sub style={{ fontSize: "0.6rem" }}>it</sub>) + ε<sub style={{ fontSize: "0.6rem" }}>it</sub> &rArr; Reach<sub style={{ fontSize: "0.6rem" }}>it</sub> = exp(ε<sub style={{ fontSize: "0.6rem" }}>it</sub> / β)
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontFamily: "monospace", fontSize: "0.75rem", color: "#475569", borderTop: "1px solid #e2e8f0", paddingTop: "0.5rem" }}>
+                                  <div>&bull; Residual (ε<sub style={{ fontSize: "0.6rem" }}>it</sub>) = log(Pay Premium) = log({(dashboardData?.pay_premium || 1).toFixed(4)}) = {Math.log(dashboardData?.pay_premium || 1).toFixed(4)}</div>
+                                  <div>&bull; Size Elasticity (β) = {modelInfo.diagnostics.size_beta.toFixed(4)}</div>
+                                  <div style={{ fontWeight: "bold", color: "#0f172a" }}>&bull; Reach<sub style={{ fontSize: "0.6rem" }}>it</sub> = exp({Math.log(dashboardData?.pay_premium || 1).toFixed(4)} / {modelInfo.diagnostics.size_beta.toFixed(4)}) = {(dashboardData?.reach_ratio || 1).toFixed(2)}x</div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -887,7 +929,35 @@ export default function App() {
                             borderLeft: `3px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}`,
                             paddingLeft: "0.75rem"
                           }}>
-                            {renderInsight("ratchet")}
+                            <div>
+                              {renderInsight("ratchet")}
+                            </div>
+                            <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px dashed #dee2e6" }}>
+                              <h5 style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#475569", textTransform: "uppercase", margin: "0 0 0.6rem 0" }}>
+                                📊 Methodological Evidence Trail
+                              </h5>
+                              <div style={{
+                                backgroundColor: "#f8fafc",
+                                border: "1px solid #e2e8f0",
+                                borderRadius: "4px",
+                                padding: "0.75rem",
+                                fontFamily: '"Times New Roman", Times, serif',
+                                fontSize: "0.9rem",
+                                color: "#1e293b",
+                                overflowX: "auto"
+                              }}>
+                                <div style={{ marginBottom: "0.5rem", fontWeight: "bold", fontSize: "0.95rem" }}>
+                                  &Delta; log(Pay<sub style={{ fontSize: "0.6rem" }}>it</sub>) = &alpha; + &beta;<sub style={{ fontSize: "0.6rem" }}>&uarr;</sub> &Delta; ROA<sub style={{ fontSize: "0.6rem" }}>it</sub><sup style={{ fontSize: "0.6rem" }}>+</sup> + &beta;<sub style={{ fontSize: "0.6rem" }}>&darr;</sub> &Delta; ROA<sub style={{ fontSize: "0.6rem" }}>it</sub><sup style={{ fontSize: "0.6rem" }}>-</sup>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontFamily: "monospace", fontSize: "0.75rem", color: "#475569", borderTop: "1px solid #e2e8f0", paddingTop: "0.5rem" }}>
+                                  <div>&bull; Good Years Slope (&beta;<sub style={{ fontSize: "0.6rem" }}>&uarr;</sub>) = {modelInfo.ratchet.good_year_slope.toFixed(4)}</div>
+                                  <div>&bull; Bad Years Slope (&beta;<sub style={{ fontSize: "0.6rem" }}>&darr;</sub>) = {modelInfo.ratchet.bad_year_slope.toFixed(4)}</div>
+                                  <div style={{ fontWeight: "bold", color: "#0f172a" }}>
+                                    &bull; Asymmetry Test (&beta;<sub style={{ fontSize: "0.6rem" }}>&uarr;</sub> &ge; 2.0 &times; |&beta;<sub style={{ fontSize: "0.6rem" }}>&darr;</sub>|): {modelInfo.ratchet.good_year_slope >= 2.0 * Math.abs(modelInfo.ratchet.bad_year_slope) ? "TRIGGERED (Asymmetric Pay-for-Luck)" : "PASSED (Symmetric Sensitivity)"}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -923,7 +993,35 @@ export default function App() {
                             borderLeft: `3px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}`,
                             paddingLeft: "0.75rem"
                           }}>
-                            {renderInsight("mom")}
+                            <div>
+                              {renderInsight("mom")}
+                            </div>
+                            <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px dashed #dee2e6" }}>
+                              <h5 style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#475569", textTransform: "uppercase", margin: "0 0 0.6rem 0" }}>
+                                📊 Methodological Evidence Trail
+                              </h5>
+                              <div style={{
+                                backgroundColor: "#f8fafc",
+                                border: "1px solid #e2e8f0",
+                                borderRadius: "4px",
+                                padding: "0.75rem",
+                                fontFamily: '"Times New Roman", Times, serif',
+                                fontSize: "0.9rem",
+                                color: "#1e293b",
+                                overflowX: "auto"
+                              }}>
+                                <div style={{ marginBottom: "0.5rem", fontWeight: "bold", fontSize: "0.95rem" }}>
+                                  MoM<sub style={{ fontSize: "0.6rem" }}>it</sub> = Total Pay<sub style={{ fontSize: "0.6rem" }}>it</sub> / Shadow Peer Median Pay<sub style={{ fontSize: "0.6rem" }}>t</sub>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontFamily: "monospace", fontSize: "0.75rem", color: "#475569", borderTop: "1px solid #e2e8f0", paddingTop: "0.5rem" }}>
+                                  <div>&bull; Total Pay (Target) = {formatCurrency(dashboardData?.actual_pay || 0)}</div>
+                                  <div>&bull; Shadow Peer Median Pay = {formatCurrency(dashboardData?.cluster_median_pay || 1)}</div>
+                                  <div style={{ fontWeight: "bold", color: "#0f172a" }}>
+                                    &bull; MoM<sub style={{ fontSize: "0.6rem" }}>it</sub> = {formatCurrency(dashboardData?.actual_pay || 0)} / {formatCurrency(dashboardData?.cluster_median_pay || 1)} = {(dashboardData?.multiple_of_median || 1).toFixed(2)}x
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1042,7 +1140,7 @@ export default function App() {
 
               </div>
 
-              {/* Right Column: High Level Descriptive & Supporting Visualizations */}
+               {/* Right Column: High Level Descriptive & Supporting Visualizations */}
               <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 
                 {/* 1. High Level Descriptive Visualizations */}
@@ -1050,6 +1148,7 @@ export default function App() {
                   data={dashboardData}
                   chartUrl={chartUrl}
                   modelInfo={modelInfo}
+                  layout="visuals-only"
                 />
 
                 {/* 2. Question Specific Supporting Visualizations (Dynamic) */}
@@ -1113,25 +1212,30 @@ export default function App() {
                         Visualizing Pay-for-Luck asymmetry (Garvey &amp; Milbourn, 2006). If pay sensitivity is highly positive on good news but flat on bad news, the CEO is shielded from downside risk.
                       </p>
 
-                      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", margin: "1.5rem 0" }}>
-                        <div>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", fontWeight: "bold", marginBottom: "4px" }}>
-                            <span>Pay Sensitivity on Good News (ΔROA &gt; 0)</span>
-                            <span style={{ color: "#c5221f" }}>+{modelInfo.ratchet.good_year_slope.toFixed(3)}</span>
-                          </div>
-                          <div style={{ height: "24px", backgroundColor: "#e9ecef", borderRadius: "4px", overflow: "hidden" }}>
-                            <div style={{ width: `${Math.min(100, Math.max(10, modelInfo.ratchet.good_year_slope * 200))}%`, height: "100%", backgroundColor: "#c5221f" }}></div>
-                          </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", margin: "1.5rem 0" }}>
+                        <div style={{
+                          backgroundColor: "#fef2f2",
+                          borderLeft: "6px solid #ef4444",
+                          borderRadius: "4px",
+                          padding: "1rem"
+                        }}>
+                          <h5 style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#991b1b", margin: "0 0 0.5rem 0" }}>Good Years (&Delta;ROA &gt; 0)</h5>
+                          <p style={{ fontSize: "0.75rem", color: "#7f1d1d", margin: "0 0 0.5rem 0" }}>Upward Ratchet sensitivity (&beta;<sub style={{ fontSize: "0.6rem" }}>&uarr;</sub>)</p>
+                          <strong style={{ fontSize: "1.5rem", color: "#ef4444", fontFamily: "monospace" }}>
+                            +{modelInfo.ratchet.good_year_slope.toFixed(4)}
+                          </strong>
                         </div>
-
-                        <div>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", fontWeight: "bold", marginBottom: "4px" }}>
-                            <span>Pay Sensitivity on Bad News (ΔROA &lt; 0)</span>
-                            <span style={{ color: "#137333" }}>{modelInfo.ratchet.bad_year_slope >= 0 ? "+" : ""}{modelInfo.ratchet.bad_year_slope.toFixed(3)}</span>
-                          </div>
-                          <div style={{ height: "24px", backgroundColor: "#e9ecef", borderRadius: "4px", overflow: "hidden" }}>
-                            <div style={{ width: `${Math.min(100, Math.max(10, Math.abs(modelInfo.ratchet.bad_year_slope) * 200))}%`, height: "100%", backgroundColor: "#137333" }}></div>
-                          </div>
+                        <div style={{
+                          backgroundColor: "#f0fdf4",
+                          borderLeft: "6px solid #22c55e",
+                          borderRadius: "4px",
+                          padding: "1rem"
+                        }}>
+                          <h5 style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#166534", margin: "0 0 0.5rem 0" }}>Bad Years (&Delta;ROA &lt; 0)</h5>
+                          <p style={{ fontSize: "0.75rem", color: "#14532d", margin: "0 0 0.5rem 0" }}>Downside Hedge sensitivity (&beta;<sub style={{ fontSize: "0.6rem" }}>&darr;</sub>)</p>
+                          <strong style={{ fontSize: "1.5rem", color: "#22c55e", fontFamily: "monospace" }}>
+                            {modelInfo.ratchet.bad_year_slope >= 0 ? "+" : ""}{modelInfo.ratchet.bad_year_slope.toFixed(4)}
+                          </strong>
                         </div>
                       </div>
 
@@ -1149,42 +1253,55 @@ export default function App() {
                       <p style={{ fontSize: "0.85rem", color: "#6c757d", margin: "0 0 1rem 0" }}>
                         ISS Multiple of Median (MoM) peer alignment distribution. Shows the proposed compensation package mapped relative to the objective Shadow Peer cluster.
                       </p>
-                      <div style={{ height: "20px", backgroundColor: "#e9ecef", borderRadius: "10px", position: "relative", margin: "2rem 0 1.25rem 0", overflow: "visible" }}>
-                        {/* Safe Zone (Green) */}
-                        <div style={{ position: "absolute", left: "0%", width: "45%", height: "100%", backgroundColor: "#e6f4ea", borderTopLeftRadius: "10px", borderBottomLeftRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <span style={{ fontSize: "0.65rem", color: "#137333", fontWeight: "bold" }}>Safe</span>
-                        </div>
-                        {/* Caution Zone (Yellow) */}
-                        <div style={{ position: "absolute", left: "45%", width: "23%", height: "100%", backgroundColor: "#fef7e0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <span style={{ fontSize: "0.65rem", color: "#b06000", fontWeight: "bold" }}>Caution</span>
-                        </div>
-                        {/* High Concern Zone (Red) */}
-                        <div style={{ position: "absolute", left: "68%", width: "32%", height: "100%", backgroundColor: "#fce8e6", borderTopRightRadius: "10px", borderBottomRightRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <span style={{ fontSize: "0.65rem", color: "#c5221f", fontWeight: "bold" }}>ISS High Concern</span>
-                        </div>
-                        {/* Slider Marker Pointer */}
+                      <div style={{ height: "16px", background: "linear-gradient(90deg, #10b981 0%, #f59e0b 55%, #ef4444 100%)", borderRadius: "10px", position: "relative", margin: "2.5rem 0 1.5rem 0", overflow: "visible", boxShadow: "inset 0 2px 4px rgba(0,0,0,0.1)", border: "1px solid rgba(0,0,0,0.05)" }}>
+                        {/* Safe Zone label */}
+                        <div style={{ position: "absolute", left: "15%", top: "50%", transform: "translate(-50%, -50%)", fontSize: "0.65rem", color: "#065f46", fontWeight: "bold", backgroundColor: "rgba(255,255,255,0.85)", padding: "2px 6px", borderRadius: "4px", backdropFilter: "blur(4px)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>Low Concern</div>
+                        {/* Caution Zone label */}
+                        <div style={{ position: "absolute", left: "56.5%", top: "50%", transform: "translate(-50%, -50%)", fontSize: "0.65rem", color: "#92400e", fontWeight: "bold", backgroundColor: "rgba(255,255,255,0.85)", padding: "2px 6px", borderRadius: "4px", backdropFilter: "blur(4px)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>Caution</div>
+                        {/* High Concern Zone label */}
+                        <div style={{ position: "absolute", left: "84%", top: "50%", transform: "translate(-50%, -50%)", fontSize: "0.65rem", color: "#991b1b", fontWeight: "bold", backgroundColor: "rgba(255,255,255,0.85)", padding: "2px 6px", borderRadius: "4px", backdropFilter: "blur(4px)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>High Concern</div>
+                        
+                        {/* Liquid Glass Slider Marker Pointer */}
                         <div style={{ 
                           position: "absolute", 
-                          left: `${Math.min(98, Math.max(2, (dashboardData?.multiple_of_median || 1) * 35))}%`, 
-                          top: "-12px", 
-                          width: "6px", 
-                          height: "44px", 
-                          backgroundColor: "#111827", 
-                          borderRadius: "3px",
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
-                          zIndex: 5
+                          left: `${Math.min(96, Math.max(4, (dashboardData?.multiple_of_median || 1) * 45))}%`, 
+                          top: "-10px", 
+                          width: "36px", 
+                          height: "36px", 
+                          backgroundColor: "rgba(255, 255, 255, 0.5)", 
+                          backdropFilter: "blur(6px)",
+                          borderRadius: "50%",
+                          border: "2px solid #ffffff",
+                          boxShadow: "0 4px 12px rgba(31, 66, 135, 0.45)",
+                          zIndex: 5,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          transform: "translateX(-50%)",
+                          transition: "left 0.25s cubic-bezier(0.16, 1, 0.3, 1)"
                         }}>
+                          {/* Concentric inner core */}
+                          <div style={{
+                            width: "16px",
+                            height: "16px",
+                            borderRadius: "50%",
+                            backgroundColor: "#1f4287",
+                            boxShadow: "0 0 6px rgba(31, 66, 135, 0.6)"
+                          }} />
+                          
+                          {/* Tabular numerals floating label above */}
                           <div style={{
                             position: "absolute",
-                            top: "-16px",
-                            left: "-18px",
-                            backgroundColor: "#111827",
+                            top: "-28px",
+                            backgroundColor: "#1e293b",
                             color: "#ffffff",
-                            padding: "2px 6px",
-                            borderRadius: "3px",
-                            fontSize: "0.7rem",
+                            padding: "3px 8px",
+                            borderRadius: "4px",
+                            fontSize: "0.75rem",
                             fontWeight: "bold",
-                            whiteSpace: "nowrap"
+                            whiteSpace: "nowrap",
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                            fontVariantNumeric: "tabular-nums"
                           }}>
                             {dashboardData?.multiple_of_median.toFixed(2)}x
                           </div>
@@ -1231,13 +1348,13 @@ export default function App() {
                       </p>
                       <div style={{ display: "flex", height: "30px", borderRadius: "4px", overflow: "hidden", margin: "1rem 0" }}>
                         <div style={{ width: `${basePct}%`, backgroundColor: "#1f4287", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: "bold" }}>
-                          Base ({basePct.toFixed(0)}%)
+                          Base Valu ({basePct.toFixed(0)}%)
                         </div>
-                        <div style={{ width: `${stiPct}%`, backgroundColor: "#007cc7", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: "bold" }}>
-                          STV ({stiPct.toFixed(0)}%)
+                        <div style={{ width: `${stiPct}%`, backgroundColor: "#00b4d8", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: "bold" }}>
+                          Var-Short- ({stiPct.toFixed(0)}%)
                         </div>
                         <div style={{ width: `${ltiPct}%`, backgroundColor: "#ff7600", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: "bold" }}>
-                          LTI ({ltiPct.toFixed(0)}%)
+                          Var-Long- ({ltiPct.toFixed(0)}%)
                         </div>
                       </div>
                       <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>

@@ -4,25 +4,16 @@ import pandas as pd
 import numpy as np
 import pytest
 
-# Ensure local src directory is in path
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
-
 from sml_engine import ProxyEngineSML
 
-def generate_background_market_data() -> pd.DataFrame:
-    """Helper to generate background peer market panel data."""
-    # Leverage the standard mock panel built by ProxyEngineSML directly to maintain code consistency
-    engine = ProxyEngineSML()
-    return engine.data.copy()
-
-def test_allianz_2025_lti_structural_imbalance():
+def test_allianz_2025_lti_structural_imbalance(shared_sml_engine):
     """
     Benchmark Test 4: Allianz SE (2025)
     Ground Truth: ISS recommended AGAINST the Remuneration Policy (Agenda Item 7).
     Reason: Excessive LTI multiplier compared to fixed base salary (breaching DCGK G.1).
     Validation: SML engine must flag the LTI-to-salary ratio when it exceeds the 4.0x imbalance threshold.
     """
-    df_market = generate_background_market_data()
+    df_market = shared_sml_engine.data.copy()
     
     # Inject Allianz 2025 profile with extremely high LTI vs fixed base
     allianz_data = pd.DataFrame([{
@@ -38,6 +29,7 @@ def test_allianz_2025_lti_structural_imbalance():
         'salary': 1800000.0,      # Fixed Base
         'sti': 2200000.0,         # Short-Term Variable
         'lti': 8000000.0,         # LTI is 4.4x salary!
+        'OOPE': 1.6e10,
         'opting_out': 0
     }])
     
@@ -50,14 +42,14 @@ def test_allianz_2025_lti_structural_imbalance():
     # Assert high LTI ratio is successfully captured and exposed
     assert trace['lti_vs_salary_ratio'] > 4.0, f"Failed to catch Allianz's G.1 structural imbalance! Ratio was {trace['lti_vs_salary_ratio']}"
 
-def test_dhl_2024_pay_performance_disconnect():
+def test_dhl_2024_pay_performance_disconnect(shared_sml_engine):
     """
     Benchmark Test 5: DHL Group (2024)
     Ground Truth: Strong shareholder pushback on the remuneration report under Agenda Item 7.
     Reason: High STV bonus payout despite operational ROA contraction.
     Validation: Panel regression must flag the disconnect between variable bonus changes and asset efficiency changes.
     """
-    df_market = generate_background_market_data()
+    df_market = shared_sml_engine.data.copy()
     
     # Inject DHL 2023-2024 profile showing STV payout escalation despite ROA drop
     dhl_data = pd.DataFrame([
@@ -74,6 +66,7 @@ def test_dhl_2024_pay_performance_disconnect():
             'salary': 1500000.0,
             'sti': 1500000.0,
             'lti': 2500000.0,
+            'OOPE': 8.1e9,
             'opting_out': 0
         },
         {
@@ -89,6 +82,7 @@ def test_dhl_2024_pay_performance_disconnect():
             'salary': 1500000.0,
             'sti': 2000000.0,          # STV went up despite performance contraction!
             'lti': 2500000.0,
+            'OOPE': 8.2e9,
             'opting_out': 0
         }
     ])

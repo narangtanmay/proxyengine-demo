@@ -33,7 +33,7 @@ app.add_middleware(
 
 # Initialize engines
 sml_engine = ProxyEngineSML()
-cache_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src", "backend", "sml_cache.json")
+cache_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sml_cache.json")
 
 # Fit the full pipeline so the dashboard/chart endpoints have the fitted model and
 # every computed column (pay_premium, reach_ratio, cluster benchmarks, ratchets).
@@ -193,11 +193,14 @@ def get_company_chart(isin: str, year: int = 2024):
         # Baseline line (PDF Step 1 fair-pay line: log_pay ~ log_size + C(shadow_peer_cluster) + roa)
         sizes_range = np.linspace(cluster_peers['log_size'].min(), cluster_peers['log_size'].max(), 100)
         median_roa = cluster_peers['roa'].median()
+        median_gear = cluster_peers['gear'].median()
 
         dummy_df = pd.DataFrame({
             'log_size': sizes_range,
             'shadow_peer_cluster': [selected_cluster] * 100,
-            'roa': [median_roa] * 100
+            'roa': [median_roa] * 100,
+            'gear': [median_gear] * 100,
+            'year': [line_year] * 100
         })
         predicted_log_pays = sml_engine.model.predict(dummy_df)
         
@@ -228,7 +231,9 @@ def get_company_chart(isin: str, year: int = 2024):
         target_dummy_df = pd.DataFrame({
             'log_size': [np.log(target_size)],
             'shadow_peer_cluster': [selected_cluster],
-            'roa': [comp_row.iloc[0]['roa']]
+            'roa': [comp_row.iloc[0]['roa']],
+            'gear': [comp_row.iloc[0]['gear']],
+            'year': [line_year]
         })
         expected_pay_at_target = np.exp(sml_engine.model.predict(target_dummy_df)[0])
         
@@ -241,6 +246,46 @@ def get_company_chart(isin: str, year: int = 2024):
             linewidth=2,
             label='Reach Residual'
         )
+        
+        # Dynamic, collision-free pointer annotation box for target
+        is_overpaid = target_pay > expected_pay_at_target
+        text_y_offset = 1.35 if is_overpaid else 0.45
+        text_align = 'bottom' if is_overpaid else 'top'
+        
+        ax.annotate(
+            f"Target: {trace['company']} ({trace['year']})\nActual Pay: €{target_pay/1e6:.2f}M\nReach: {trace['reach_ratio']:.1f}x",
+            xy=(target_size / 1e6, target_pay / 1e6),
+            xytext=(target_size * 1.3 / 1e6, target_pay * text_y_offset / 1e6),
+            arrowprops=dict(arrowstyle="->", color="#ef4444", lw=1.5, shrinkA=0, shrinkB=5),
+            fontweight='bold',
+            fontsize=8.5,
+            va=text_align,
+            ha='left',
+            bbox=dict(facecolor='#fff5f0', edgecolor='#ff7600', boxstyle='round,pad=0.3', alpha=0.95),
+            zorder=10
+        )
+        
+        # Collision-safe regression line mid-label
+        mid_idx = len(sizes_range) // 2
+        mid_x = np.exp(sizes_range[mid_idx]) / 1e6
+        mid_y = np.exp(predicted_log_pays[mid_idx]) / 1e6
+        ax.text(
+            mid_x * 1.15,
+            mid_y * 1.25,
+            "Fair-Pay Regression Line (q=0.5)",
+            color='#ff7600',
+            fontweight='bold',
+            fontsize=8,
+            alpha=0.95,
+            bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.2', alpha=0.8),
+            zorder=6
+        )
+        
+        # Set boundaries with log-scale safety padding to prevent boundary clipping
+        x_vals = np.exp(plot_df['log_size']) / 1e6
+        y_vals = np.exp(plot_df['log_pay']) / 1e6
+        ax.set_xlim(x_vals.min() / 1.5, x_vals.max() * 2.5)
+        ax.set_ylim(y_vals.min() / 1.5, y_vals.max() * 1.6)
         
         ax.set_xscale('log')
         ax.set_yscale('log')
@@ -283,12 +328,13 @@ def chat_with_translator(request: ChatRequest):
         # User message could ask to change perspective or drill down
         # In a real system, the LLM takes this message. For our connected system,
         # we generate the selected dual-lens report and prepend the assistant's dialogue.
+        # Pass the conversational user query into the report generators
         if request.lens == "auditor":
-            report = dual_lens_translator.generate_auditor_report(trace, proposal_data)
-            intro = f"Based on your query regarding **{trace['company']}**, here is our institutional shareholder and proxy advisor report evaluating their executive compensation structure under our SML baseline.\n\n"
+            report = dual_lens_translator.generate_auditor_report(trace, proposal_data, user_query=request.message)
+            intro = f"Based on your query \"*{request.message}*\" regarding **{trace['company']}**, here is our institutional shareholder and proxy advisor report:\n\n"
         else:
-            report = dual_lens_translator.generate_compliance_report(trace, proposal_data)
-            intro = f"In response to your inquiry about **{trace['company']}**'s Say-on-Pay audit risks, here is our corporate secretary and legal counsel defense positioning under DCGK principles.\n\n"
+            report = dual_lens_translator.generate_compliance_report(trace, proposal_data, user_query=request.message)
+            intro = f"In response to your inquiry \"*{request.message}*\" about **{trace['company']}**'s Say-on-Pay audit risks, here is our defense positioning:\n\n"
             
         return {"content": intro + report}
     except Exception as e:

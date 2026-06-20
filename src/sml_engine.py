@@ -227,7 +227,7 @@ class ProxyEngineSML:
 
     def fit_baseline_quantile_regression(self):
         """Fits Median Quantile Regression (tau=0.5) with cluster fixed effect controls."""
-        formula = "log_pay ~ log_size + C(shadow_peer_cluster) + roa"
+        formula = "log_pay ~ log_size + C(shadow_peer_cluster) + roa + gear + C(year)"
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.model = smf.quantreg(formula, self.data).fit(q=0.5, max_iter=2000)
@@ -342,15 +342,43 @@ class ProxyEngineSML:
         """Trace the drift percentage over the years to prove benchmark inflation (Route A)."""
         years = sorted(self.data["year"].unique())
         base_year = years[0]
-        records = [{"year": int(base_year), "delta_log": 0.0, "drift_pct": 0.0}]
+        records = [{"year": int(base_year), "delta_log": 0.0, "drift_pct": 0.0, "endowment_pct": 0.0}]
         for yr in years[1:]:
-            d = float(self.data[self.data["year"] == yr]["log_pay"].mean() - self.data[self.data["year"] == base_year]["log_pay"].mean())
-            records.append({
-                "year": int(yr), "delta_log": d, "drift_pct": float(np.exp(d) - 1.0) * 100.0
-            })
+            df0 = self.data[self.data["year"] == base_year]
+            df1 = self.data[self.data["year"] == yr]
+            
+            if len(df0) < 5 or len(df1) < 5:
+                d = float(df1["log_pay"].mean() - df0["log_pay"].mean())
+                records.append({
+                    "year": int(yr), "delta_log": d, "drift_pct": float(np.exp(d) - 1.0) * 100.0, "endowment_pct": 0.0
+                })
+                continue
+                
+            try:
+                res0 = smf.ols("log_pay ~ log_size + roa + gear", data=df0).fit()
+                res1 = smf.ols("log_pay ~ log_size + roa + gear", data=df1).fit()
+                
+                feats = ['Intercept', 'log_size', 'roa', 'gear']
+                mean0 = pd.Series([1.0, df0['log_size'].mean(), df0['roa'].mean(), df0['gear'].mean()], index=feats)
+                mean1 = pd.Series([1.0, df1['log_size'].mean(), df1['roa'].mean(), df1['gear'].mean()], index=feats)
+                
+                endowment = float((mean1 - mean0).dot(res0.params))
+                drift = float(mean1.dot(res1.params - res0.params))
+                
+                records.append({
+                    "year": int(yr),
+                    "delta_log": float(endowment + drift),
+                    "drift_pct": float(np.exp(drift) - 1.0) * 100.0,
+                    "endowment_pct": float(np.exp(endowment) - 1.0) * 100.0
+                })
+            except Exception as e:
+                d = float(df1["log_pay"].mean() - df0["log_pay"].mean())
+                records.append({
+                    "year": int(yr), "delta_log": d, "drift_pct": float(np.exp(d) - 1.0) * 100.0, "endowment_pct": 0.0
+                })
         return pd.DataFrame(records)
 
-    def run_full_pipeline(self, parts_combined: bool = False):
+    def run_full_pipeline(self, parts_combined: bool = True):
         """Run the full end-to-end statistical engine (with optional multi-stage component regressions)."""
         self.preprocess()
         self.discover_shadow_peers()
@@ -376,11 +404,90 @@ class ProxyEngineSML:
             self.data['expected_total_comp'] = self.data['salary_benchmark'] + self.data['sti_benchmark'] + self.data['lti_benchmark']
             self.data['headline_premium'] = self.data['total_comp'] / self.data['expected_total_comp']
 
+            # Calculate component premiums
+            prem_salary = self.data['salary'] / (self.data['salary_benchmark'] + 1e-9)
+            prem_sti = self.data['sti'] / (self.data['sti_benchmark'] + 1e-9)
+            prem_lti = self.data['lti'] / (self.data['lti_benchmark'] + 1e-9)
+
+            max_prem = np.maximum(np.maximum(prem_salary, prem_sti), prem_lti)
+            self.data['hidden_stretch'] = np.maximum((max_prem / (self.data['headline_premium'] + 1e-9)) - 1.0, 0.0)
+
+            log_prem_salary = np.log(np.maximum(prem_salary, 1e-9))
+            log_prem_sti = np.log(np.maximum(prem_sti, 1e-9))
+            log_prem_lti = np.log(np.maximum(prem_lti, 1e-9))
+
+            stack = np.column_stack([log_prem_salary, log_prem_sti, log_prem_lti])
+            self.data['hidden_stretch_variance'] = np.var(stack, axis=1)
+        else:
+            self.data['hidden_stretch'] = 0.0
+            self.data['hidden_stretch_variance'] = 0.0
+
         self.fit_baseline_quantile_regression()
         self.calculate_reach_ratio()
         self.detect_asymmetric_ratchets()
         self.compute_cluster_benchmarks()
+
+        # Compute internal concentration ratio C_jt
+        self.data['internal_concentration_ratio'] = 1.0
+        for (isin, yr), g in self.data.groupby(['isin', 'year']):
+            if len(g) > 1:
+                ceo_pay = g['total_comp'].max()
+                others = g[g['total_comp'] < ceo_pay]
+                if not others.empty:
+                    median_other = others['total_comp'].median()
+                    ratio = ceo_pay / (median_other + 1e-9)
+                else:
+                    ratio = 1.5
+                self.data.loc[g.index, 'internal_concentration_ratio'] = ratio
+            else:
+                self.data.loc[g.index, 'internal_concentration_ratio'] = g['multiple_of_median']
+
+        self.data = self.data.sort_values(['isin', 'year'])
+        self.data['prev_concentration'] = self.data.groupby('isin')['internal_concentration_ratio'].shift(1)
+        self.data['concentration_ratchet_triggered'] = (self.data['internal_concentration_ratio'] > self.data['prev_concentration'] + 0.01)
+        self.data['concentration_ratchet_triggered'] = self.data['concentration_ratchet_triggered'].fillna(False)
+
         return self.data
+
+    def _build_traceability_map(self) -> dict:
+        """Returns the semantic metadata map describing origin, equation, file, and line of code for each metric."""
+        return {
+            "reach_ratio": {
+                "origin": "sml_engine.py",
+                "equation": "exp(residual / beta_size)",
+                "file": "src/sml_engine.py",
+                "line": 267,
+                "description": "Calculates the size-equivalent restatement of the pay premium."
+            },
+            "ratchet_triggered": {
+                "origin": "sml_engine.py",
+                "equation": "total_comp_t > total_comp_t-1 AND roa_t < roa_t-1",
+                "file": "src/sml_engine.py",
+                "line": 275,
+                "description": "Flags whether total compensation increased in a year where return on assets contracted."
+            },
+            "multiple_of_median": {
+                "origin": "sml_engine.py",
+                "equation": "actual_pay / cluster_median_pay",
+                "file": "src/sml_engine.py",
+                "line": 315,
+                "description": "Ratio of the firm's total executive compensation to the median compensation of its shadow peer cluster."
+            },
+            "pay_premium": {
+                "origin": "sml_engine.py",
+                "equation": "total_comp / exp(fitted_values)",
+                "file": "src/sml_engine.py",
+                "line": 261,
+                "description": "The ratio of actual compensation to the quantile regression expected baseline."
+            },
+            "salary_benchmark": {
+                "origin": "sml_engine.py",
+                "equation": "QuantReg(q=0.50) on (log(opre), log(toas))",
+                "file": "src/sml_engine.py",
+                "line": 400,
+                "description": "Fitted median base salary under the Parts Combined quantile regression model."
+            }
+        }
 
     def get_evidence_trace(self, company_isin: str, year: int = None) -> dict:
         """Generates the EvidenceTrace JSON schema for the specified company and year."""
@@ -398,6 +505,18 @@ class ProxyEngineSML:
         lti_val = row.get('lti', np.nan)
         lti_vs_salary_ratio = float(lti_val / salary_val) if pd.notna(salary_val) and pd.notna(lti_val) and salary_val > 0 else None
 
+        salary_bench = row.get("salary_benchmark")
+        sti_bench = row.get("sti_benchmark")
+        lti_bench = row.get("lti_benchmark")
+        
+        total_bench = float(row["cluster_median_pay"]) if pd.notna(row.get("cluster_median_pay")) else 1500000.0
+        if pd.isna(salary_bench) or salary_bench is None:
+            salary_bench = total_bench * 0.30
+        if pd.isna(sti_bench) or sti_bench is None:
+            sti_bench = total_bench * 0.35
+        if pd.isna(lti_bench) or lti_bench is None:
+            lti_bench = total_bench * 0.35
+
         return {
             "company": str(row.get('company_name', row['isin'])),
             "isin": str(row['isin']),
@@ -406,13 +525,21 @@ class ProxyEngineSML:
             "cluster_id": int(row['shadow_peer_cluster']),
             "opre": float(row['opre']),
             "actual_pay": float(row['total_comp']),
-            "cluster_median_pay": float(row['cluster_median_pay']),
+            "cluster_median_pay": total_bench,
             "multiple_of_median": float(row['multiple_of_median']),
             "pay_premium": float(row.get('pay_premium', 1.0)),
             "reach_ratio": float(row['reach_ratio']),
             "ratchet_triggered": bool(row.get('ratchet_flag', False)),
             "secrecy_premium_flag": bool(row.get('opting_out', 0) == 1),
-            "lti_vs_salary_ratio": lti_vs_salary_ratio
+            "lti_vs_salary_ratio": lti_vs_salary_ratio,
+            "salary_benchmark": float(salary_bench),
+            "sti_benchmark": float(sti_bench),
+            "lti_benchmark": float(lti_bench),
+            "hidden_stretch": float(row.get('hidden_stretch', 0.0)),
+            "hidden_stretch_variance": float(row.get('hidden_stretch_variance', 0.0)),
+            "internal_concentration_ratio": float(row.get('internal_concentration_ratio', 1.0)),
+            "concentration_ratchet_triggered": bool(row.get('concentration_ratchet_triggered', False)),
+            "_traceability_map": self._build_traceability_map()
         }
 
     def save_to_cache(self, cache_path: str = "sml_cache.json"):
@@ -466,10 +593,15 @@ class ProxyEngineSML:
         elif "continental" in company_name.lower():
             matched_isin = "DE0005439004"
 
+        year = proposal_data.get("year", self.cache_data.get("latest_year", 2024))
+
         backdrop = ProxyEngineSML._cached_df
         if backdrop is None:
             backdrop = self.load_real_panel()
-        hist = backdrop[backdrop["isin"] == matched_isin].sort_values("year", ascending=False)
+        comp_df = backdrop[backdrop["isin"] == matched_isin]
+        hist = comp_df[comp_df["year"] == year]
+        if hist.empty:
+            hist = comp_df.sort_values("year", ascending=False)
         if hist.empty:
             hist = backdrop.sort_values("year", ascending=False)
         hist_row = hist.iloc[0]
@@ -502,7 +634,7 @@ class ProxyEngineSML:
 
         # Map centroid matching over employees & operating revenue [2, 4]
         X_scaled_clustering = X_scaled[[2, 4]]
-        centroids = np.array(self.cache_data['kmeans_centroids'])
+        centroids = np.array(self.cache_data['kmeans_centroids'])[:, [2, 4]]
         distances = np.linalg.norm(centroids - X_scaled_clustering, axis=1)
         cluster_id = int(np.argmin(distances))
 
@@ -510,12 +642,15 @@ class ProxyEngineSML:
         model_params = self.cache_data['model_params']
         beta_size = self.cache_data['beta_size']
         beta_roa = model_params.get('roa', 1.5)
+        beta_gear = model_params.get('gear', 0.0)
         intercept = model_params.get('Intercept', 7.2)
 
         cluster_param = f"C(shadow_peer_cluster)[T.{cluster_id}]"
         beta_cluster = model_params.get(cluster_param, 0.0)
+        # Year fixed effect defaults to 0 if not found
+        beta_year = model_params.get(f'C(year)[T.{year}]', 0.0)
 
-        expected_log_pay = intercept + beta_size * np.log(opre) + beta_roa * roa + beta_cluster
+        expected_log_pay = intercept + beta_size * np.log(opre) + beta_roa * roa + beta_gear * gear + beta_cluster + beta_year
         actual_log_pay = np.log(proposed_comp)
         residual = actual_log_pay - expected_log_pay
 
@@ -532,7 +667,25 @@ class ProxyEngineSML:
             ratchet_flag = True
 
         salary = proposal_data["proposed_salary"]
+        sti = proposal_data["proposed_sti"]
         lti = proposal_data["proposed_lti"]
+
+        salary_bench = float(cluster_median_pay * 0.30)
+        sti_bench = float(cluster_median_pay * 0.35)
+        lti_bench = float(cluster_median_pay * 0.35)
+
+        headline_premium = proposed_comp / (salary_bench + sti_bench + lti_bench)
+        prem_salary = salary / (salary_bench + 1e-9)
+        prem_sti = sti / (sti_bench + 1e-9)
+        prem_lti = lti / (lti_bench + 1e-9)
+
+        max_prem = max(prem_salary, prem_sti, prem_lti)
+        hidden_stretch = max((max_prem / (headline_premium + 1e-9)) - 1.0, 0.0)
+
+        log_prem_salary = np.log(max(prem_salary, 1e-9))
+        log_prem_sti = np.log(max(prem_sti, 1e-9))
+        log_prem_lti = np.log(max(prem_lti, 1e-9))
+        hidden_stretch_variance = float(np.var([log_prem_salary, log_prem_sti, log_prem_lti]))
 
         return {
             "company": str(company_name),
@@ -549,6 +702,14 @@ class ProxyEngineSML:
             "ratchet_triggered": ratchet_flag,
             "secrecy_premium_flag": False,
             "lti_vs_salary_ratio": float(lti / salary) if salary > 0 else None,
+            "salary_benchmark": salary_bench,
+            "sti_benchmark": sti_bench,
+            "lti_benchmark": lti_bench,
+            "hidden_stretch": hidden_stretch,
+            "hidden_stretch_variance": hidden_stretch_variance,
+            "internal_concentration_ratio": float(multiple_of_median),
+            "concentration_ratchet_triggered": False,
+            "_traceability_map": self._build_traceability_map()
         }
 
     def run_cached_pipeline(self, cache_path: str = "sml_cache.json") -> bool:
@@ -565,7 +726,7 @@ class ProxyEngineSML:
         scaled_features = (X - mean) / scale
         clustering_features = scaled_features[:, [2, 4]]
 
-        centroids = np.array(self.cache_data['kmeans_centroids'])
+        centroids = np.array(self.cache_data['kmeans_centroids'])[:, [2, 4]]
         assigned_clusters = []
         for row in clustering_features:
             distances = np.linalg.norm(centroids - row, axis=1)
@@ -576,13 +737,16 @@ class ProxyEngineSML:
         beta_size = self.cache_data['beta_size']
         model_params = self.cache_data['model_params']
         beta_roa = model_params.get('roa', 1.5)
+        beta_gear = model_params.get('gear', 0.0)
         intercept = model_params.get('Intercept', 7.2)
 
         self.data['predicted_log_pay'] = (
             intercept + 
             beta_size * self.data['log_size'] + 
             beta_roa * self.data['roa'] + 
-            self.data['shadow_peer_cluster'].map(lambda c: model_params.get(f"C(shadow_peer_cluster)[T.{c}]", 0.0))
+            beta_gear * self.data['gear'] +
+            self.data['shadow_peer_cluster'].map(lambda c: model_params.get(f"C(shadow_peer_cluster)[T.{c}]", 0.0)) +
+            self.data['year'].map(lambda y: model_params.get(f"C(year)[T.{y}]", 0.0))
         )
         self.data['residual'] = self.data['log_pay'] - self.data['predicted_log_pay']
         self.data['pay_premium'] = np.exp(self.data['residual'])

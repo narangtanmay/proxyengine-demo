@@ -15,7 +15,7 @@ class ProxyEngineDualLens:
         """
         pass
 
-    def _generate_narrative_with_api(self, mode: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
+    def _generate_narrative_with_api(self, mode: str, trace: Dict[str, Any], proposal_data: Dict[str, Any], user_query: str = None) -> str:
         """
         Uses OpenAI or Anthropic API to generate tailored narrative reports if credentials exist.
         """
@@ -38,6 +38,21 @@ class ProxyEngineDualLens:
             )
         }
         
+        system_prompt = system_prompts[mode]
+        if user_query:
+            if mode == "auditor":
+                system_prompt += (
+                    f"\n\nAn investor has queried: \"{user_query}\". "
+                    "You MUST tailor your response to directly answer this question, grounding all arguments "
+                    "strictly in the SML Evidence Trace."
+                )
+            else:
+                system_prompt += (
+                    f"\n\nThe board/counsel has queried: \"{user_query}\". "
+                    "You MUST tailor your response to directly answer this question, grounding all arguments "
+                    "strictly in the SML Evidence Trace and DCGK guidelines."
+                )
+        
         user_content = (
             f"Econometric Evidence Trace (SML Output):\n"
             f"{json.dumps(trace, indent=2)}\n\n"
@@ -53,7 +68,7 @@ class ProxyEngineDualLens:
                 response = client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[
-                        {"role": "system", "content": system_prompts[mode]},
+                        {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_content}
                     ],
                     temperature=0.2,
@@ -71,7 +86,7 @@ class ProxyEngineDualLens:
                 response = client.messages.create(
                     model="claude-3-5-sonnet-20241022",
                     max_tokens=1500,
-                    system=system_prompts[mode],
+                    system=system_prompt,
                     messages=[{"role": "user", "content": user_content}],
                     temperature=0.2
                 )
@@ -111,6 +126,14 @@ class ProxyEngineDualLens:
         "esg": (
             "whether variable remuneration is anchored to quantifiable ESG / sustainability KPIs under DCGK Section G.1. "
             "Grounding field: esg_linked."
+        ),
+        "stretch": (
+            "the hidden stretch / component divergence anomaly - showing whether excessive pay is masked inside complex, "
+            "divergent variable components. Grounding fields: hidden_stretch, hidden_stretch_variance."
+        ),
+        "concentration": (
+            "the executive board internal concentration ratio C_jt - dividing CEO pay by the median other-board-member pay, "
+            "and showing whether concentration ratcheted upward over time. Grounding fields: internal_concentration_ratio, concentration_ratchet_triggered."
         ),
     }
 
@@ -240,22 +263,65 @@ class ProxyEngineDualLens:
                 "auditor": "\U0001f50d Activist Advisor Analysis: ESG linkages lack quantifiable, audited carbon metrics and read as a symbolic 'greenwashing' shield rather than a binding performance condition." if not esg else "\U0001f50d Activist Advisor Analysis: While ESG targets are present, their weighting and measurability must be independently verified before they can offset the quantitative pay anomalies above.",
                 "compliance": f"\U0001f6e1️ Corporate Board Counsel Defense: Variable STV/LTI payouts are anchored to quantifiable carbon-reduction and diversity targets under DCGK Section G.1." if esg else "\U0001f6e1️ Corporate Board Counsel Defense: The board should introduce quantifiable ESG/sustainability targets to satisfy DCGK Section G.1 and pre-empt proxy-advisor criticism.",
             },
+            "stretch": {
+                "auditor": f"\U0001f50d Activist Advisor Analysis: SML component decomposition flags a Hidden Stretch in variable components (variance: {trace.get('hidden_stretch_variance', 0.0):.2f}). This confirms the board is hiding bloated payouts inside lumpy options or STI targets rather than base pay. We recommend voting AGAINST.",
+                "compliance": f"\U0001f6e1️ Corporate Board Counsel Defense: The component divergence reflects a deliberate DCGK-compliant design maximizing variable incentive weight under G.10; the option/LTI variance aligns with multi-year performance milestones.",
+            },
+            "concentration": {
+                "auditor": f"\U0001f50d Activist Advisor Analysis: The internal concentration ratio C_jt is {trace.get('internal_concentration_ratio', 1.0):.2f}x, indicating excessive CEO payout relative to other executive board members (ratchet triggered: {trace.get('concentration_ratchet_triggered', False)}). This represents poor internal equity. We recommend voting AGAINST.",
+                "compliance": f"\U0001f6e1️ Corporate Board Counsel Defense: The CEO-to-median-board ratio is justified by the unique responsibilities, global experience, and market value of the chief executive in accordance with DCGK Section G.3.",
+            },
         }
         lens_map = templates.get(criterion)
         if not lens_map:
             return "No segment narrative generated."
         return lens_map.get(lens, lens_map.get("auditor", "No segment narrative generated."))
 
-    def generate_auditor_report(self, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
+    def _generate_fallback_chat_response(self, mode: str, trace: Dict[str, Any], proposal_data: Dict[str, Any], user_query: str) -> str:
         """
-        Generates the Activist Investor / Proxy Advisor audit report (VOTE AGAINST).
+        Parses the user query for key governance and econometric terms
+        and dynamically routes to the relevant SML Single-Criterion fallback templates.
         """
-        # Try API first
-        api_report = self._generate_narrative_with_api("auditor", trace, proposal_data)
-        if api_report:
-            return api_report
+        if not user_query:
+            return ""
+        q = user_query.lower()
+        
+        # 1. Reach/Size premiums
+        if "reach" in q or "size" in q or "premium" in q or "scale" in q:
+            return self._fallback_insight("reach", mode, trace, proposal_data)
             
-        # Fallback to deterministic high-fidelity templates
+        # 2. Asymmetric ratcheting/pay-for-luck
+        elif "ratchet" in q or "luck" in q or "downside" in q or "performance" in q:
+            return self._fallback_insight("ratchet", mode, trace, proposal_data)
+            
+        # 3. Multiple of Median/ISS checks
+        elif "mom" in q or "median" in q or "peer" in q or "iss" in q or "limit" in q:
+            return self._fallback_insight("mom", mode, trace, proposal_data)
+            
+        # 4. Disclosure secrecy HGB § 286
+        elif "secrecy" in q or "disclosure" in q or "opt-out" in q or "hgb" in q:
+            return self._fallback_insight("secrecy", mode, trace, proposal_data)
+            
+        # 5. LTI ratios and DCGK G.1
+        elif "lti" in q or "ratio" in q or "salary" in q or "fixed" in q or "balance" in q:
+            return self._fallback_insight("ltiRatio", mode, trace, proposal_data)
+            
+        # 6. ESG indicators and carbon targets
+        elif "esg" in q or "carbon" in q or "green" in q or "sustainability" in q:
+            return self._fallback_insight("esg", mode, trace, proposal_data)
+
+        # 7. Stretch / Divergence
+        elif "stretch" in q or "divergence" in q or "skew" in q or "bucket" in q:
+            return self._fallback_insight("stretch", mode, trace, proposal_data)
+            
+        # 8. Concentration / CEO ratio
+        elif "concentration" in q or "equity" in q or "ceo ratio" in q or "board ratio" in q:
+            return self._fallback_insight("concentration", mode, trace, proposal_data)
+            
+        return ""
+
+    def _fallback_auditor_report(self, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
+        """Deterministic high-fidelity offline template for the activist auditor report."""
         company = trace.get("company", proposal_data.get("company_name", "the Company"))
         exec_id = trace.get("exec_id", proposal_data.get("exec_id", "the CEO"))
         agenda_item = proposal_data.get("agenda_item", "Approval of Remuneration System")
@@ -297,6 +363,7 @@ We recommend that institutional shareholders vote **AGAINST** the proposed remun
 2. **Asymmetric Downside Protection:** {ratchet_text}
 3. **Imbalanced Compensation Structure:** The proposed Long-Term Incentive (LTI) is **{lti_vs_salary_ratio:.2f}x** the base fixed salary. While equity linkage is theoretically alignment-positive, here it is leveraged on top of an inflated size premium.
 4. **Transparency and Disclosure:** {secrecy_text}
+5. **Component Stretch & Concentration:** We detect a hidden stretch of **{trace.get('hidden_stretch', 0.0)*100:.1f}%** across variable components (variance: **{trace.get('hidden_stretch_variance', 0.0):.2f}**). CEO internal board concentration ratio is **{trace.get('internal_concentration_ratio', 1.0):.2f}x** (ratchet triggered: **{trace.get('concentration_ratchet_triggered', False)}**).
 
 ### Econometric Evidence & Metrics
 * **Shadow Peer Universe:** Cluster {cluster_id} (Grouped by Asset Turnover, ROA, and Gearing).
@@ -306,16 +373,27 @@ We recommend that institutional shareholders vote **AGAINST** the proposed remun
 **Conclusion:** This package represents a Transfer of Wealth from shareholders to the Executive Board without corresponding downside risk. We urge institutional clients to vote **AGAINST**."""
         return report
 
-    def generate_compliance_report(self, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
+    def generate_auditor_report(self, trace: Dict[str, Any], proposal_data: Dict[str, Any], user_query: str = None) -> str:
         """
-        Generates the Corporate Board / Defense report.
+        Generates the Activist Investor / Proxy Advisor audit report (VOTE AGAINST).
+        Supports custom conversational queries with intelligent keyword fallback routing.
         """
         # Try API first
-        api_report = self._generate_narrative_with_api("compliance", trace, proposal_data)
+        api_report = self._generate_narrative_with_api("auditor", trace, proposal_data, user_query)
         if api_report:
             return api_report
             
+        # If user query is provided, check for keyword fallback routing
+        if user_query:
+            fallback_response = self._generate_fallback_chat_response("auditor", trace, proposal_data, user_query)
+            if fallback_response:
+                return fallback_response
+            
         # Fallback to deterministic high-fidelity templates
+        return self._fallback_auditor_report(trace, proposal_data)
+
+    def _fallback_compliance_report(self, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
+        """Deterministic high-fidelity offline template for the corporate board compliance report."""
         company = trace.get("company", proposal_data.get("company_name", "the Company"))
         exec_id = trace.get("exec_id", proposal_data.get("exec_id", "the CEO"))
         agenda_item = proposal_data.get("agenda_item", "Approval of Remuneration System")
@@ -355,11 +433,34 @@ The remuneration proposal for **{company}**'s Executive Board is highly likely t
    * *The Threat:* Extreme long-term equity-incentive tilt.
    * *Board Defense (DCGK G.1):* Frame this tilt as a deliberate governance decision to align the vast majority of CEO compensation directly with long-term shareholder return (TSR), ensuring that {exec_id} is only rewarded if shareholders win.
 
+4. **Internal Concentration ({trace.get('internal_concentration_ratio', 1.0):.2f}x) & Hidden Stretch:**
+   * *The Threat:* High internal board concentration ratio and component divergence (hidden stretch of {trace.get('hidden_stretch', 0.0)*100:.1f}%) will trigger concerns over internal equity and transparency.
+   * *Board Defense (DCGK G.3):* Justify the concentration ratio based on unique CEO scale responsibilities, and argue that variable option variance is designed strictly to incentivize multi-year performance milestones under G.10.
+
 ### Action Plan for Board Communication
 * **Preemptive Disclosure:** Draft a supplementary corporate governance statement detailing the global peer comparison methodology used by the supervisory board.
 * **Shareholder Outreach:** Schedule 1-on-1 engagement calls with top 10 institutional shareholders to proactively explain the size premium and contract conditions.
 * **Governance Review:** Integrate the proposed {esg_text} to satisfy ISS sustainability alignment checks."""
         return report
+
+    def generate_compliance_report(self, trace: Dict[str, Any], proposal_data: Dict[str, Any], user_query: str = None) -> str:
+        """
+        Generates the Corporate Board / Defense report.
+        Supports custom conversational queries with intelligent keyword fallback routing.
+        """
+        # Try API first
+        api_report = self._generate_narrative_with_api("compliance", trace, proposal_data, user_query)
+        if api_report:
+            return api_report
+            
+        # If user query is provided, check for keyword fallback routing
+        if user_query:
+            fallback_response = self._generate_fallback_chat_response("compliance", trace, proposal_data, user_query)
+            if fallback_response:
+                return fallback_response
+            
+        # Fallback to deterministic high-fidelity templates
+        return self._fallback_compliance_report(trace, proposal_data)
 
 if __name__ == "__main__":
     # Test

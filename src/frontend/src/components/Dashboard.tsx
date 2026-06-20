@@ -1,3 +1,4 @@
+import { useState } from "react";
 import PlaceholderCard from "./PlaceholderCard";
 import type { DashboardData } from "../types";
 
@@ -7,6 +8,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ data, chartUrl }: DashboardProps) {
+  const [isAcademicViewExpanded, setIsAcademicViewExpanded] = useState(false);
   if (!data) {
     return (
       <section className="dashboard" style={{ display: "flex", justifyContent: "center", padding: "4rem" }}>
@@ -84,30 +86,69 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
         {/* Right Column: Key Statistical Diagnostics & Disclosures */}
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           
-          <PlaceholderCard title="📚 Statistical Rigor & Diagnostics">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", fontSize: "0.9rem" }}>
-              <div>
-                <p style={{ margin: "0 0 4px 0", color: "#6c757d" }}>Size Elasticity (β):</p>
-                <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>~0.3000</p>
-                <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Standard Gabaix-Landier baseline</span>
+          <div className="placeholder-card" style={{ 
+            border: "1px solid #dee2e6", 
+            borderRadius: "6px", 
+            overflow: "hidden", 
+            backgroundColor: "#ffffff",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+            minHeight: "auto"
+          }}>
+            <button 
+              type="button"
+              onClick={() => setIsAcademicViewExpanded(!isAcademicViewExpanded)}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#eef1f6")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#f8f9fa")}
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "1rem 1.25rem",
+                backgroundColor: "#f8f9fa",
+                border: "none",
+                borderBottom: isAcademicViewExpanded ? "1px solid #dee2e6" : "none",
+                cursor: "pointer",
+                textAlign: "left",
+                fontWeight: "bold",
+                color: "#1f4287",
+                fontSize: "0.95rem",
+                transition: "background-color 0.2s ease"
+              }}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>📚</span> Advanced Academic Diagnostics
+              </span>
+              <span style={{ fontSize: "0.75rem", color: "#6c757d", textTransform: "uppercase" }}>
+                {isAcademicViewExpanded ? "▼ Collapse" : "▶ Expand View"}
+              </span>
+            </button>
+
+            {isAcademicViewExpanded && (
+              <div style={{ padding: "1.25rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", fontSize: "0.9rem" }}>
+                <div>
+                  <p style={{ margin: "0 0 4px 0", color: "#6c757d", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>Size Elasticity (β):</p>
+                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>~0.3000</p>
+                  <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Standard Gabaix-Landier baseline</span>
+                </div>
+                <div>
+                  <p style={{ margin: "0 0 4px 0", color: "#6c757d", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>Pseudo R² (Goodness of Fit):</p>
+                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>0.1585</p>
+                  <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Quantile Regression goodness</span>
+                </div>
+                <div>
+                  <p style={{ margin: "0 0 4px 0", color: "#6c757d", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>t-Statistic of Size:</p>
+                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>34.52</p>
+                  <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Highly significant (p &lt; 0.05)</span>
+                </div>
+                <div>
+                  <p style={{ margin: "0 0 4px 0", color: "#6c757d", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>p-Value of Size Influence:</p>
+                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>0.0000</p>
+                  <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Statistically bulletproof</span>
+                </div>
               </div>
-              <div>
-                <p style={{ margin: "0 0 4px 0", color: "#6c757d" }}>Pseudo R² (Goodness of Fit):</p>
-                <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>0.1585</p>
-                <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Quantile Regression goodness</span>
-              </div>
-              <div>
-                <p style={{ margin: "0 0 4px 0", color: "#6c757d" }}>t-Statistic of Size:</p>
-                <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>34.52</p>
-                <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Highly significant (p &lt; 0.05)</span>
-              </div>
-              <div>
-                <p style={{ margin: "0 0 4px 0", color: "#6c757d" }}>p-Value of Size Influence:</p>
-                <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>0.0000</p>
-                <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Statistically bulletproof</span>
-              </div>
-            </div>
-          </PlaceholderCard>
+            )}
+          </div>
 
           <PlaceholderCard title="🛡️ Governance & Disclosures">
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.85rem" }}>

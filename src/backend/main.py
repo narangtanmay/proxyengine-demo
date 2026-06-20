@@ -18,12 +18,14 @@ from sml_engine import ProxyEngineSML
 from pdf_parser_poc import PDFExtractorPOC
 from llm_wrapper import ProxyEngineDualLens
 
-app = FastAPI(title="ProxyEngine API Server", version="1.0.0")
+app = FastAPI(title="ProxyEngine API", version="1.0.0")
 
-# Enable CORS for frontend connection
+# Enable CORS for frontend connection (Restricted origins for security)
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000,http://localhost:5173,http://127.0.0.1:8000,http://127.0.0.1:5173").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Allow all origins for local hackathon development
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

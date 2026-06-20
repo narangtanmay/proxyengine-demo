@@ -193,7 +193,12 @@ class ProxyEngineSML:
         self.data['residual'] = self.data['log_pay'] - self.data['predicted_log_pay']
         
         # Prevent zero or extremely small beta from causing division issues
-        beta = self.beta_size if (self.beta_size and self.beta_size > 0.05) else 0.3
+        if not self.beta_size or self.beta_size <= 0.05:
+            import warnings
+            warnings.warn("Quantile regression yielded an unstable or negative size coefficient (beta <= 0.05). Falling back to Gabaix-Landier baseline beta = 0.3000.", RuntimeWarning)
+            beta = 0.3
+        else:
+            beta = self.beta_size
         self.data['reach_ratio'] = np.exp(self.data['residual'] / beta)
         return self.data
 

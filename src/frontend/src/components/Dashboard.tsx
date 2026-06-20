@@ -19,8 +19,12 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
     return new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(val);
   };
 
+  const COLOR_ALERT = "#d32f2f";
+  const COLOR_OK = "#2e7d32";
   const isMoMHigh = data.multiple_of_median > 1.5;
   const isReachHigh = data.reach_ratio > 1.5;
+  const momColor = isMoMHigh ? COLOR_ALERT : COLOR_OK;
+  const reachColor = isReachHigh ? COLOR_ALERT : COLOR_OK;
 
   return (
     <section className="dashboard" aria-label="Compensation dashboard" style={{ padding: "1.5rem", maxWidth: "1280px", margin: "0 auto" }}>
@@ -42,18 +46,18 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
           </div>
         </article>
 
-        <article className="placeholder-card" style={{ borderLeft: `5px solid ${isMoMHigh ? "#d32f2f" : "#2e7d32"}` }}>
+        <article className="placeholder-card" style={{ borderLeft: `5px solid ${momColor}` }}>
           <h3 className="placeholder-card__title" style={{ fontSize: "0.85rem", color: "#6c757d", textTransform: "uppercase", letterSpacing: "1px" }}>Multiple of Median (MoM)</h3>
           <div className="placeholder-card__body" style={{ marginTop: "0.5rem" }}>
-            <p style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0, color: isMoMHigh ? "#d32f2f" : "#2e7d32" }}>{data.multiple_of_median.toFixed(2)}x</p>
+            <p style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0, color: momColor }}>{data.multiple_of_median.toFixed(2)}x</p>
             <p style={{ fontSize: "0.8rem", color: "#6c757d", margin: "0.2rem 0 0 0" }}>ISS high-concern limit: 1.50x</p>
           </div>
         </article>
 
-        <article className="placeholder-card" style={{ borderLeft: `5px solid ${isReachHigh ? "#d32f2f" : "#2e7d32"}` }}>
+        <article className="placeholder-card" style={{ borderLeft: `5px solid ${reachColor}` }}>
           <h3 className="placeholder-card__title" style={{ fontSize: "0.85rem", color: "#6c757d", textTransform: "uppercase", letterSpacing: "1px" }}>Econometric Reach</h3>
           <div className="placeholder-card__body" style={{ marginTop: "0.5rem" }}>
-            <p style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0, color: isReachHigh ? "#d32f2f" : "#2e7d32" }}>{data.reach_ratio.toFixed(1)}x</p>
+            <p style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0, color: reachColor }}>{data.reach_ratio.toFixed(1)}x</p>
             <p style={{ fontSize: "0.8rem", color: "#6c757d", margin: "0.2rem 0 0 0" }}>Paid like a firm X times bigger</p>
           </div>
         </article>

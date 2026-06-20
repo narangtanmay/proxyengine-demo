@@ -69,14 +69,16 @@ body {
   justify-content: space-between;
   gap: var(--space);
   padding: 12px var(--space);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  background: #0f172a; /* Premium Slate-900 */
+  border-bottom: 1px solid #1e293b;
+  color: #ffffff;
 }
 
 .app-title {
   font-size: 1.125rem;
   font-weight: 600;
   margin: 0;
+  color: #ffffff; /* White text for contrast */
 }
 
 .app-header__controls {

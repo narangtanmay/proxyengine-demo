@@ -86,6 +86,9 @@ export default function App() {
 
   // Selected criterion in Step 3 for detailed insights / visual support
   const [activeCriterion, setActiveCriterion] = useState<string>("reach");
+  
+  // Interactive Selection Profile modal state
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const toggleChat = useCallback(() => setIsChatOpen((open) => !open), []);
   const closeChat = useCallback(() => setIsChatOpen(false), []);
@@ -516,7 +519,7 @@ export default function App() {
               <button 
                 type="button" 
                 className="button"
-                onClick={() => setCriteria({ reach: true, ratchet: true, mom: false, secrecy: false, ltiRatio: false, esg: false })}
+                onClick={() => setIsProfileModalOpen(true)}
                 style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", backgroundColor: "#e9ecef", border: "none", borderRadius: "4px", cursor: "pointer" }}
               >
                 📂 Load Stored Selection Profile
@@ -1078,6 +1081,136 @@ export default function App() {
         messages={messages}
         onSend={handleSendMessage}
       />
+
+      {/* Interactive Selection Profile Popup Modal */}
+      {isProfileModalOpen && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(15, 23, 42, 0.65)",
+          backdropFilter: "blur(4px)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1000,
+          transition: "all 0.3s ease"
+        }}>
+          <div style={{
+            backgroundColor: "#ffffff",
+            borderRadius: "8px",
+            width: "100%",
+            maxWidth: "500px",
+            padding: "2rem",
+            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+            border: "1px solid #dee2e6"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+              <h3 style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#1f4287", margin: 0 }}>
+                Select Evaluation Profile
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsProfileModalOpen(false)}
+                style={{
+                  border: "none",
+                  backgroundColor: "transparent",
+                  fontSize: "1.2rem",
+                  cursor: "pointer",
+                  color: "#6c757d"
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ color: "#6c757d", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
+              Choose a predefined analysis profile to automatically activate the matching checklist criteria.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              
+              {/* Profile 1: Auditor */}
+              <div 
+                onClick={() => {
+                  setCriteria({ reach: true, ratchet: true, mom: true, secrecy: false, ltiRatio: false, esg: false });
+                  setIsProfileModalOpen(false);
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#1f4287")}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#dee2e6")}
+                style={{
+                  border: "1px solid #dee2e6",
+                  borderRadius: "6px",
+                  padding: "1rem",
+                  cursor: "pointer",
+                  transition: "border-color 0.2s ease",
+                  textAlign: "left"
+                }}
+              >
+                <strong style={{ display: "block", fontSize: "0.95rem", color: "#1f4287", marginBottom: "0.25rem" }}>
+                  🔍 Institutional Auditor Profile (ISS/Glass Lewis)
+                </strong>
+                <span style={{ fontSize: "0.8rem", color: "#6c757d" }}>
+                  Focuses on outlier reach ratios, pay-for-luck ratchets, and multiple of median thresholds.
+                </span>
+              </div>
+
+              {/* Profile 2: Compliance */}
+              <div 
+                onClick={() => {
+                  setCriteria({ reach: false, ratchet: false, mom: false, secrecy: false, ltiRatio: true, esg: true });
+                  setIsProfileModalOpen(false);
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#ff7600")}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#dee2e6")}
+                style={{
+                  border: "1px solid #dee2e6",
+                  borderRadius: "6px",
+                  padding: "1rem",
+                  cursor: "pointer",
+                  transition: "border-color 0.2s ease",
+                  textAlign: "left"
+                }}
+              >
+                <strong style={{ display: "block", fontSize: "0.95rem", color: "#ff7600", marginBottom: "0.25rem" }}>
+                  🛡️ DCGK Board Compliance Profile
+                </strong>
+                <span style={{ fontSize: "0.8rem", color: "#6c757d" }}>
+                  Enforces structural balance under Section G.1 and sustainable target cardboard linkage.
+                </span>
+              </div>
+
+              {/* Profile 3: Full Sweep */}
+              <div 
+                onClick={() => {
+                  setCriteria({ reach: true, ratchet: true, mom: true, secrecy: true, ltiRatio: true, esg: true });
+                  setIsProfileModalOpen(false);
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#2e7d32")}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#dee2e6")}
+                style={{
+                  border: "1px solid #dee2e6",
+                  borderRadius: "6px",
+                  padding: "1rem",
+                  cursor: "pointer",
+                  transition: "border-color 0.2s ease",
+                  textAlign: "left"
+                }}
+              >
+                <strong style={{ display: "block", fontSize: "0.95rem", color: "#2e7d32", marginBottom: "0.25rem" }}>
+                  ⚖️ Full Governance Audit Profile
+                </strong>
+                <span style={{ fontSize: "0.8rem", color: "#6c757d" }}>
+                  Rigorous forensic sweep of all six econometric and disclosure rules.
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

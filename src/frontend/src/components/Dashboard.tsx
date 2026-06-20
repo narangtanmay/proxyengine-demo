@@ -21,6 +21,21 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
     return new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(val);
   };
 
+  // Modernized Strategic Risk & Excess calculations
+  let riskLabel = "Low Concern (Pass)";
+  let riskColor = "#2e7d32"; // Green
+  
+  if (data.multiple_of_median >= 2.33 || data.reach_ratio >= 2.0 || data.ratchet_triggered) {
+    riskLabel = "High Concern (Fail)";
+    riskColor = "#d32f2f"; // Red
+  } else if (data.multiple_of_median >= 1.50 || data.reach_ratio >= 1.30 || data.secrecy_premium_flag) {
+    riskLabel = "Elevated Concern (Warning)";
+    riskColor = "#d97706"; // Amber
+  }
+
+  const excess = data.actual_pay - data.cluster_median_pay;
+  const isExcessPositive = excess > 0;
+
   const COLOR_ALERT = "#d32f2f";
   const COLOR_OK = "#2e7d32";
   const isMoMHigh = data.multiple_of_median > 1.5;
@@ -32,19 +47,43 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
     <section className="dashboard" aria-label="Compensation dashboard" style={{ padding: "1.5rem", maxWidth: "1280px", margin: "0 auto" }}>
       {/* 4 Metrics Cards Grid */}
       <div className="dashboard__grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
-        <article className="placeholder-card" style={{ borderLeft: "5px solid #1f4287" }}>
-          <h3 className="placeholder-card__title" style={{ fontSize: "0.85rem", color: "#6c757d", textTransform: "uppercase", letterSpacing: "1px" }}>Actual Compensation</h3>
+        
+        {/* Card 1: Strategic Risk Badge Card */}
+        <article className="placeholder-card" style={{ borderLeft: `5px solid ${riskColor}`, backgroundColor: "#ffffff" }}>
+          <h3 className="placeholder-card__title" style={{ fontSize: "0.85rem", color: "#6c757d", textTransform: "uppercase", letterSpacing: "1px" }}>Strategic Risk Rating</h3>
           <div className="placeholder-card__body" style={{ marginTop: "0.5rem" }}>
-            <p className="tabular-nums" style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0 }}>{formatCurrency(data.actual_pay)}</p>
-            <p style={{ fontSize: "0.8rem", color: "#6c757d", margin: "0.2rem 0 0 0" }}>Base salary + STV + LTI target</p>
+            <span style={{ 
+              backgroundColor: riskColor, 
+              color: "#ffffff", 
+              padding: "6px 12px", 
+              borderRadius: "4px", 
+              fontWeight: "bold", 
+              fontSize: "1.1rem" 
+            }}>
+              {riskLabel}
+            </span>
           </div>
         </article>
 
-        <article className="placeholder-card" style={{ borderLeft: "5px solid #6c757d" }}>
-          <h3 className="placeholder-card__title" style={{ fontSize: "0.85rem", color: "#6c757d", textTransform: "uppercase", letterSpacing: "1px" }}>Shadow Peer Median</h3>
-          <div className="placeholder-card__body" style={{ marginTop: "0.5rem" }}>
-            <p className="tabular-nums" style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0 }}>{formatCurrency(data.cluster_median_pay)}</p>
-            <p style={{ fontSize: "0.8rem", color: "#6c757d", margin: "0.2rem 0 0 0" }}>Cluster {data.cluster_id} Median Baseline</p>
+        {/* Card 2: Compensation Excess over Expected Peer Median Card */}
+        <article className="placeholder-card" style={{ borderLeft: `5px solid ${isExcessPositive ? "#d32f2f" : "#2e7d32"}`, backgroundColor: "#ffffff" }}>
+          <h3 className="placeholder-card__title" style={{ fontSize: "0.85rem", color: "#6c757d", textTransform: "uppercase", letterSpacing: "1px" }}>Compensation Excess</h3>
+          <div className="placeholder-card__body" style={{ marginTop: "0.5rem", flexDirection: "column", alignItems: "flex-start" }}>
+            {isExcessPositive ? (
+              <>
+                <p className="tabular-nums" style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0, color: "#d32f2f" }}>
+                  +{formatCurrency(excess)}
+                </p>
+                <p style={{ fontSize: "0.8rem", color: "#d32f2f", margin: "0.2rem 0 0 0", fontWeight: "500" }}>Over expected peer median</p>
+              </>
+            ) : (
+              <>
+                <p style={{ fontSize: "1.3rem", fontWeight: "bold", margin: 0, color: "#2e7d32" }}>
+                  Within peer limits (Pass)
+                </p>
+                <p style={{ fontSize: "0.8rem", color: "#6c757d", margin: "0.2rem 0 0 0" }}>No excessive rent detected</p>
+              </>
+            )}
           </div>
         </article>
 

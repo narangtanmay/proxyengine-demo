@@ -6,17 +6,83 @@ from sklearn.preprocessing import StandardScaler
 import json
 
 class ProxyEngineSML:
+    _cached_df = None
+
     def __init__(self, data: pd.DataFrame = None):
         """
-        Initialize SML Engine. If data is not provided, we can build the mock panel.
+        Initialize SML Engine. If data is not provided, we load the real dataset.
         """
         if data is None:
-            self.data = self.build_mock_panel()
+            self.data = self.load_real_panel()
         else:
             self.data = data.copy()
         self.model = None
         self.beta_size = None
         self.scaler = StandardScaler()
+
+    def load_real_panel(self) -> pd.DataFrame:
+        """
+        Loads and joins the real-world company_year.csv and ORBIS_Abzug_DE_2005_2024.csv datasets,
+        filtering and cleaning null values to generate a pristine matched historical financial panel.
+        """
+        if ProxyEngineSML._cached_df is not None:
+            # Map company names dictionary for lookup from cache
+            self.company_names = {row['isin']: row['company_name'] for _, row in ProxyEngineSML._cached_df.iterrows()}
+            return ProxyEngineSML._cached_df.copy()
+
+        import os
+        base_path = "/home/tanmay/Desktop/science_hack/Scienehack TUM FA/Data"
+        comp_file = os.path.join(base_path, "2008-2020", "company_year.csv")
+        orbis_file = os.path.join(base_path, "ORBIS_Abzug_DE_2005_2024.csv")
+        
+        # Load datasets
+        df_comp = pd.read_csv(comp_file, sep="|")
+        df_orbis = pd.read_csv(orbis_file, sep=",", low_memory=False)
+        
+        # Clean duplicates on Orbis panel (keeping consolidated C1 first)
+        df_orbis_clean = df_orbis.sort_values(by=['SD_ISIN', 'CLOSDATE_year', 'CONSCODE']).drop_duplicates(subset=['SD_ISIN', 'CLOSDATE_year'], keep='first')
+        
+        # Merge datasets
+        df_combined = pd.merge(df_comp, df_orbis_clean, left_on=['isin', 'year'], right_on=['SD_ISIN', 'CLOSDATE_year'])
+        
+        # Fill LTI NaNs with 0.0 representing no long-term incentives granted
+        df_combined['multi_year_bonus_grants_bt'] = df_combined['multi_year_bonus_grants_bt'].fillna(0.0)
+        
+        # Filter and drop missing values for fundamental econometric metrics
+        cols_to_check = ['isin', 'company_name', 'year', 'OPRE', 'TOAS', 'ROA', 'GEAR', 'total_comp_bt', 'salary_bt', 'one_year_bonus_bt', 'multi_year_bonus_grants_bt', 'opting_out']
+        df_cleaned = df_combined.dropna(subset=cols_to_check).copy()
+        
+        # Standardize units (BT are in thousands, ORBIS are in thousands or units depending on row, but we standardise)
+        df_cleaned['total_comp'] = df_cleaned['total_comp_bt'] * 1000.0
+        df_cleaned['salary'] = df_cleaned['salary_bt'] * 1000.0
+        df_cleaned['sti'] = df_cleaned['one_year_bonus_bt'] * 1000.0
+        df_cleaned['lti'] = df_cleaned['multi_year_bonus_grants_bt'] * 1000.0
+        
+        df_cleaned['opre'] = df_cleaned['OPRE'] * 1000.0
+        df_cleaned['toas'] = df_cleaned['TOAS'] * 1000.0
+        df_cleaned['roa'] = df_cleaned['ROA'] / 100.0 # Convert ROA percentage to decimal (e.g. 5.5 -> 0.055)
+        df_cleaned['gear'] = df_cleaned['GEAR'] / 100.0 # Convert Gearing percentage to decimal
+        
+        # Ensure all fundamental economic metrics are strictly positive to prevent log(0) and log(-x) errors
+        df_cleaned = df_cleaned[
+            (df_cleaned['total_comp'] > 0.0) & 
+            (df_cleaned['opre'] > 0.0) & 
+            (df_cleaned['toas'] > 0.0)
+        ].copy()
+        
+        # Re-map/rename columns to standard pipeline identifiers
+        df_cleaned['exec_id'] = "Executive Board average"
+        df_cleaned = df_cleaned.rename(columns={
+            'company_name_x': 'company_name'
+        })
+        
+        # Map company names dictionary for lookup
+        self.company_names = {row['isin']: row['company_name'] for _, row in df_cleaned.iterrows()}
+        
+        # Save to class-level cache
+        ProxyEngineSML._cached_df = df_cleaned.copy()
+        
+        return df_cleaned.sort_values(['isin', 'year']).reset_index(drop=True)
         
     def build_mock_panel(self) -> pd.DataFrame:
         """
@@ -28,7 +94,7 @@ class ProxyEngineSML:
         
         # Explicit high-profile companies for realistic wargaming demos
         special_companies = [
-            {"isin": "DE0007664039", "name": "Volkswagen AG", "exec_id": "Oliver Blume", "base_size": 2.5e11, "is_tech": False, "is_outlier": True},
+            {"isin": "DE0007664005", "name": "Volkswagen AG", "exec_id": "Oliver Blume", "base_size": 2.5e11, "is_tech": False, "is_outlier": True},
             {"isin": "DE000BAY0017", "name": "Bayer AG", "exec_id": "Bill Anderson", "base_size": 4.7e10, "is_tech": False, "is_outlier": False},
             {"isin": "DE0005439004", "name": "Continental AG", "exec_id": "Nikolai Setzer", "base_size": 3.9e10, "is_tech": False, "is_outlier": False}
         ]
@@ -331,7 +397,7 @@ class ProxyEngineSML:
         company_name = proposal_data.get("company_name", "Volkswagen AG")
         
         # Map ISIN to match in historical data
-        matched_isin = "DE0007664039"
+        matched_isin = "DE0007664005"
         if "bayer" in company_name.lower():
             matched_isin = "DE000BAY0017"
         elif "continental" in company_name.lower():
@@ -382,7 +448,7 @@ class ProxyEngineSML:
         
         # Ratchet check: triggers for VW if total comp increased
         ratchet_flag = False
-        if matched_isin == "DE0007664039" and proposed_comp > 4000000.0:
+        if matched_isin == "DE0007664005" and proposed_comp > 4000000.0:
             ratchet_flag = True
             
         evidence_trace = {
@@ -456,7 +522,7 @@ if __name__ == "__main__":
     engine = ProxyEngineSML()
     engine.run_full_pipeline()
     
-    # Get trace for VW (outlier DE0007664039 in 2024)
-    trace = engine.get_evidence_trace("DE0007664039", 2024)
+    # Get trace for VW (outlier DE0007664005 in 2024)
+    trace = engine.get_evidence_trace("DE0007664005", 2024)
     print("\n=== EVIDENCE TRACE OUTPUT (VW AG 2024) ===")
     print(json.dumps(trace, indent=2))

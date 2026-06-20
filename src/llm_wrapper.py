@@ -78,8 +78,173 @@ class ProxyEngineDualLens:
                 return response.content[0].text
             except Exception as e:
                 print(f"[LLM Dual-Lens] Anthropic call failed: {e}. Falling back to template generator.")
-                
+
         return ""
+
+    # ------------------------------------------------------------------ #
+    # Per-criterion AI insights (Gemini)                                 #
+    # ------------------------------------------------------------------ #
+
+    # One short, lens-neutral description of what each checklist criterion is asking,
+    # plus which deterministic SML trace fields ground the answer (no hallucinated numbers).
+    CRITERION_GUIDE = {
+        "reach": (
+            "the econometric 'Reach' anomaly - the size-equivalent restatement of the pay premium, "
+            "reach = exp(residual / beta). Grounding fields: reach_ratio, pay_premium, opre."
+        ),
+        "ratchet": (
+            "asymmetric ratcheting / 'pay-for-luck' - whether total pay rose while firm profitability (ROA) "
+            "contracted year-over-year. Grounding field: ratchet_triggered."
+        ),
+        "mom": (
+            "the ISS Multiple-of-Median check - proposed total pay divided by the shadow-peer cluster median. "
+            "The ISS high-concern threshold is 1.5x. Grounding fields: multiple_of_median, cluster_median_pay, actual_pay."
+        ),
+        "secrecy": (
+            "the secrecy premium - whether the board opted out of individual pay disclosure under section 286 Abs. 5 HGB. "
+            "Grounding field: secrecy_premium_flag."
+        ),
+        "ltiRatio": (
+            "the Long-Term-Incentive to fixed-base-salary balance under DCGK Section G.1; the imbalance threshold is ~4.0x. "
+            "Grounding fields: lti_vs_salary_ratio, proposed_lti, proposed_salary."
+        ),
+        "esg": (
+            "whether variable remuneration is anchored to quantifiable ESG / sustainability KPIs under DCGK Section G.1. "
+            "Grounding field: esg_linked."
+        ),
+    }
+
+    SYSTEM_PROMPTS = {
+        "auditor": (
+            "You are an activist institutional investor and proxy advisor (in the mould of ISS or Glass Lewis). "
+            "You write a direct, mathematically grounded, and ruthless analysis of ONE specific compensation finding, "
+            "building toward a VOTE AGAINST when the evidence shows rent extraction. "
+            "Open with the prefix '🔍 Activist Advisor Analysis:'. "
+            "Use ONLY the numbers provided in the evidence trace - never invent figures. "
+            "Keep it to 2-4 sentences, no headings, no bullet lists, no conversational filler."
+        ),
+        "compliance": (
+            "You are corporate secretary and legal counsel defending a German supervisory board's remuneration system "
+            "against hostile activist shareholders. You frame ONE specific statistical finding as a defensible, "
+            "strategically justified decision compliant with the DCGK (German Corporate Governance Code). "
+            "Open with the prefix '🛡️ Corporate Board Counsel Defense:'. "
+            "Use ONLY the numbers provided in the evidence trace - never invent figures. "
+            "Keep it to 2-4 sentences, no headings, no bullet lists, no conversational filler."
+        ),
+    }
+
+    def _build_insight_user_content(self, criterion: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
+        """Assemble the grounded prompt payload sent to the model for a single criterion."""
+        focus = self.CRITERION_GUIDE.get(criterion, criterion)
+        return (
+            f"Company: {trace.get('company', proposal_data.get('company_name', 'the company'))}\n"
+            f"Executive scope: {trace.get('exec_id', 'Executive Board')}\n\n"
+            f"Focus your analysis ONLY on: {focus}\n\n"
+            f"Deterministic SML evidence trace:\n{json.dumps(trace, indent=2)}\n\n"
+            f"Remuneration proposal details:\n{json.dumps(proposal_data, indent=2)}"
+        )
+
+    def _generate_with_gemini(self, criterion: str, lens: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
+        """
+        Generate a single-criterion insight with Google Gemini, if GEMINI_API_KEY is set
+        and the SDK is installed. Returns "" on any miss so callers fall back to templates.
+
+        Configurable purely via environment variables:
+          GEMINI_API_KEY      - required to enable Gemini at all
+          GEMINI_MODEL        - model id (default: gemini-2.0-flash)
+          GEMINI_TEMPERATURE  - sampling temperature (default: 0.3)
+          GEMINI_MAX_TOKENS   - max output tokens (default: 600)
+        """
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return ""
+
+        model_name = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+        try:
+            temperature = float(os.getenv("GEMINI_TEMPERATURE", "0.3"))
+        except ValueError:
+            temperature = 0.3
+        try:
+            max_tokens = int(os.getenv("GEMINI_MAX_TOKENS", "600"))
+        except ValueError:
+            max_tokens = 600
+
+        system_prompt = self.SYSTEM_PROMPTS.get(lens, self.SYSTEM_PROMPTS["auditor"])
+        user_content = self._build_insight_user_content(criterion, trace, proposal_data)
+
+        try:
+            import google.generativeai as genai  # lazy import: only needed when key is present
+
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel(
+                model_name=model_name,
+                system_instruction=system_prompt,
+            )
+            response = model.generate_content(
+                user_content,
+                generation_config={
+                    "temperature": temperature,
+                    "max_output_tokens": max_tokens,
+                },
+            )
+            return (response.text or "").strip()
+        except Exception as e:  # noqa: BLE001 - any failure must degrade gracefully
+            print(f"[LLM Dual-Lens] Gemini call failed: {e}. Falling back to deterministic template.")
+            return ""
+
+    def generate_criterion_insight(self, criterion: str, lens: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
+        """
+        Public entry point for a single checklist criterion. Tries Gemini first, then
+        falls back to a deterministic, grounded template so the UI always has an answer.
+        """
+        ai_text = self._generate_with_gemini(criterion, lens, trace, proposal_data)
+        if ai_text:
+            return ai_text
+        return self._fallback_insight(criterion, lens, trace, proposal_data)
+
+    def _fallback_insight(self, criterion: str, lens: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
+        """Deterministic, offline templates mirroring the original UI answers (grounded in trace values)."""
+        company = trace.get("company", proposal_data.get("company_name", "the company"))
+        exec_id = trace.get("exec_id", "the Executive Board")
+        reach = trace.get("reach_ratio", 1.0)
+        mom = trace.get("multiple_of_median", 1.0)
+        salary = proposal_data.get("proposed_salary", 0.0) or 0.0
+        lti = proposal_data.get("proposed_lti", 0.0) or 0.0
+        lti_ratio = trace.get("lti_vs_salary_ratio")
+        if lti_ratio is None:
+            lti_ratio = (lti / salary) if salary > 0 else 0.0
+        esg = proposal_data.get("esg_linked", False)
+
+        templates = {
+            "reach": {
+                "auditor": f"\U0001f50d Activist Advisor Analysis: SML Quantile Residual mapping indicates {exec_id} at {company} is compensated as if running a company {reach:.1f}x its actual economic scale. This signals unearned rent extraction with no size-elasticity justification. We recommend voting AGAINST.",
+                "compliance": f"\U0001f6e1️ Corporate Board Counsel Defense: The {reach:.1f}x size premium for {company} reflects a vital global retention necessity in an internationally competitive CEO marketplace. Under DCGK Sections G.2 & G.9, it captures operating complexity not reflected in simple European scale metrics.",
+            },
+            "ratchet": {
+                "auditor": "\U0001f50d Activist Advisor Analysis: Our panel regression flags an asymmetric ratchet (pay-for-luck): compensation escalated on positive performance yet stayed insulated during ROA contraction, transferring wealth from shareholders to the board.",
+                "compliance": "\U0001f6e1️ Corporate Board Counsel Defense: Compensation adjustments were driven by contractual long-term restructuring milestones independent of cyclical ROA shocks; disclosure of these milestones satisfies DCGK Section G.10.",
+            },
+            "mom": {
+                "auditor": f"\U0001f50d Activist Advisor Analysis: Total compensation is {mom:.2f}x the shadow-peer cluster median, breaching the ISS high-concern threshold of 1.50x and confirming the package is a statistical outlier.",
+                "compliance": f"\U0001f6e1️ Corporate Board Counsel Defense: The {mom:.2f}x multiple reflects a peer index that does not capture {company}'s specialized global footprint; the board applies a customized international peer set compliant with DCGK G.2.",
+            },
+            "secrecy": {
+                "auditor": "\U0001f50d Activist Advisor Analysis: The board opted out of individual compensation disclosure under § 286 Abs. 5 HGB. This secrecy flag is a critical accountability risk and correlates with a documented pay premium.",
+                "compliance": "\U0001f6e1️ Corporate Board Counsel Defense: The individual opt-out was approved by a supermajority shareholder resolution and complies fully with German HGB transparency statutes.",
+            },
+            "ltiRatio": {
+                "auditor": f"\U0001f50d Activist Advisor Analysis: The LTI-to-salary ratio of {lti_ratio:.2f}x, compounded with a size-inflated base, amplifies unearned payouts even under median market performance.",
+                "compliance": f"\U0001f6e1️ Corporate Board Counsel Defense: The {lti_ratio:.2f}x long-term tilt deliberately aligns the majority of pay with multi-year shareholder return (TSR) under DCGK Section G.1.",
+            },
+            "esg": {
+                "auditor": "\U0001f50d Activist Advisor Analysis: ESG linkages lack quantifiable, audited carbon metrics and read as a symbolic 'greenwashing' shield rather than a binding performance condition." if not esg else "\U0001f50d Activist Advisor Analysis: While ESG targets are present, their weighting and measurability must be independently verified before they can offset the quantitative pay anomalies above.",
+                "compliance": f"\U0001f6e1️ Corporate Board Counsel Defense: Variable STV/LTI payouts are anchored to quantifiable carbon-reduction and diversity targets under DCGK Section G.1." if esg else "\U0001f6e1️ Corporate Board Counsel Defense: The board should introduce quantifiable ESG/sustainability targets to satisfy DCGK Section G.1 and pre-empt proxy-advisor criticism.",
+            },
+        }
+        lens_map = templates.get(criterion)
+        if not lens_map:
+            return "No segment narrative generated."
+        return lens_map.get(lens, lens_map.get("auditor", "No segment narrative generated."))
 
     def generate_auditor_report(self, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
         """

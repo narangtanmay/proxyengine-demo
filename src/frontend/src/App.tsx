@@ -124,6 +124,72 @@ export default function App() {
   // Selected criterion in Step 3 for detailed insights / visual support
   const [activeCriterion, setActiveCriterion] = useState<string>("reach");
   
+  // Per-criterion AI insights, cached by `${criterion}_${lens}`. Falls back to the
+  // deterministic templates in getAIAnswer when the backend / Gemini is unavailable.
+  const [insights, setInsights] = useState<Record<string, string>>({});
+  const [insightLoading, setInsightLoading] = useState(false);
+
+  // Fetch a Gemini-generated narrative for the active criterion (cached per criterion+lens).
+  useEffect(() => {
+    if (currentStep !== 3 || !dashboardData) return;
+    const cacheKey = `${activeCriterion}_${lens}`;
+    if (insights[cacheKey]) return; // already have it
+
+    let cancelled = false;
+    const run = async () => {
+      setInsightLoading(true);
+      try {
+        const response = await fetch("http://localhost:8000/api/insight", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            criterion: activeCriterion,
+            lens,
+            trace: dashboardData,
+            proposal: {
+              company_name: dashboardData.company,
+              exec_id: dashboardData.exec_id,
+              proposed_salary: proposedBase,
+              proposed_sti: proposedSti,
+              proposed_lti: proposedLti,
+              esg_linked: isEsgLinked,
+              agenda_item: `Approval of Remuneration System for ${boardPosition}`,
+            },
+          }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (!cancelled && data.content) {
+            setInsights(prev => ({ ...prev, [cacheKey]: data.content }));
+          }
+        }
+      } catch (err) {
+        console.warn("Insight backend offline. Using deterministic template.", err);
+      } finally {
+        if (!cancelled) setInsightLoading(false);
+      }
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [activeCriterion, lens, currentStep, dashboardData, proposedBase, proposedSti, proposedLti, isEsgLinked, boardPosition, insights]);
+
+  // Resolve the text shown for a criterion: AI insight if cached, else deterministic fallback.
+  const renderInsight = (key: string) => {
+    const cacheKey = `${key}_${lens}`;
+    const text = insights[cacheKey] ?? getAIAnswer(key, lens, dashboardData);
+    const isLoading = insightLoading && activeCriterion === key && !insights[cacheKey];
+    return (
+      <>
+        {isLoading && (
+          <div style={{ fontSize: "0.75rem", color: "#d97706", marginBottom: "0.4rem", fontStyle: "italic", fontWeight: "bold" }}>
+            ✨ Generating real-time SML AI analysis…
+          </div>
+        )}
+        {text}
+      </>
+    );
+  };
+  
   // Interactive Selection Profile modal state
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
@@ -184,6 +250,7 @@ export default function App() {
   const handleCalculateAnalysis = useCallback(async () => {
     // Start progress loading screen first
     setIsCalculating(true);
+    setInsights({}); // invalidate cached AI insights for the new package
     setCalculationProgress(5);
     setCalculationMessage("Initializing SML environment...");
 
@@ -265,6 +332,7 @@ export default function App() {
 
   // Handle live PDF uploads from header
   const handlePdfUploaded = useCallback((result: { trace: DashboardData; proposal: any }) => {
+    setInsights({}); // invalidate cached AI insights for the freshly parsed package
     setSelectedCompanyId(result.trace.isin);
     setProposedSalary(result.proposal.proposed_salary);
     setProposedSti(result.proposal.proposed_sti);
@@ -783,7 +851,7 @@ export default function App() {
                             borderLeft: `3px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}`,
                             paddingLeft: "0.75rem"
                           }}>
-                            {getAIAnswer("reach", lens, dashboardData)}
+                            {renderInsight("reach")}
                           </div>
                         )}
                       </div>
@@ -819,7 +887,7 @@ export default function App() {
                             borderLeft: `3px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}`,
                             paddingLeft: "0.75rem"
                           }}>
-                            {getAIAnswer("ratchet", lens, dashboardData)}
+                            {renderInsight("ratchet")}
                           </div>
                         )}
                       </div>
@@ -855,7 +923,7 @@ export default function App() {
                             borderLeft: `3px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}`,
                             paddingLeft: "0.75rem"
                           }}>
-                            {getAIAnswer("mom", lens, dashboardData)}
+                            {renderInsight("mom")}
                           </div>
                         )}
                       </div>
@@ -891,7 +959,7 @@ export default function App() {
                             borderLeft: `3px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}`,
                             paddingLeft: "0.75rem"
                           }}>
-                            {getAIAnswer("secrecy", lens, dashboardData)}
+                            {renderInsight("secrecy")}
                           </div>
                         )}
                       </div>
@@ -927,7 +995,7 @@ export default function App() {
                             borderLeft: `3px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}`,
                             paddingLeft: "0.75rem"
                           }}>
-                            {getAIAnswer("ltiRatio", lens, dashboardData)}
+                            {renderInsight("ltiRatio")}
                           </div>
                         )}
                       </div>
@@ -963,7 +1031,7 @@ export default function App() {
                             borderLeft: `3px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}`,
                             paddingLeft: "0.75rem"
                           }}>
-                            {getAIAnswer("esg", lens, dashboardData)}
+                            {renderInsight("esg")}
                           </div>
                         )}
                       </div>

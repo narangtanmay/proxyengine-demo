@@ -59,6 +59,12 @@ class ChatRequest(BaseModel):
     message: str
     lens: str # "auditor" or "compliance"
 
+class InsightRequest(BaseModel):
+    criterion: str            # one of: reach, ratchet, mom, secrecy, ltiRatio, esg
+    lens: str                 # "auditor" or "compliance"
+    trace: dict               # the SML trace currently displayed
+    proposal: dict | None = None  # the proposed package details (optional)
+
 @app.get("/api/companies")
 def get_companies():
     """Returns available German corporations in our dataset."""
@@ -106,6 +112,32 @@ def get_model_info():
 def get_clusters():
     """Returns the per-shadow-peer-cluster analysis (size, pay level, premium spread)."""
     return sml_engine.get_cluster_analysis().to_dict(orient="records")
+
+
+@app.get("/api/treadmill")
+def get_treadmill_route_b():
+    """Returns the pre-calculated Oaxaca-Blinder Treadmill Route B decomposition."""
+    csv_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        "Implementation", "outputs", "data", "treadmill_route_b.csv"
+    )
+    if not os.path.exists(csv_path):
+        raise HTTPException(status_code=404, detail="Oaxaca-Blinder Treadmill Route B data not found.")
+    try:
+        df = pd.read_csv(csv_path)
+        data = df.to_dict(orient="records")[0]
+        return {
+            "year_first": int(data["year_first"]),
+            "year_last": int(data["year_last"]),
+            "delta_log_pay": float(data["delta_log_pay"]),
+            "fundamentals_component": float(data["fundamentals_component"]),
+            "treadmill_component": float(data["treadmill_component"]),
+            "treadmill_share_pct": float(data["treadmill_share"]) * 100.0,
+            "b0_beta_size": float(data["b0_beta"]),
+            "bT_beta_size": float(data["bT_beta"])
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/companies/{isin}/dashboard")
@@ -158,16 +190,14 @@ def get_company_chart(isin: str, year: int = 2024):
             comp_row = plot_df[plot_df['isin'] == isin].sort_values('year', ascending=False).head(1)
         line_year = int(comp_row.iloc[0]['year'])
 
-        # Baseline line (PDF Step 1 fair-pay line: log_pay ~ log_size + roa + gear + C(year))
+        # Baseline line (PDF Step 1 fair-pay line: log_pay ~ log_size + C(shadow_peer_cluster) + roa)
         sizes_range = np.linspace(cluster_peers['log_size'].min(), cluster_peers['log_size'].max(), 100)
         median_roa = cluster_peers['roa'].median()
-        median_gear = cluster_peers['gear'].median()
 
         dummy_df = pd.DataFrame({
             'log_size': sizes_range,
-            'roa': [median_roa] * 100,
-            'gear': [median_gear] * 100,
-            'year': [line_year] * 100
+            'shadow_peer_cluster': [selected_cluster] * 100,
+            'roa': [median_roa] * 100
         })
         predicted_log_pays = sml_engine.model.predict(dummy_df)
         
@@ -197,9 +227,8 @@ def get_company_chart(isin: str, year: int = 2024):
         # Vertical residual line (expected pay on the fair-pay line at the target's size)
         target_dummy_df = pd.DataFrame({
             'log_size': [np.log(target_size)],
-            'roa': [comp_row.iloc[0]['roa']],
-            'gear': [comp_row.iloc[0]['gear']],
-            'year': [line_year]
+            'shadow_peer_cluster': [selected_cluster],
+            'roa': [comp_row.iloc[0]['roa']]
         })
         expected_pay_at_target = np.exp(sml_engine.model.predict(target_dummy_df)[0])
         
@@ -262,6 +291,25 @@ def chat_with_translator(request: ChatRequest):
             intro = f"In response to your inquiry about **{trace['company']}**'s Say-on-Pay audit risks, here is our corporate secretary and legal counsel defense positioning under DCGK principles.\n\n"
             
         return {"content": intro + report}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/insight")
+def get_criterion_insight(request: InsightRequest):
+    """Returns a single-criterion, lens-specific narrative (Gemini, with deterministic fallback)."""
+    try:
+        proposal = request.proposal or {
+            "company_name": request.trace.get("company"),
+            "exec_id": request.trace.get("exec_id"),
+            "proposed_salary": request.trace.get("actual_pay", 0.0) * 0.25,
+            "proposed_sti": request.trace.get("actual_pay", 0.0) * 0.30,
+            "proposed_lti": request.trace.get("actual_pay", 0.0) * 0.45,
+            "esg_linked": True,
+        }
+        content = dual_lens_translator.generate_criterion_insight(
+            request.criterion, request.lens, request.trace, proposal
+        )
+        return {"content": content}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -1,15 +1,21 @@
-import { COMPANIES } from "../stubs";
+import type { Company } from "../types";
 
-/**
- * Static, non-functional company picker. Selecting an option has no effect yet.
- */
-export default function CompanyPicker() {
+interface CompanyPickerProps {
+  companies: Company[];
+  selectedId: string;
+  onCompanyChange: (id: string) => void;
+}
+
+export default function CompanyPicker({ companies, selectedId, onCompanyChange }: CompanyPickerProps) {
   return (
     <label className="company-picker">
       <span className="visually-hidden">Select a company</span>
-      {/* TODO: drive dashboard + chat context from selected company */}
-      <select className="company-picker__select" defaultValue={COMPANIES[0]?.id}>
-        {COMPANIES.map((company) => (
+      <select 
+        className="company-picker__select" 
+        value={selectedId}
+        onChange={(e) => onCompanyChange(e.target.value)}
+      >
+        {companies.map((company) => (
           <option key={company.id} value={company.id}>
             {company.name}
           </option>

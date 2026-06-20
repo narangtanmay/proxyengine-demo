@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive Compensation — Dashboard</title>
+  <style>{{ inline_css }}</style>
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <p class="eyebrow">TUM Science Hackathon · Implementation</p>
+      <h1>Executive Compensation Benchmarking</h1>
+      <p class="subtitle">Peer clustering, Ozkan (2011) compensation prediction, and full methodology pipeline</p>
+      {% if summary %}
+      <div class="stats-bar">
+        <div class="stat"><span class="num">{{ summary.usable_firm_years | int }}</span><span class="lbl">Firm-Years</span></div>
+        <div class="stat"><span class="num">{{ summary.usable_firms | int }}</span><span class="lbl">Firms</span></div>
+        <div class="stat"><span class="num">{{ (summary.join_rate * 100) | round(1) }}%</span><span class="lbl">ORBIS Join</span></div>
+        <div class="stat"><span class="num">{{ summary.movers | int }}</span><span class="lbl">Exec Movers</span></div>
+      </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="container">
+    <nav class="main-nav">
+      <a href="{{ url_for('predict') }}" class="nav-primary">Predict One Company</a>
+      <a href="#results">Results</a>
+      <a href="#predictions">All Predictions</a>
+      <a href="#pipeline">Pipeline Charts</a>
+      <a href="#downloads">Downloads</a>
+    </nav>
+
+    <section class="step-card cta-card">
+      <div class="step-header">
+        <span class="step-badge">Next step</span>
+        <h2>Predict compensation for one company</h2>
+        <p class="step-desc">Choose any of the 130 firms — Ozkan model predicts cash, LTI, and total pay for the next year.</p>
+      </div>
+      <a class="cta-button" href="{{ url_for('predict') }}">Select company &amp; predict →</a>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="results" class="step-card">
+      <div class="step-header">
+        <span class="step-badge">Results</span>
+        <h2>Peer Clusters (7 groups, 130 companies)</h2>
+        <p class="step-desc">Companies grouped by fundamentals — not DAX/MDAX tier.</p>
+      </div>
+      {% if cluster_summary %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Cluster</th><th>Companies</th><th>Median Pay (€k)</th></tr>
+          </thead>
+          <tbody>
+            {% for c in cluster_summary %}
+            <tr>
+              <td>{{ c.peer_label }}</td>
+              <td>{{ c.n_companies }}</td>
+              <td>{{ c.median_pay_k | int }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if peer_rows %}
+      <h3 class="sub-heading">Sample companies by cluster</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Cluster</th><th>Company</th><th>Index</th><th>Median OPRE (€m)</th><th>Median Pay (€k)</th></tr>
+          </thead>
+          <tbody>
+            {% for r in peer_rows %}
+            <tr>
+              <td>{{ r.peer_label }}</td>
+              <td>{{ r.company }}</td>
+              <td>{{ r.index }}</td>
+              <td>{{ r.median_opre_m | int }}</td>
+              <td>{{ r.median_pay_k | int }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+      {% else %}
+      <div class="missing">Run <code>python run_pipeline.py</code> first.</div>
+      {% endif %}
+    </section>
+
+    <!-- PREDICTIONS -->
+    <section id="predictions" class="step-card">
+      <div class="step-header">
+        <span class="step-badge">Ozkan 2011</span>
+        <h2>Next-Year Total Compensation Predictions</h2>
+        <p class="step-desc">Cash (salary+STI) + LTI predicted per peer cluster using Ozkan Eq. 6.1.</p>
+      </div>
+      {% if prediction_rows %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Company</th><th>Cluster</th><th>Year</th><th>Cash (€k)</th><th>LTI (€k)</th><th>Total (€k)</th></tr>
+          </thead>
+          <tbody>
+            {% for r in prediction_rows %}
+            <tr>
+              <td><strong>{{ r.company }}</strong></td>
+              <td>{{ r.peer_label }}</td>
+              <td>{{ r.year }}</td>
+              <td>{{ r.cash_k | int }}</td>
+              <td>{{ r.lti_k | int }}</td>
+              <td><strong>{{ r.total_k | int }}</strong></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="missing">Run <code>python run_pipeline.py</code> to generate Ozkan predictions.</div>
+      {% endif %}
+    </section>
+
+    <!-- PIPELINE CHARTS -->
+    <section id="pipeline">
+      <h2 class="section-title">Methodology Pipeline — Step Charts</h2>
+      <nav class="step-nav">
+        {% for s in steps %}
+        <a href="#step-{{ s.step }}">{{ s.step_label | default(s.step) }}</a>
+        {% endfor %}
+      </nav>
+
+      {% for s in steps %}
+      <article id="step-{{ s.step }}" class="step-card">
+        <div class="step-header">
+          <span class="step-badge">Step {{ s.step_label | default(s.step) }}</span>
+          <h2>{{ s.title }}</h2>
+          <p class="step-desc">{{ s.description }}</p>
+        </div>
+        <div class="figure-wrap">
+          {% if s.exists %}
+          <img src="{{ s.image_url }}" alt="{{ s.title }}">
+          {% else %}
+          <div class="missing">Run <code>python run_pipeline.py</code> to generate this chart.</div>
+          {% endif %}
+        </div>
+        <a class="detail-link" href="{{ url_for('step_detail', step_id=s.step) }}">View full screen →</a>
+      </article>
+      {% endfor %}
+    </section>
+
+    <!-- DOWNLOADS -->
+    <section id="downloads" class="step-card">
+      <div class="step-header">
+        <span class="step-badge">Data</span>
+        <h2>Download Output Files</h2>
+      </div>
+      <ul class="download-list">
+        <li><a href="/data/peer_cluster_companies.csv">peer_cluster_companies.csv</a></li>
+        <li><a href="/data/ozkan_predicted_comp_next_year.csv">ozkan_predicted_comp_next_year.csv</a></li>
+        <li><a href="/data/ozkan_model_coefficients.csv">ozkan_model_coefficients.csv</a></li>
+        <li><a href="/data/red_flags.csv">red_flags.csv</a></li>
+        <li><a href="/data/benchmark_models.csv">benchmark_models.csv</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <p>Server: <code>http://127.0.0.1:{{ port }}</code> · Run <code>python run_pipeline.py</code> then <code>python app.py</code></p>
+  </footer>
+</body>
+</html>

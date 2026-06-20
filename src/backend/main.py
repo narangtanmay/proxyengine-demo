@@ -62,12 +62,35 @@ class ChatRequest(BaseModel):
 @app.get("/api/companies")
 def get_companies():
     """Returns available German corporations in our dataset."""
+    predictions_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ozkan_predictions.json")
+    if os.path.exists(predictions_path):
+        try:
+            with open(predictions_path, "r") as f:
+                data = json.load(f)
+            return [{"id": c["isin"], "name": f"{c['name']}"} for c in data.get("companies", [])]
+        except Exception:
+            pass
     companies = [
         {"id": "DE0007664005", "name": "Volkswagen AG"},
         {"id": "DE000BAY0017", "name": "Bayer AG"},
         {"id": "DE0005439004", "name": "Continental AG"}
     ]
     return companies
+
+@app.get("/api/companies/{isin}/ozkan")
+def get_company_ozkan(isin: str):
+    """Returns the Ozkan next-year cash, LTI, and total predictions for the firm."""
+    predictions_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ozkan_predictions.json")
+    if os.path.exists(predictions_path):
+        try:
+            with open(predictions_path, "r") as f:
+                data = json.load(f)
+            for c in data.get("companies", []):
+                if c["isin"] == isin:
+                    return c
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    raise HTTPException(status_code=404, detail=f"Ozkan prediction not found for ISIN {isin}")
 
 @app.get("/api/model")
 def get_model_info():
@@ -256,12 +279,17 @@ async def upload_remuneration_pdf(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Mount static frontend build
+# Mount static frontend build & figures
 frontend_dist_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
+figures_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Implementation", "outputs", "figures")
+
+from fastapi.staticfiles import StaticFiles
+
+if os.path.exists(figures_path):
+    app.mount("/figures", StaticFiles(directory=figures_path), name="figures")
+
 if os.path.exists(frontend_dist_path):
-    from fastapi.staticfiles import StaticFiles
     from fastapi.responses import FileResponse
-    
     # We mount the API routes first, so we mount static files last as catch-all
     app.mount("/", StaticFiles(directory=frontend_dist_path, html=True), name="frontend")
 

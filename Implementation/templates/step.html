@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ step.title }}</title>
+  <style>{{ inline_css }}</style>
+</head>
+<body>
+  <header class="hero compact">
+    <div class="container">
+      <a href="{{ url_for('index') }}" class="back">← All steps</a>
+      <span class="step-badge">Step {{ step.step_label | default(step.step) }}</span>
+      <h1>{{ step.title }}</h1>
+      <p class="subtitle">{{ step.description }}</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="figure-wrap full">
+      {% if step.exists %}
+      <img src="{{ step.image_url }}" alt="{{ step.title }}">
+      {% else %}
+      <div class="missing">Chart not generated yet.</div>
+      {% endif %}
+    </div>
+  </main>
+</body>
+</html>

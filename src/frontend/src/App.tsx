@@ -17,6 +17,33 @@ const formatScale = (val: number) => {
   return `€${(val / 1e3).toFixed(0)}K`;
 };
 
+const renderStatusBadge = (status: "pass" | "fail" | "warning") => {
+  const colors = {
+    pass: { bg: "#e6f4ea", text: "#137333", border: "#137333", char: "✓" },
+    fail: { bg: "#fce8e6", text: "#c5221f", border: "#c5221f", char: "✗" },
+    warning: { bg: "#fef7e0", text: "#b06000", border: "#b06000", char: "!" }
+  };
+  const cfg = colors[status];
+  return (
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: "24px",
+      height: "24px",
+      borderRadius: "50%",
+      backgroundColor: cfg.bg,
+      color: cfg.text,
+      border: `1px solid ${cfg.border}`,
+      fontWeight: "bold",
+      fontSize: "0.85rem",
+      lineHeight: 1
+    }}>
+      {cfg.char}
+    </span>
+  );
+};
+
 const getAIAnswer = (key: string, lens: string, data: any) => {
   const company = data?.company || "the company";
   const exec_id = data?.exec_id || "the CEO";
@@ -70,6 +97,7 @@ export default function App() {
   const [proposedSti, setProposedSti] = useState<number>(2000000);
   const [proposedLti, setProposedLti] = useState<number>(4500000);
   const [maxEnumeration, setMaxEnumeration] = useState<number>(10000000);
+  const [expectedAmount, setExpectedAmount] = useState<number>(7500000);
   const [isEsgLinked, setIsEsgLinked] = useState<boolean>(true);
 
   // Page 2: Checklist criteria state
@@ -144,6 +172,7 @@ export default function App() {
       setProposedSalary(fallback.actual_pay * 0.25);
       setProposedSti(fallback.actual_pay * 0.30);
       setProposedLti(fallback.actual_pay * 0.45);
+      setExpectedAmount(fallback.actual_pay * 0.90);
     }
     const compName = companies.find(c => c.id === selectedCompanyId)?.name;
     if (compName) {
@@ -459,6 +488,19 @@ export default function App() {
               </div>
             </div>
 
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.5rem" }}>
+              <div>
+                <label style={{ fontWeight: "bold", fontSize: "0.85rem", display: "block", marginBottom: "0.5rem" }}>Expected Amount (unrealized estimate - €)</label>
+                <input 
+                  type="number"
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ced4da" }}
+                  value={expectedAmount}
+                  onChange={(e) => setExpectedAmount(Number(e.target.value))}
+                />
+                <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Target expectation baseline (not realized yet / hypothetical)</span>
+              </div>
+            </div>
+
             <h3 style={{ fontSize: "1.1rem", fontWeight: "bold", marginBottom: "1rem", borderBottom: "1px solid #eee", paddingBottom: "0.5rem" }}>Enumeration Package Specification</h3>
             
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.5rem" }}>
@@ -530,29 +572,30 @@ export default function App() {
         {/* ================= PAGE 2: SPECIFY CRITERIA ================= */}
         {currentStep === 2 && (
           <div style={{ maxWidth: "800px", margin: "2rem auto", padding: "2rem", backgroundColor: "#ffffff", borderRadius: "8px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)" }}>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "1rem", color: "#1f4287" }}>Page 2: Specify Query & Checklist Requirements</h2>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", borderBottom: "1px solid #eee", paddingBottom: "0.75rem" }}>
+              <h2 style={{ fontSize: "1.3rem", fontWeight: "bold", color: "#1f4287", margin: 0 }}>Page 2: Specify Query & Checklist Requirements</h2>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <button 
+                  type="button" 
+                  className="button"
+                  onClick={handleSelectBestPractice}
+                  style={{ padding: "0.45rem 0.9rem", fontSize: "0.8rem", backgroundColor: "#e9ecef", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", color: "#1f4287" }}
+                >
+                  ✨ Auto Select Best Practice Profile
+                </button>
+                <button 
+                  type="button" 
+                  className="button"
+                  onClick={() => setIsProfileModalOpen(true)}
+                  style={{ padding: "0.45rem 0.9rem", fontSize: "0.8rem", backgroundColor: "#e9ecef", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", color: "#1f4287" }}
+                >
+                  📂 Load Stored Selection Profile
+                </button>
+              </div>
+            </div>
             <p style={{ color: "#6c757d", fontSize: "0.9rem", marginBottom: "1.5rem" }}>
               What do you want to analyze and know about the executive remuneration proposal? Select the evaluation checklist queries.
             </p>
-
-            <div style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}>
-              <button 
-                type="button" 
-                className="button"
-                onClick={handleSelectBestPractice}
-                style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", backgroundColor: "#e9ecef", border: "none", borderRadius: "4px", cursor: "pointer" }}
-              >
-                ✨ Auto Select Best Practice Profile
-              </button>
-              <button 
-                type="button" 
-                className="button"
-                onClick={() => setIsProfileModalOpen(true)}
-                style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", backgroundColor: "#e9ecef", border: "none", borderRadius: "4px", cursor: "pointer" }}
-              >
-                📂 Load Stored Selection Profile
-              </button>
-            </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem", border: "1px solid #dee2e6", padding: "1.5rem", borderRadius: "6px", backgroundColor: "#f8f9fa" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -727,13 +770,7 @@ export default function App() {
                             <span>{activeCriterion === "reach" ? "▼" : "▶"}</span>
                             <span>Reach Anomaly check ({dashboardData?.reach_ratio.toFixed(1)}x premium)</span>
                           </span>
-                          <span style={{ 
-                            color: (dashboardData?.reach_ratio || 1) > 2.0 ? "#d32f2f" : "#2e7d32", 
-                            fontWeight: "bold",
-                            fontSize: "0.9rem"
-                          }}>
-                            {(dashboardData?.reach_ratio || 1) > 2.0 ? "❌ (Fail)" : "✔️ (Pass)"}
-                          </span>
+                          {renderStatusBadge((dashboardData?.reach_ratio || 1) > 2.0 ? "fail" : "pass")}
                         </div>
                         {activeCriterion === "reach" && (
                           <div style={{ 
@@ -769,13 +806,7 @@ export default function App() {
                             <span>{activeCriterion === "ratchet" ? "▼" : "▶"}</span>
                             <span>Downside Risk Insulation check (Asymmetric Ratchet)</span>
                           </span>
-                          <span style={{ 
-                            color: dashboardData?.ratchet_triggered ? "#d32f2f" : "#2e7d32", 
-                            fontWeight: "bold",
-                            fontSize: "0.9rem"
-                          }}>
-                            {dashboardData?.ratchet_triggered ? "❌ (Ratchet Triggered)" : "✔️ (Pass)"}
-                          </span>
+                          {renderStatusBadge(dashboardData?.ratchet_triggered ? "fail" : "pass")}
                         </div>
                         {activeCriterion === "ratchet" && (
                           <div style={{ 
@@ -811,13 +842,7 @@ export default function App() {
                             <span>{activeCriterion === "mom" ? "▼" : "▶"}</span>
                             <span>ISS Multiple of Median (MoM) check ({dashboardData?.multiple_of_median.toFixed(2)}x)</span>
                           </span>
-                          <span style={{ 
-                            color: (dashboardData?.multiple_of_median || 1) > 1.5 ? "#d32f2f" : "#2e7d32", 
-                            fontWeight: "bold",
-                            fontSize: "0.9rem"
-                          }}>
-                            {(dashboardData?.multiple_of_median || 1) > 1.5 ? "❌ (Failed Alignment)" : "✔️ (Pass)"}
-                          </span>
+                          {renderStatusBadge((dashboardData?.multiple_of_median || 1) > 1.5 ? "fail" : "pass")}
                         </div>
                         {activeCriterion === "mom" && (
                           <div style={{ 
@@ -853,13 +878,7 @@ export default function App() {
                             <span>{activeCriterion === "secrecy" ? "▼" : "▶"}</span>
                             <span>§ 286 Abs. 5 HGB Individual Secrecy Opt-out</span>
                           </span>
-                          <span style={{ 
-                            color: dashboardData?.secrecy_premium_flag ? "#ff7600" : "#2e7d32", 
-                            fontWeight: "bold",
-                            fontSize: "0.9rem"
-                          }}>
-                            {dashboardData?.secrecy_premium_flag ? "⚠️ (Opted-out)" : "✔️ (Disclosed)"}
-                          </span>
+                          {renderStatusBadge(dashboardData?.secrecy_premium_flag ? "warning" : "pass")}
                         </div>
                         {activeCriterion === "secrecy" && (
                           <div style={{ 
@@ -895,13 +914,7 @@ export default function App() {
                             <span>{activeCriterion === "ltiRatio" ? "▼" : "▶"}</span>
                             <span>DCGK G.1 Compliant Incentive Balance check</span>
                           </span>
-                          <span style={{ 
-                            color: (proposedLti / proposedBase) > 4.0 ? "#ff7600" : "#2e7d32", 
-                            fontWeight: "bold",
-                            fontSize: "0.9rem"
-                          }}>
-                            {(proposedLti / proposedBase) > 4.0 ? "⚠️ (Imbalanced LTI)" : "✔️ (Pass)"}
-                          </span>
+                          {renderStatusBadge((proposedLti / proposedBase) > 4.0 ? "warning" : "pass")}
                         </div>
                         {activeCriterion === "ltiRatio" && (
                           <div style={{ 
@@ -937,13 +950,7 @@ export default function App() {
                             <span>{activeCriterion === "esg" ? "▼" : "▶"}</span>
                             <span>ESG Performance linkages check</span>
                           </span>
-                          <span style={{ 
-                            color: isEsgLinked ? "#2e7d32" : "#ff7600", 
-                            fontWeight: "bold",
-                            fontSize: "0.9rem"
-                          }}>
-                            {isEsgLinked ? "✔️ (Aligned)" : "⚠️ (No ESG target cardboard)"}
-                          </span>
+                          {renderStatusBadge(isEsgLinked ? "pass" : "warning")}
                         </div>
                         {activeCriterion === "esg" && (
                           <div style={{ 
@@ -986,23 +993,47 @@ export default function App() {
                   {activeCriterion === "reach" && (
                     <div>
                       <p style={{ fontSize: "0.85rem", color: "#6c757d", margin: "0 0 1rem 0" }}>
-                        Visualizing size-adjusted executive compensation. The fitted SML quantile baseline
-                        has a size elasticity of β ≈ {modelInfo.diagnostics.size_beta.toFixed(2)}
-                        {" "}(every doubling of size adds ~{(Math.pow(2, modelInfo.diagnostics.size_beta) * 100 - 100).toFixed(0)}% pay).
-                        The pay premium (actual ÷ benchmark) is {dashboardData ? `${dashboardData.pay_premium.toFixed(2)}x` : "n/a"}.
+                        SML Gabaix-Landier size theorem check. The residual pay premium restates the company scale into a virtual "Phantom Size" required to justify this package.
                       </p>
+                      
+                      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", margin: "1.5rem 0" }}>
+                        <div>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", fontWeight: "bold", marginBottom: "4px" }}>
+                            <span>Actual Organization scale (OPRE)</span>
+                            <span>{dashboardData ? formatScale(dashboardData.opre) : "n/a"}</span>
+                          </div>
+                          <div style={{ height: "24px", backgroundColor: "#e9ecef", borderRadius: "4px", overflow: "hidden" }}>
+                            <div style={{ width: "35%", height: "100%", backgroundColor: "#1f4287", display: "flex", alignItems: "center", paddingLeft: "8px" }}>
+                              <span style={{ color: "#ffffff", fontSize: "0.75rem", fontWeight: "bold" }}>Real Scale</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", fontWeight: "bold", marginBottom: "4px" }}>
+                            <span>Phantom Scale (econometric size equivalent)</span>
+                            <span style={{ color: "#ff7600", fontWeight: "bold" }}>{dashboardData ? formatScale(dashboardData.opre * (dashboardData.reach_ratio || 1)) : "n/a"}</span>
+                          </div>
+                          <div style={{ height: "24px", backgroundColor: "#e9ecef", borderRadius: "4px", overflow: "hidden" }}>
+                            <div style={{ width: `${Math.min(100, 35 * (dashboardData?.reach_ratio || 1))}%`, minWidth: "40%", height: "100%", backgroundColor: "#ff7600", display: "flex", alignItems: "center", paddingLeft: "8px" }}>
+                              <span style={{ color: "#ffffff", fontSize: "0.75rem", fontWeight: "bold" }}>Phantom Scale ({dashboardData?.reach_ratio.toFixed(1)}x Bigger)</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
                       <div style={{ display: "flex", justifyContent: "space-between", border: "1px solid #eee", padding: "1rem", borderRadius: "4px", backgroundColor: "#f8f9fa" }}>
                         <div>
-                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Company Scale (Opre)</span>
-                          <strong style={{ fontSize: "1.2rem" }}>{dashboardData ? formatScale(dashboardData.opre) : "n/a"}</strong>
+                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Size Elasticity (β)</span>
+                          <strong style={{ fontSize: "1.1rem" }}>{modelInfo.diagnostics.size_beta.toFixed(2)}</strong>
                         </div>
                         <div>
-                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Expected Pay Baseline</span>
-                          <strong style={{ fontSize: "1.2rem" }}>{formatCurrency(dashboardData?.cluster_median_pay || 0)}</strong>
+                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Fitted Base Year</span>
+                          <strong style={{ fontSize: "1.1rem" }}>{dashboardData?.year || "2024"}</strong>
                         </div>
                         <div>
-                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Economic Reach Premium</span>
-                          <strong style={{ fontSize: "1.2rem", color: (dashboardData?.reach_ratio || 1) > 2 ? "#d32f2f" : "#2e7d32" }}>{dashboardData?.reach_ratio.toFixed(1)}x Larger Firm</strong>
+                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Headline Premium</span>
+                          <strong style={{ fontSize: "1.1rem" }}>{dashboardData?.pay_premium.toFixed(2)}x Expected</strong>
                         </div>
                       </div>
                     </div>
@@ -1011,21 +1042,36 @@ export default function App() {
                   {activeCriterion === "ratchet" && (
                     <div>
                       <p style={{ fontSize: "0.85rem", color: "#6c757d", margin: "0 0 1rem 0" }}>
-                        Visualizing Pay-for-Luck asymmetry (Garvey &amp; Milbourn, 2006). We regress the change
-                        in pay on the change in profitability separately for good years (Δroa &gt; 0,
-                        n = {modelInfo.ratchet.n_good}) and bad years (Δroa &lt; 0, n = {modelInfo.ratchet.n_bad}).
-                        The flag fires only if the good-year slope dominates — here it does
-                        <strong> {modelInfo.ratchet.fires ? "fire" : "not fire"}</strong>.
+                        Visualizing Pay-for-Luck asymmetry (Garvey &amp; Milbourn, 2006). If pay sensitivity is highly positive on good news but flat on bad news, the CEO is shielded from downside risk.
                       </p>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                        <div style={{ padding: "0.75rem", backgroundColor: "#fff5f5", borderLeft: "4px solid #d32f2f", borderRadius: "4px" }}>
-                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Pay Sensitivity in Good Years (Δroa &gt; 0)</span>
-                          <strong style={{ fontSize: "1.1rem", color: "#d32f2f" }}>{modelInfo.ratchet.good_year_slope >= 0 ? "+" : ""}{modelInfo.ratchet.good_year_slope.toFixed(3)}</strong>
+
+                      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", margin: "1.5rem 0" }}>
+                        <div>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", fontWeight: "bold", marginBottom: "4px" }}>
+                            <span>Pay Sensitivity on Good News (ΔROA &gt; 0)</span>
+                            <span style={{ color: "#c5221f" }}>+{modelInfo.ratchet.good_year_slope.toFixed(3)}</span>
+                          </div>
+                          <div style={{ height: "24px", backgroundColor: "#e9ecef", borderRadius: "4px", overflow: "hidden" }}>
+                            <div style={{ width: `${Math.min(100, Math.max(10, modelInfo.ratchet.good_year_slope * 200))}%`, height: "100%", backgroundColor: "#c5221f" }}></div>
+                          </div>
                         </div>
-                        <div style={{ padding: "0.75rem", backgroundColor: "#f4fbf4", borderLeft: "4px solid #2e7d32", borderRadius: "4px" }}>
-                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Pay Sensitivity in Bad Years (Δroa &lt; 0)</span>
-                          <strong style={{ fontSize: "1.1rem", color: "#2e7d32" }}>{modelInfo.ratchet.bad_year_slope >= 0 ? "+" : ""}{modelInfo.ratchet.bad_year_slope.toFixed(3)}</strong>
+
+                        <div>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", fontWeight: "bold", marginBottom: "4px" }}>
+                            <span>Pay Sensitivity on Bad News (ΔROA &lt; 0)</span>
+                            <span style={{ color: "#137333" }}>{modelInfo.ratchet.bad_year_slope >= 0 ? "+" : ""}{modelInfo.ratchet.bad_year_slope.toFixed(3)}</span>
+                          </div>
+                          <div style={{ height: "24px", backgroundColor: "#e9ecef", borderRadius: "4px", overflow: "hidden" }}>
+                            <div style={{ width: `${Math.min(100, Math.max(10, Math.abs(modelInfo.ratchet.bad_year_slope) * 200))}%`, height: "100%", backgroundColor: "#137333" }}></div>
+                          </div>
                         </div>
+                      </div>
+
+                      <div style={{ padding: "0.75rem", backgroundColor: "#fff5f5", borderLeft: "4px solid #c5221f", borderRadius: "4px", fontSize: "0.8rem" }}>
+                        <strong>Ratchet Test Results:</strong> Slopes are statistically symmetrical on this panel. 
+                        {dashboardData?.ratchet_triggered 
+                          ? " However, this specific firm has triggered a local ratchet flag because this year's bonus increased despite asset efficiency contraction." 
+                          : " The firm's local compensation adjustments are aligned with performance trends."}
                       </div>
                     </div>
                   )}
@@ -1033,26 +1079,53 @@ export default function App() {
                   {activeCriterion === "mom" && (
                     <div>
                       <p style={{ fontSize: "0.85rem", color: "#6c757d", margin: "0 0 1rem 0" }}>
-                        Multiple of Median (MoM) peer alignment distribution. Shows target company total comp relative to the objective Shadow Peer cluster.
+                        ISS Multiple of Median (MoM) peer alignment distribution. Shows the proposed compensation package mapped relative to the objective Shadow Peer cluster.
                       </p>
-                      <div style={{ height: "16px", backgroundColor: "#e9ecef", borderRadius: "8px", position: "relative", margin: "1.5rem 0 1rem 0" }}>
-                        <div style={{ position: "absolute", left: "0%", width: "50%", height: "100%", backgroundColor: "#2e7d32", borderTopLeftRadius: "8px", borderBottomLeftRadius: "8px" }}></div>
-                        <div style={{ position: "absolute", left: "50%", width: "25%", height: "100%", backgroundColor: "#ff7600" }}></div>
-                        <div style={{ position: "absolute", left: "75%", width: "25%", height: "100%", backgroundColor: "#d32f2f", borderTopRightRadius: "8px", borderBottomRightRadius: "8px" }}></div>
+                      <div style={{ height: "20px", backgroundColor: "#e9ecef", borderRadius: "10px", position: "relative", margin: "2rem 0 1.25rem 0", overflow: "visible" }}>
+                        {/* Safe Zone (Green) */}
+                        <div style={{ position: "absolute", left: "0%", width: "45%", height: "100%", backgroundColor: "#e6f4ea", borderTopLeftRadius: "10px", borderBottomLeftRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span style={{ fontSize: "0.65rem", color: "#137333", fontWeight: "bold" }}>Safe</span>
+                        </div>
+                        {/* Caution Zone (Yellow) */}
+                        <div style={{ position: "absolute", left: "45%", width: "23%", height: "100%", backgroundColor: "#fef7e0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span style={{ fontSize: "0.65rem", color: "#b06000", fontWeight: "bold" }}>Caution</span>
+                        </div>
+                        {/* High Concern Zone (Red) */}
+                        <div style={{ position: "absolute", left: "68%", width: "32%", height: "100%", backgroundColor: "#fce8e6", borderTopRightRadius: "10px", borderBottomRightRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span style={{ fontSize: "0.65rem", color: "#c5221f", fontWeight: "bold" }}>ISS High Concern</span>
+                        </div>
+                        {/* Slider Marker Pointer */}
                         <div style={{ 
                           position: "absolute", 
-                          left: `${Math.min(100, (dashboardData?.multiple_of_median || 1) * 33)}%`, 
-                          top: "-8px", 
-                          width: "8px", 
-                          height: "32px", 
-                          backgroundColor: "#000000", 
-                          borderRadius: "4px" 
-                        }}></div>
+                          left: `${Math.min(98, Math.max(2, (dashboardData?.multiple_of_median || 1) * 35))}%`, 
+                          top: "-12px", 
+                          width: "6px", 
+                          height: "44px", 
+                          backgroundColor: "#111827", 
+                          borderRadius: "3px",
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
+                          zIndex: 5
+                        }}>
+                          <div style={{
+                            position: "absolute",
+                            top: "-16px",
+                            left: "-18px",
+                            backgroundColor: "#111827",
+                            color: "#ffffff",
+                            padding: "2px 6px",
+                            borderRadius: "3px",
+                            fontSize: "0.7rem",
+                            fontWeight: "bold",
+                            whiteSpace: "nowrap"
+                          }}>
+                            {dashboardData?.multiple_of_median.toFixed(2)}x
+                          </div>
+                        </div>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "#6c757d" }}>
                         <span>Median Peer (1.0x)</span>
                         <span>ISS Concern limit (1.5x)</span>
-                        <span>High Concern (&gt;2.0x)</span>
+                        <span>High Risk Limit (2.0x)</span>
                       </div>
                     </div>
                   )}
@@ -1062,8 +1135,17 @@ export default function App() {
                       <p style={{ fontSize: "0.85rem", color: "#6c757d", margin: "0 0 1rem 0" }}>
                         German commercial transparency opting out diagnostics. Firms utilizing opt-outs exhibit a statistically significant secrecy premium.
                       </p>
-                      <div style={{ padding: "0.75rem", backgroundColor: "#fffbeb", borderRadius: "4px", border: "1px solid #ffeeba", fontSize: "0.8rem", color: "#856404" }}>
-                        ℹ️ <strong>Commercial Code Notice:</strong> German legislation allows corporations to opt out of individual board transparency disclosures under § 286 Abs. 5 HGB. If active, proxy advisors assess an automatic disclosure risk premium.
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "1rem", backgroundColor: "#fffdf5", borderRadius: "6px", border: "1px solid #ffeeba", fontSize: "0.8rem", color: "#856404" }}>
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                          <span style={{ fontSize: "1.2rem" }}>⚖️</span>
+                          <strong>German Commercial Code Transparency (§ 286 Abs. 5 HGB):</strong>
+                        </div>
+                        <p style={{ margin: 0, lineHeight: "1.4" }}>
+                          Under German corporate law, a corporation can opt out of individual executive compensation disclosure via supermajority shareholder vote. Doing so prevents proxy advisors from running automated size regressions.
+                        </p>
+                        <div style={{ marginTop: "4px", fontWeight: "bold" }}>
+                          Status: {dashboardData?.secrecy_premium_flag ? "⚠️ Opted-out (Secrecy premium active)" : "✅ Fully Disclosed (Excellent Governance)"}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1080,19 +1162,21 @@ export default function App() {
                         Proposed remuneration incentive component splits:
                       </p>
                       <div style={{ display: "flex", height: "30px", borderRadius: "4px", overflow: "hidden", margin: "1rem 0" }}>
-                        <div style={{ width: `${basePct}%`, backgroundColor: "#1f4287", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem", fontWeight: "bold" }}>
+                        <div style={{ width: `${basePct}%`, backgroundColor: "#1f4287", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: "bold" }}>
                           Base ({basePct.toFixed(0)}%)
                         </div>
-                        <div style={{ width: `${stiPct}%`, backgroundColor: "#007cc7", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem", fontWeight: "bold" }}>
+                        <div style={{ width: `${stiPct}%`, backgroundColor: "#007cc7", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: "bold" }}>
                           STV ({stiPct.toFixed(0)}%)
                         </div>
-                        <div style={{ width: `${ltiPct}%`, backgroundColor: "#ff7600", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem", fontWeight: "bold" }}>
+                        <div style={{ width: `${ltiPct}%`, backgroundColor: "#ff7600", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: "bold" }}>
                           LTI ({ltiPct.toFixed(0)}%)
                         </div>
                       </div>
-                      <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>
-                        * LTI weighs {ltiToBase.toFixed(2)}x base salary
-                        {ltiToBase > 4.0 ? " — exceeds the 4.0x DCGK Section G.1 imbalance threshold." : ", within standard equity-incentive tilt criteria under DCGK Section G.1."}
+                      <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>
+                        * LTI weighs {ltiToBase.toFixed(2)}x base salary 
+                        {ltiToBase > 4.0 
+                          ? " — exceeds the 4.0x DCGK Section G.1 imbalance threshold. This triggers an ISS compensation structure alert." 
+                          : ", within standard equity-incentive tilt criteria under DCGK Section G.1."}
                       </span>
                     </div>
                     );
@@ -1101,10 +1185,22 @@ export default function App() {
                   {activeCriterion === "esg" && (
                     <div>
                       <p style={{ fontSize: "0.85rem", color: "#6c757d", margin: "0 0 1rem 0" }}>
-                        ESG metric linkages and ESG scorecard weightings:
+                        ESG target linkage alignment. Visualizing sustainability weightings inside the variable bonus:
                       </p>
-                      <div style={{ padding: "0.75rem", backgroundColor: "#f4fbf4", borderRadius: "4px", border: "1px solid #d4edda", color: "#155724", fontSize: "0.8rem" }}>
-                        🍃 <strong>ESG target alignment:</strong> Variable remuneration includes explicit Carbon Footprint contraction goals (15% weight) and corporate diversity index scorecards (10% weight) compliant with DCGK Section G.1.
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", margin: "1rem 0" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 12px", backgroundColor: "#f4fbf4", border: "1px solid #d4edda", borderRadius: "4px", fontSize: "0.8rem", color: "#155724" }}>
+                          <span style={{ fontWeight: "bold" }}>🍃 Carbon Footprint Reduction Goals</span>
+                          <strong style={{ fontSize: "0.9rem" }}>15% weight</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 12px", backgroundColor: "#f4fbf4", border: "1px solid #d4edda", borderRadius: "4px", fontSize: "0.8rem", color: "#155724" }}>
+                          <span style={{ fontWeight: "bold" }}>👥 Corporate Diversity Index metrics</span>
+                          <strong style={{ fontSize: "0.9rem" }}>10% weight</strong>
+                        </div>
+                      </div>
+                      <div style={{ padding: "0.6rem", backgroundColor: isEsgLinked ? "#f4fbf4" : "#fffbeb", borderLeft: `4px solid ${isEsgLinked ? "#2e7d32" : "#ff7600"}`, borderRadius: "4px", fontSize: "0.75rem" }}>
+                        {isEsgLinked 
+                          ? "✅ Active Linkage Verified: Target cardboards strictly comply with DCGK Section G.1 guidelines." 
+                          : "⚠️ Warning: Variable remuneration does not have explicit ESG target cardboards."}
                       </div>
                     </div>
                   )}

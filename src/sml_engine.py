@@ -255,7 +255,7 @@ class ProxyEngineSML:
         lti_vs_salary_ratio = lti_val / salary_val if salary_val > 0 else 0.0
         
         evidence_trace = {
-            "company": str(row['isin']),
+            "company": str(row.get('company_name', row['isin'])),
             "isin": str(row['isin']),
             "exec_id": str(row['exec_id']),
             "year": int(row['year']),

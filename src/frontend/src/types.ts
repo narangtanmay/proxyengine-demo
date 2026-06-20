@@ -18,11 +18,36 @@ export interface DashboardData {
   exec_id: string;
   year: number;
   cluster_id: number;
+  opre: number;
   actual_pay: number;
   cluster_median_pay: number;
   multiple_of_median: number;
+  pay_premium: number;
   reach_ratio: number;
   ratchet_triggered: boolean;
   secrecy_premium_flag: boolean;
-  lti_vs_salary_ratio: number;
+  lti_vs_salary_ratio: number | null;
+}
+
+export interface ModelInfo {
+  diagnostics: {
+    pseudo_r2: number;
+    size_beta: number;
+    size_se: number;
+    size_tstat: number;
+    size_pvalue: number;
+    roa_beta: number;
+    gear_beta: number;
+    n_obs: number;
+  };
+  ratchet: {
+    good_year_slope: number;
+    bad_year_slope: number;
+    n_good: number;
+    n_bad: number;
+    fires: boolean;
+  };
+  n_clusters: number;
+  year_min: number;
+  year_max: number;
 }

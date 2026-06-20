@@ -2,11 +2,19 @@ import { useCallback, useState, useEffect } from "react";
 import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
 import ChatDrawer from "./components/chat/ChatDrawer";
-import { COMPANIES, FALLBACK_DASHBOARD_DATA } from "./stubs";
-import type { Message, Company, DashboardData } from "./types";
+import { COMPANIES, FALLBACK_DASHBOARD_DATA, FALLBACK_MODEL_INFO } from "./stubs";
+import type { Message, Company, DashboardData, ModelInfo } from "./types";
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(val);
+};
+
+// Compact scale label for company size (operating revenue): e.g. 300.9B, 45.6B, 980M.
+const formatScale = (val: number) => {
+  if (!val || val <= 0) return "n/a";
+  if (val >= 1e9) return `€${(val / 1e9).toFixed(1)}B`;
+  if (val >= 1e6) return `€${(val / 1e6).toFixed(0)}M`;
+  return `€${(val / 1e3).toFixed(0)}K`;
 };
 
 const getAIAnswer = (key: string, lens: string, data: any) => {
@@ -53,7 +61,7 @@ export default function App() {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   
   // Page 1: Input and Data entry states
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("DE0007664039");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("DE0007664005");
   const [firmSearchText, setFirmSearchText] = useState("Volkswagen AG");
   const [showSuggestions, setShowSuggestions] = useState(false);
   
@@ -76,6 +84,7 @@ export default function App() {
 
   const [lens, setLens] = useState<string>("auditor"); // auditor or compliance
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [modelInfo, setModelInfo] = useState<ModelInfo>(FALLBACK_MODEL_INFO);
   const [chartUrl, setChartUrl] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -113,6 +122,21 @@ export default function App() {
     fetchCompanies();
   }, []);
 
+  // Fetch the fitted model diagnostics + sample-wide ratchet test once on mount.
+  useEffect(() => {
+    const fetchModelInfo = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/api/model");
+        if (response.ok) {
+          setModelInfo(await response.json());
+        }
+      } catch (err) {
+        console.warn("Backend offline. Using fallback model diagnostics.", err);
+      }
+    };
+    fetchModelInfo();
+  }, []);
+
   // Synchronize initial input values when company selection changes
   useEffect(() => {
     const fallback = FALLBACK_DASHBOARD_DATA[selectedCompanyId];
@@ -145,7 +169,7 @@ export default function App() {
       // In a real local connected app, we post our manual input states to compute trace
       const payload = {
         company_name: companies.find(c => c.id === selectedCompanyId)?.name || "Volkswagen AG",
-        exec_id: boardPosition === "CEO" ? "Oliver Blume" : "Executive Board Member",
+        exec_id: `Executive Board (${boardPosition})`,
         proposed_salary: proposedBase,
         proposed_sti: proposedSti,
         proposed_lti: proposedLti,
@@ -181,15 +205,19 @@ export default function App() {
       }
     } catch (err) {
       console.warn("Using offline deterministic analytical simulation.", err);
-      const fallback = FALLBACK_DASHBOARD_DATA[selectedCompanyId] || FALLBACK_DASHBOARD_DATA["DE0007664039"];
+      const fallback = FALLBACK_DASHBOARD_DATA[selectedCompanyId] || FALLBACK_DASHBOARD_DATA["DE0007664005"];
       const proposed_comp = proposedBase + proposedSti + proposedLti;
-      
+      // Re-derive the premium/reach from the proposed package against the cached
+      // fair-pay backdrop, using the real fitted size elasticity (beta).
+      const beta = modelInfo.diagnostics.size_beta || 0.3;
+      const residual = Math.log(proposed_comp) - Math.log(fallback.actual_pay) + Math.log(fallback.pay_premium);
       setDashboardData({
         ...fallback,
         actual_pay: proposed_comp,
         multiple_of_median: proposed_comp / fallback.cluster_median_pay,
-        reach_ratio: (proposed_comp / fallback.cluster_median_pay) * 2.2, // Simulate reach
-        lti_vs_salary_ratio: proposedLti / proposedBase
+        pay_premium: Math.exp(residual),
+        reach_ratio: Math.exp(residual / beta),
+        lti_vs_salary_ratio: proposedBase > 0 ? proposedLti / proposedBase : null
       });
       setChartUrl("");
     }
@@ -943,9 +971,10 @@ export default function App() {
               <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 
                 {/* 1. High Level Descriptive Visualizations */}
-                <Dashboard 
-                  data={dashboardData} 
+                <Dashboard
+                  data={dashboardData}
                   chartUrl={chartUrl}
+                  modelInfo={modelInfo}
                 />
 
                 {/* 2. Question Specific Supporting Visualizations (Dynamic) */}
@@ -957,20 +986,23 @@ export default function App() {
                   {activeCriterion === "reach" && (
                     <div>
                       <p style={{ fontSize: "0.85rem", color: "#6c757d", margin: "0 0 1rem 0" }}>
-                        Visualizing size-adjusted executive compensation. Under Gabaix-Landier theorems, CEO payout scale operates on a power-law baseline with slope β ≈ 0.3. Target is placed significantly above normal quantile baseline.
+                        Visualizing size-adjusted executive compensation. The fitted SML quantile baseline
+                        has a size elasticity of β ≈ {modelInfo.diagnostics.size_beta.toFixed(2)}
+                        {" "}(every doubling of size adds ~{(Math.pow(2, modelInfo.diagnostics.size_beta) * 100 - 100).toFixed(0)}% pay).
+                        The pay premium (actual ÷ benchmark) is {dashboardData ? `${dashboardData.pay_premium.toFixed(2)}x` : "n/a"}.
                       </p>
                       <div style={{ display: "flex", justifyContent: "space-between", border: "1px solid #eee", padding: "1rem", borderRadius: "4px", backgroundColor: "#f8f9fa" }}>
                         <div>
                           <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Company Scale (Opre)</span>
-                          <strong style={{ fontSize: "1.2rem" }}>€{COMPANIES.find(c => c.id === selectedCompanyId)?.name === "Volkswagen AG" ? "250B" : "40B"}</strong>
+                          <strong style={{ fontSize: "1.2rem" }}>{dashboardData ? formatScale(dashboardData.opre) : "n/a"}</strong>
                         </div>
                         <div>
                           <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Expected Pay Baseline</span>
-                          <strong style={{ fontSize: "1.2rem" }}>{formatCurrency(dashboardData?.cluster_median_pay || 1500000)}</strong>
+                          <strong style={{ fontSize: "1.2rem" }}>{formatCurrency(dashboardData?.cluster_median_pay || 0)}</strong>
                         </div>
                         <div>
                           <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Economic Reach Premium</span>
-                          <strong style={{ fontSize: "1.2rem", color: "#d32f2f" }}>{dashboardData?.reach_ratio.toFixed(1)}x Larger Firm</strong>
+                          <strong style={{ fontSize: "1.2rem", color: (dashboardData?.reach_ratio || 1) > 2 ? "#d32f2f" : "#2e7d32" }}>{dashboardData?.reach_ratio.toFixed(1)}x Larger Firm</strong>
                         </div>
                       </div>
                     </div>
@@ -979,16 +1011,20 @@ export default function App() {
                   {activeCriterion === "ratchet" && (
                     <div>
                       <p style={{ fontSize: "0.85rem", color: "#6c757d", margin: "0 0 1rem 0" }}>
-                        Visualizing Pay-for-Luck asymmetry. Panel regressions map whether salary scales up on positive earnings while remaining insulated during ROA shocks.
+                        Visualizing Pay-for-Luck asymmetry (Garvey &amp; Milbourn, 2006). We regress the change
+                        in pay on the change in profitability separately for good years (Δroa &gt; 0,
+                        n = {modelInfo.ratchet.n_good}) and bad years (Δroa &lt; 0, n = {modelInfo.ratchet.n_bad}).
+                        The flag fires only if the good-year slope dominates — here it does
+                        <strong> {modelInfo.ratchet.fires ? "fire" : "not fire"}</strong>.
                       </p>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                         <div style={{ padding: "0.75rem", backgroundColor: "#fff5f5", borderLeft: "4px solid #d32f2f", borderRadius: "4px" }}>
-                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Pay Sensitivity to +ROA</span>
-                          <strong style={{ fontSize: "1.1rem", color: "#d32f2f" }}>+0.42 (High upside capture)</strong>
+                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Pay Sensitivity in Good Years (Δroa &gt; 0)</span>
+                          <strong style={{ fontSize: "1.1rem", color: "#d32f2f" }}>{modelInfo.ratchet.good_year_slope >= 0 ? "+" : ""}{modelInfo.ratchet.good_year_slope.toFixed(3)}</strong>
                         </div>
                         <div style={{ padding: "0.75rem", backgroundColor: "#f4fbf4", borderLeft: "4px solid #2e7d32", borderRadius: "4px" }}>
-                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Pay Sensitivity to -ROA</span>
-                          <strong style={{ fontSize: "1.1rem", color: "#2e7d32" }}>-0.01 (Downside risk shielded)</strong>
+                          <span style={{ fontSize: "0.75rem", color: "#6c757d", display: "block" }}>Pay Sensitivity in Bad Years (Δroa &lt; 0)</span>
+                          <strong style={{ fontSize: "1.1rem", color: "#2e7d32" }}>{modelInfo.ratchet.bad_year_slope >= 0 ? "+" : ""}{modelInfo.ratchet.bad_year_slope.toFixed(3)}</strong>
                         </div>
                       </div>
                     </div>
@@ -1032,25 +1068,35 @@ export default function App() {
                     </div>
                   )}
 
-                  {activeCriterion === "ltiRatio" && (
+                  {activeCriterion === "ltiRatio" && (() => {
+                    const total = proposedBase + proposedSti + proposedLti || 1;
+                    const basePct = (proposedBase / total) * 100;
+                    const stiPct = (proposedSti / total) * 100;
+                    const ltiPct = (proposedLti / total) * 100;
+                    const ltiToBase = proposedBase > 0 ? proposedLti / proposedBase : 0;
+                    return (
                     <div>
                       <p style={{ fontSize: "0.85rem", color: "#6c757d", margin: "0 0 1rem 0" }}>
                         Proposed remuneration incentive component splits:
                       </p>
                       <div style={{ display: "flex", height: "30px", borderRadius: "4px", overflow: "hidden", margin: "1rem 0" }}>
-                        <div style={{ width: "25%", backgroundColor: "#1f4287", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem", fontWeight: "bold" }}>
-                          Base (25%)
+                        <div style={{ width: `${basePct}%`, backgroundColor: "#1f4287", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem", fontWeight: "bold" }}>
+                          Base ({basePct.toFixed(0)}%)
                         </div>
-                        <div style={{ width: "30%", backgroundColor: "#007cc7", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem", fontWeight: "bold" }}>
-                          STV (30%)
+                        <div style={{ width: `${stiPct}%`, backgroundColor: "#007cc7", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem", fontWeight: "bold" }}>
+                          STV ({stiPct.toFixed(0)}%)
                         </div>
-                        <div style={{ width: "45%", backgroundColor: "#ff7600", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem", fontWeight: "bold" }}>
-                          LTI (45%)
+                        <div style={{ width: `${ltiPct}%`, backgroundColor: "#ff7600", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem", fontWeight: "bold" }}>
+                          LTI ({ltiPct.toFixed(0)}%)
                         </div>
                       </div>
-                      <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>* LTI weighs 1.8x base salary, compliant with standard equity-incentive tilt criteria under DCGK Section G.1.</span>
+                      <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>
+                        * LTI weighs {ltiToBase.toFixed(2)}x base salary
+                        {ltiToBase > 4.0 ? " — exceeds the 4.0x DCGK Section G.1 imbalance threshold." : ", within standard equity-incentive tilt criteria under DCGK Section G.1."}
+                      </span>
                     </div>
-                  )}
+                    );
+                  })()}
 
                   {activeCriterion === "esg" && (
                     <div>

@@ -34,9 +34,24 @@ app.add_middleware(
 # Initialize engines
 sml_engine = ProxyEngineSML()
 cache_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src", "backend", "sml_cache.json")
-if not sml_engine.load_from_cache(cache_path):
-    print("Warning: SML Cache not found. Performing live model fitting...")
-    sml_engine.run_full_pipeline()
+
+# Fit the full pipeline so the dashboard/chart endpoints have the fitted model and
+# every computed column (pay_premium, reach_ratio, cluster benchmarks, ratchets).
+print("Fitting SML pipeline on the real peer-cluster panel...")
+sml_engine.run_full_pipeline()
+# Also load the cache so the stateless O(1) upload endpoint can score proposals.
+sml_engine.load_from_cache(cache_path)
+
+# Model-level summary (regression diagnostics + sample-wide ratchet test) is the
+# same for every company, so we compute it once at startup.
+MODEL_INFO = {
+    "diagnostics": sml_engine.get_model_diagnostics(),
+    "ratchet": sml_engine.asymmetric_ratchet_analysis(),
+    "n_clusters": int(sml_engine.data["shadow_peer_cluster"].nunique()),
+    "year_min": int(sml_engine.data["year"].min()),
+    "year_max": int(sml_engine.data["year"].max()),
+}
+
 dual_lens_translator = ProxyEngineDualLens()
 
 class ChatRequest(BaseModel):
@@ -53,6 +68,22 @@ def get_companies():
         {"id": "DE0005439004", "name": "Continental AG"}
     ]
     return companies
+
+@app.get("/api/model")
+def get_model_info():
+    """Returns the fitted fair-pay model diagnostics and the sample-wide ratchet test.
+
+    These values are model-level (identical for every company) and let the frontend
+    render real regression statistics instead of hardcoded numbers.
+    """
+    return MODEL_INFO
+
+
+@app.get("/api/clusters")
+def get_clusters():
+    """Returns the per-shadow-peer-cluster analysis (size, pay level, premium spread)."""
+    return sml_engine.get_cluster_analysis().to_dict(orient="records")
+
 
 @app.get("/api/companies/{isin}/dashboard")
 def get_company_dashboard(isin: str, year: int = 2024):

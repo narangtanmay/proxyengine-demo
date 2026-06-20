@@ -1,13 +1,14 @@
 import { useState } from "react";
 import PlaceholderCard from "./PlaceholderCard";
-import type { DashboardData } from "../types";
+import type { DashboardData, ModelInfo } from "../types";
 
 interface DashboardProps {
   data: DashboardData | null;
   chartUrl: string;
+  modelInfo: ModelInfo;
 }
 
-export default function Dashboard({ data, chartUrl }: DashboardProps) {
+export default function Dashboard({ data, chartUrl, modelInfo }: DashboardProps) {
   const [isAcademicViewExpanded, setIsAcademicViewExpanded] = useState(false);
   if (!data) {
     return (
@@ -42,6 +43,8 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
   const isReachHigh = data.reach_ratio > 1.5;
   const momColor = isMoMHigh ? COLOR_ALERT : COLOR_OK;
   const reachColor = isReachHigh ? COLOR_ALERT : COLOR_OK;
+  // Top 10% of firms sit at >= ~2x premium (PDF Step 2); flag that expensive tail.
+  const premiumColor = data.pay_premium > 2.0 ? COLOR_ALERT : data.pay_premium > 1.0 ? "#d97706" : COLOR_OK;
 
   return (
     <section className="dashboard" aria-label="Compensation dashboard" style={{ padding: "1.5rem", maxWidth: "1280px", margin: "0 auto" }}>
@@ -92,6 +95,14 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
           <div className="placeholder-card__body" style={{ marginTop: "0.5rem" }}>
             <p className="tabular-nums" style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0, color: momColor }}>{data.multiple_of_median.toFixed(2)}x</p>
             <p style={{ fontSize: "0.8rem", color: "#6c757d", margin: "0.2rem 0 0 0" }}>ISS high-concern limit: 1.50x</p>
+          </div>
+        </article>
+
+        <article className="placeholder-card" style={{ borderLeft: `5px solid ${premiumColor}` }}>
+          <h3 className="placeholder-card__title" style={{ fontSize: "0.85rem", color: "#6c757d", textTransform: "uppercase", letterSpacing: "1px" }}>Pay Premium</h3>
+          <div className="placeholder-card__body" style={{ marginTop: "0.5rem" }}>
+            <p className="tabular-nums" style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0, color: premiumColor }}>{data.pay_premium.toFixed(2)}x</p>
+            <p style={{ fontSize: "0.8rem", color: "#6c757d", margin: "0.2rem 0 0 0" }}>{(data.pay_premium * 100 - 100).toFixed(0)}% vs fair-pay benchmark</p>
           </div>
         </article>
 
@@ -167,23 +178,23 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
               <div style={{ padding: "1.25rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", fontSize: "0.9rem" }}>
                 <div>
                   <p style={{ margin: "0 0 4px 0", color: "#6c757d", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>Size Elasticity (β):</p>
-                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>~0.3000</p>
-                  <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Standard Gabaix-Landier baseline</span>
+                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>{modelInfo.diagnostics.size_beta.toFixed(4)}</p>
+                  <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Fitted on {modelInfo.diagnostics.n_obs.toLocaleString()} firm-years ({modelInfo.year_min}–{modelInfo.year_max})</span>
                 </div>
                 <div>
                   <p style={{ margin: "0 0 4px 0", color: "#6c757d", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>Pseudo R² (Goodness of Fit):</p>
-                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>0.1585</p>
+                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>{modelInfo.diagnostics.pseudo_r2.toFixed(4)}</p>
                   <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Quantile Regression goodness</span>
                 </div>
                 <div>
                   <p style={{ margin: "0 0 4px 0", color: "#6c757d", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>t-Statistic of Size:</p>
-                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>34.52</p>
-                  <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Highly significant (p &lt; 0.05)</span>
+                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>{modelInfo.diagnostics.size_tstat.toFixed(2)}</p>
+                  <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>{modelInfo.diagnostics.size_pvalue < 0.05 ? "Highly significant (p < 0.05)" : "Not significant"}</span>
                 </div>
                 <div>
                   <p style={{ margin: "0 0 4px 0", color: "#6c757d", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>p-Value of Size Influence:</p>
-                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>0.0000</p>
-                  <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Statistically bulletproof</span>
+                  <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0, color: "#1f4287" }}>{modelInfo.diagnostics.size_pvalue < 1e-4 ? modelInfo.diagnostics.size_pvalue.toExponential(1) : modelInfo.diagnostics.size_pvalue.toFixed(4)}</p>
+                  <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>{modelInfo.diagnostics.size_pvalue < 1e-4 ? "Statistically bulletproof" : ""}</span>
                 </div>
               </div>
             )}
@@ -220,7 +231,9 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
                 <div>
                   <p style={{ fontWeight: "bold", margin: 0 }}>LTI to Salary Ratio</p>
                   <p style={{ color: "#6c757d", margin: "2px 0 0 0" }}>
-                    Proposed Long-Term Incentive target is <strong>{data.lti_vs_salary_ratio.toFixed(2)}x</strong> the fixed base salary, showing equity alignment in line with DCGK Section G.1.
+                    {data.lti_vs_salary_ratio != null
+                      ? <>Proposed Long-Term Incentive target is <strong>{data.lti_vs_salary_ratio.toFixed(2)}x</strong> the fixed base salary, showing equity alignment in line with DCGK Section G.1.</>
+                      : <>Pay-form split (Fixed / STI / LTI) is not disclosed in the historical board-total panel; upload a remuneration report to evaluate the LTI-to-salary ratio.</>}
                   </p>
                 </div>
               </div>

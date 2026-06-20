@@ -1,0 +1,28 @@
+# ProxyEngine Python dependencies
+# Core statistical / data stack (SML engine)
+pandas
+numpy
+scikit-learn
+statsmodels
+
+# Backend API
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+
+# Visualization (chart endpoint)
+matplotlib
+seaborn
+
+# PDF parsing + LLM translation layer
+PyPDF2
+python-dotenv
+openai
+anthropic
+
+# Optional UI / prototyping
+streamlit
+
+# Testing
+pytest

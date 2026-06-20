@@ -48,7 +48,7 @@ class ChatRequest(BaseModel):
 def get_companies():
     """Returns available German corporations in our dataset."""
     companies = [
-        {"id": "DE0007664039", "name": "Volkswagen AG"},
+        {"id": "DE0007664005", "name": "Volkswagen AG"},
         {"id": "DE000BAY0017", "name": "Bayer AG"},
         {"id": "DE0005439004", "name": "Continental AG"}
     ]
@@ -98,14 +98,22 @@ def get_company_chart(isin: str, year: int = 2024):
             linewidth=0.5
         )
         
-        # Baseline line
+        # Resolve the target company-year first (the fitted model needs a known year).
+        comp_row = plot_df[(plot_df['isin'] == isin) & (plot_df['year'] == year)]
+        if comp_row.empty:
+            comp_row = plot_df[plot_df['isin'] == isin].sort_values('year', ascending=False).head(1)
+        line_year = int(comp_row.iloc[0]['year'])
+
+        # Baseline line (PDF Step 1 fair-pay line: log_pay ~ log_size + roa + gear + C(year))
         sizes_range = np.linspace(cluster_peers['log_size'].min(), cluster_peers['log_size'].max(), 100)
         median_roa = cluster_peers['roa'].median()
-        
+        median_gear = cluster_peers['gear'].median()
+
         dummy_df = pd.DataFrame({
             'log_size': sizes_range,
-            'shadow_peer_cluster': [selected_cluster] * 100,
-            'roa': [median_roa] * 100
+            'roa': [median_roa] * 100,
+            'gear': [median_gear] * 100,
+            'year': [line_year] * 100
         })
         predicted_log_pays = sml_engine.model.predict(dummy_df)
         
@@ -119,11 +127,6 @@ def get_company_chart(isin: str, year: int = 2024):
         )
         
         # Current company point
-        # Check if company has this year
-        comp_row = plot_df[(plot_df['isin'] == isin) & (plot_df['year'] == year)]
-        if comp_row.empty:
-            comp_row = plot_df[plot_df['isin'] == isin].sort_values('year', ascending=False).head(1)
-            
         target_size = np.exp(comp_row.iloc[0]['log_size'])
         target_pay = trace['actual_pay']
         
@@ -137,11 +140,12 @@ def get_company_chart(isin: str, year: int = 2024):
             zorder=5
         )
         
-        # Vertical residual line
+        # Vertical residual line (expected pay on the fair-pay line at the target's size)
         target_dummy_df = pd.DataFrame({
             'log_size': [np.log(target_size)],
-            'shadow_peer_cluster': [selected_cluster],
-            'roa': [comp_row.iloc[0]['roa']]
+            'roa': [comp_row.iloc[0]['roa']],
+            'gear': [comp_row.iloc[0]['gear']],
+            'year': [line_year]
         })
         expected_pay_at_target = np.exp(sml_engine.model.predict(target_dummy_df)[0])
         

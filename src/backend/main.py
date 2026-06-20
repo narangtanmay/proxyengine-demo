@@ -33,8 +33,8 @@ app.add_middleware(
 
 # Initialize engines
 sml_engine = ProxyEngineSML()
-cache_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sml_cache.json")
-if not sml_engine.run_cached_pipeline(cache_path):
+cache_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src", "backend", "sml_cache.json")
+if not sml_engine.load_from_cache(cache_path):
     print("Warning: SML Cache not found. Performing live model fitting...")
     sml_engine.run_full_pipeline()
 dual_lens_translator = ProxyEngineDualLens()
@@ -215,35 +215,8 @@ async def upload_remuneration_pdf(file: UploadFile = File(...)):
         extractor = PDFExtractorPOC()
         proposal_data = extractor.process(file_bytes=file_bytes)
         
-        # Map to matching historical company in-memory
-        matched_isin = "DE0007664039"
-        if "bayer" in proposal_data["company_name"].lower():
-            matched_isin = "DE000BAY0017"
-        elif "continental" in proposal_data["company_name"].lower():
-            matched_isin = "DE0005439004"
-            
-        # Build temp dataframe and re-run SML pipeline
-        hist_row = sml_engine.data[sml_engine.data['isin'] == matched_isin].sort_values('year', ascending=False).iloc[0].copy()
-        proposed_comp = proposal_data["proposed_salary"] + proposal_data["proposed_sti"] + proposal_data["proposed_lti"]
-        
-        temp_data = sml_engine.data.copy()
-        temp_data = temp_data[~((temp_data['isin'] == matched_isin) & (temp_data['year'] == 2024))]
-        
-        new_row = hist_row.to_dict()
-        new_row['year'] = 2024
-        new_row['total_comp'] = proposed_comp
-        new_row['salary'] = proposal_data["proposed_salary"]
-        new_row['sti'] = proposal_data["proposed_sti"]
-        new_row['lti'] = proposal_data["proposed_lti"]
-        
-        temp_data = pd.concat([temp_data, pd.DataFrame([new_row])], ignore_index=True)
-        
-        temp_engine = ProxyEngineSML(temp_data)
-        cache_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sml_cache.json")
-        if not temp_engine.run_cached_pipeline(cache_file):
-            temp_engine.run_full_pipeline()
-        
-        trace = temp_engine.get_evidence_trace(matched_isin, 2024)
+        # Stateless evaluation of the proposal in O(1) time
+        trace = sml_engine.evaluate_proposal_statelessly(proposal_data)
         return {"trace": trace, "proposal": proposal_data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -20,7 +20,7 @@ def main():
     engine.run_full_pipeline()
     
     # 3. Export parameters to JSON cache
-    cache_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sml_cache.json")
+    cache_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src", "backend", "sml_cache.json")
     print(f"Exporting model coefficients, scaler states, and shadow peer centroids...")
     engine.save_to_cache(cache_path)
     

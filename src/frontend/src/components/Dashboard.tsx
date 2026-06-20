@@ -33,7 +33,7 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
         <article className="placeholder-card" style={{ borderLeft: "5px solid #1f4287" }}>
           <h3 className="placeholder-card__title" style={{ fontSize: "0.85rem", color: "#6c757d", textTransform: "uppercase", letterSpacing: "1px" }}>Actual Compensation</h3>
           <div className="placeholder-card__body" style={{ marginTop: "0.5rem" }}>
-            <p style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0 }}>{formatCurrency(data.actual_pay)}</p>
+            <p className="tabular-nums" style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0 }}>{formatCurrency(data.actual_pay)}</p>
             <p style={{ fontSize: "0.8rem", color: "#6c757d", margin: "0.2rem 0 0 0" }}>Base salary + STV + LTI target</p>
           </div>
         </article>
@@ -41,7 +41,7 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
         <article className="placeholder-card" style={{ borderLeft: "5px solid #6c757d" }}>
           <h3 className="placeholder-card__title" style={{ fontSize: "0.85rem", color: "#6c757d", textTransform: "uppercase", letterSpacing: "1px" }}>Shadow Peer Median</h3>
           <div className="placeholder-card__body" style={{ marginTop: "0.5rem" }}>
-            <p style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0 }}>{formatCurrency(data.cluster_median_pay)}</p>
+            <p className="tabular-nums" style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0 }}>{formatCurrency(data.cluster_median_pay)}</p>
             <p style={{ fontSize: "0.8rem", color: "#6c757d", margin: "0.2rem 0 0 0" }}>Cluster {data.cluster_id} Median Baseline</p>
           </div>
         </article>
@@ -49,7 +49,7 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
         <article className="placeholder-card" style={{ borderLeft: `5px solid ${momColor}` }}>
           <h3 className="placeholder-card__title" style={{ fontSize: "0.85rem", color: "#6c757d", textTransform: "uppercase", letterSpacing: "1px" }}>Multiple of Median (MoM)</h3>
           <div className="placeholder-card__body" style={{ marginTop: "0.5rem" }}>
-            <p style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0, color: momColor }}>{data.multiple_of_median.toFixed(2)}x</p>
+            <p className="tabular-nums" style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0, color: momColor }}>{data.multiple_of_median.toFixed(2)}x</p>
             <p style={{ fontSize: "0.8rem", color: "#6c757d", margin: "0.2rem 0 0 0" }}>ISS high-concern limit: 1.50x</p>
           </div>
         </article>
@@ -57,7 +57,7 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
         <article className="placeholder-card" style={{ borderLeft: `5px solid ${reachColor}` }}>
           <h3 className="placeholder-card__title" style={{ fontSize: "0.85rem", color: "#6c757d", textTransform: "uppercase", letterSpacing: "1px" }}>Econometric Reach</h3>
           <div className="placeholder-card__body" style={{ marginTop: "0.5rem" }}>
-            <p style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0, color: reachColor }}>{data.reach_ratio.toFixed(1)}x</p>
+            <p className="tabular-nums" style={{ fontSize: "1.8rem", fontWeight: "bold", margin: 0, color: reachColor }}>{data.reach_ratio.toFixed(1)}x</p>
             <p style={{ fontSize: "0.8rem", color: "#6c757d", margin: "0.2rem 0 0 0" }}>Paid like a firm X times bigger</p>
           </div>
         </article>
@@ -88,22 +88,22 @@ export default function Dashboard({ data, chartUrl }: DashboardProps) {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", fontSize: "0.9rem" }}>
               <div>
                 <p style={{ margin: "0 0 4px 0", color: "#6c757d" }}>Size Elasticity (β):</p>
-                <p style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>~0.3000</p>
+                <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>~0.3000</p>
                 <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Standard Gabaix-Landier baseline</span>
               </div>
               <div>
                 <p style={{ margin: "0 0 4px 0", color: "#6c757d" }}>Pseudo R² (Goodness of Fit):</p>
-                <p style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>0.1585</p>
+                <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>0.1585</p>
                 <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Quantile Regression goodness</span>
               </div>
               <div>
                 <p style={{ margin: "0 0 4px 0", color: "#6c757d" }}>t-Statistic of Size:</p>
-                <p style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>34.52</p>
+                <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>34.52</p>
                 <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Highly significant (p &lt; 0.05)</span>
               </div>
               <div>
                 <p style={{ margin: "0 0 4px 0", color: "#6c757d" }}>p-Value of Size Influence:</p>
-                <p style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>0.0000</p>
+                <p className="tabular-nums" style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>0.0000</p>
                 <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Statistically bulletproof</span>
               </div>
             </div>

@@ -641,15 +641,15 @@ export default function App() {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", textAlign: "center" }}>
                       <div style={{ backgroundColor: "#f8f9fa", padding: "4px", borderRadius: "4px" }}>
                         <span style={{ fontSize: "0.7rem", color: "#6c757d", display: "block" }}>Base</span>
-                        <strong style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedBase * 0.9)}</strong>
+                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedBase * 0.9)}</strong>
                       </div>
                       <div style={{ backgroundColor: "#f8f9fa", padding: "4px", borderRadius: "4px" }}>
                         <span style={{ fontSize: "0.7rem", color: "#6c757d", display: "block" }}>STV</span>
-                        <strong style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedSti * 0.75)}</strong>
+                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedSti * 0.75)}</strong>
                       </div>
                       <div style={{ backgroundColor: "#f8f9fa", padding: "4px", borderRadius: "4px" }}>
                         <span style={{ fontSize: "0.7rem", color: "#6c757d", display: "block" }}>LTI</span>
-                        <strong style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedLti * 0.65)}</strong>
+                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedLti * 0.65)}</strong>
                       </div>
                     </div>
                   </div>
@@ -659,15 +659,15 @@ export default function App() {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", textAlign: "center" }}>
                       <div style={{ backgroundColor: "#fff5f0", padding: "4px", borderRadius: "4px" }}>
                         <span style={{ fontSize: "0.7rem", color: "#ff7600", display: "block" }}>Base</span>
-                        <strong style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedBase)}</strong>
+                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedBase)}</strong>
                       </div>
                       <div style={{ backgroundColor: "#fff5f0", padding: "4px", borderRadius: "4px" }}>
                         <span style={{ fontSize: "0.7rem", color: "#ff7600", display: "block" }}>STV</span>
-                        <strong style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedSti)}</strong>
+                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedSti)}</strong>
                       </div>
                       <div style={{ backgroundColor: "#fff5f0", padding: "4px", borderRadius: "4px" }}>
                         <span style={{ fontSize: "0.7rem", color: "#ff7600", display: "block" }}>LTI</span>
-                        <strong style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedLti)}</strong>
+                        <strong className="tabular-nums" style={{ fontSize: "0.85rem" }}>{formatCurrency(proposedLti)}</strong>
                       </div>
                     </div>
                   </div>

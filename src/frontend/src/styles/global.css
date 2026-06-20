@@ -22,6 +22,11 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 html,
 body,
 #root {
@@ -92,6 +97,13 @@ body {
   border-radius: var(--radius);
   padding: 8px 14px;
   cursor: pointer;
+  transition-property: transform, background-color, border-color, box-shadow;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.96);
 }
 
 .button--primary {
@@ -273,6 +285,19 @@ body {
 }
 
 /* ---------- Responsive: full-width drawer on narrow screens ---------- */
+.app-title, h1, h2, h3, h4 {
+  text-wrap: balance;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+img {
+  outline: 1px solid rgba(0, 0, 0, 0.08);
+  outline-offset: -1px;
+}
+
 @media (max-width: 640px) {
   .chat-drawer {
     width: 100vw;

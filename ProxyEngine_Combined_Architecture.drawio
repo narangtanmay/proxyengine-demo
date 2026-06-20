@@ -1,0 +1,376 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Teammate Architecture (Updated)" id="proxyengine-arch">
+    <mxGraphModel dx="1868" dy="1172" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-44" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="320" width="270" x="1010" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="John Tyler" vertex="1">
+          <mxGeometry height="260" width="160" x="1680" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Web Scraping the Pay Package reports" vertex="1">
+          <mxGeometry height="70" width="150" x="50" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-5" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" value="Main Database" vertex="1">
+          <mxGeometry height="80" width="60" x="95" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-6" edge="1" parent="1" source="WM4isf5iBtK8rN7JYO4I-4" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="WM4isf5iBtK8rN7JYO4I-5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="430" y="450" as="sourcePoint" />
+            <mxPoint x="480" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Selecting Firm&amp;nbsp;" vertex="1">
+          <mxGeometry height="60" width="110" x="257.5" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-8" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;font style=&quot;font-size: 7px;&quot;&gt;We need the characteristcs of the company to tailor the analysis to the firm&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 7px;&quot;&gt;Eg. size and board member role&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 7px;&quot;&gt;User enters data we dont already have. &lt;b&gt;Provide automated data entry trough pdf or doc processing ?&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="112.5" width="112.5" x="257.5" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-21" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" value="1. Data Ingestion&#10;ORBIS (15-yr Financials)&#10;+ Compensation Targets" vertex="1">
+          <mxGeometry height="80" width="200" x="30" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-22" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" value="2. SML Engine&#10;K-Means: Shadow Peers&#10;Quantile Reg: 'Reach'&#10;Panel Reg: Asymmetric Ratchets" vertex="1">
+          <mxGeometry height="80" width="230" x="290" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-23" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=14;" value="3. EvidenceTrace JSON&#10;(Strict, typed numeric payload.&#10;No Prose. No Hallucinations.)" vertex="1">
+          <mxGeometry height="80" width="220" x="580" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-24" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=14;" value="4. UI Toggle" vertex="1">
+          <mxGeometry height="80" width="160" x="860" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-25" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" value="5A. Auditor Mode&#10;(Activist Investor Lens)" vertex="1">
+          <mxGeometry height="60" width="200" x="1100" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-26" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" value="5B. Compliance Mode&#10;(Corporate Board Lens)" vertex="1">
+          <mxGeometry height="60" width="200" x="1100" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-27" parent="1" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;" value="Ruthless 'Vote Against'&#10;Proxy Recommendation" vertex="1">
+          <mxGeometry height="60" width="200" x="1380" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-28" parent="1" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;" value="DCGK Compliance Warning&#10;&amp; Defense Strategy" vertex="1">
+          <mxGeometry height="60" width="200" x="1380" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-29" edge="1" parent="1" source="anj8r9etqsJZ6B1hXlaY-21" target="anj8r9etqsJZ6B1hXlaY-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-30" edge="1" parent="1" source="anj8r9etqsJZ6B1hXlaY-22" target="anj8r9etqsJZ6B1hXlaY-23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-31" edge="1" parent="1" source="anj8r9etqsJZ6B1hXlaY-23" target="anj8r9etqsJZ6B1hXlaY-24">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-32" edge="1" parent="1" source="anj8r9etqsJZ6B1hXlaY-24" style="edgeStyle=orthogonalEdgeStyle;" target="anj8r9etqsJZ6B1hXlaY-25">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="570" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-33" edge="1" parent="1" source="anj8r9etqsJZ6B1hXlaY-24" style="edgeStyle=orthogonalEdgeStyle;" target="anj8r9etqsJZ6B1hXlaY-26">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="730" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-34" edge="1" parent="1" source="anj8r9etqsJZ6B1hXlaY-25" target="anj8r9etqsJZ6B1hXlaY-27">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-35" edge="1" parent="1" source="anj8r9etqsJZ6B1hXlaY-26" target="anj8r9etqsJZ6B1hXlaY-28">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-36" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;spacing=8;" value="EvidenceTrace Fields:&#10;- isin, year, exec_id&#10;- size_elasticity (beta ≈ 0.3)&#10;- reach_ratio&#10;- lti_sti_balance&#10;- asymmetric_ratchet_beta&#10;- opting_out_flag" vertex="1">
+          <mxGeometry height="160" width="220" x="580" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="anj8r9etqsJZ6B1hXlaY-37" edge="1" parent="1" source="anj8r9etqsJZ6B1hXlaY-23" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="anj8r9etqsJZ6B1hXlaY-36">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Clustering" vertex="1">
+          <mxGeometry height="60" width="117.5" x="402.5" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-11" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;span style=&quot;font-size: 7px;&quot;&gt;We create a peer group for the selected company. This groups data is used to calculate metrics and do predictions&lt;/span&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="410" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-12" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;Web Scraping &amp;amp; PDF POC:&lt;/b&gt;&lt;br&gt;We scrape historical reports to expand our dataset. The PDF upload POC strictly parses standard components (salary, STI, LTI) into our schema to prevent LLM hallucination.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="257.5" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-13" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;Math constraint:&lt;/b&gt;&lt;br&gt;We do not cluster on arbitrary industry labels. We use K-Means on objective ORBIS fundamentals (opre, roa, gear) to find True Shadow Peers.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="410" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-14" parent="1" style="text;html=1;fontSize=22;fontStyle=1;align=left;verticalAlign=middle;" value="ProxyEngine — Deterministic SML &amp; Dual-Lens Architecture" vertex="1">
+          <mxGeometry height="40" width="800" x="27.5" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Generate Intermediate Metrics" vertex="1">
+          <mxGeometry height="60" width="117.5" x="550" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-17" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;span style=&quot;font-size: 7px;&quot;&gt;Based on the grouping we compute a wide range of metrics to be used as a decision basis.&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 7px;&quot;&gt;e.g. Averages inside the group. Ratios, Time series developments&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="112.5" width="112.5" x="547.5" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-18" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;SML constraint:&lt;/b&gt;&lt;br&gt;Lasso-Regularized Quantile Regressions calculate the expected pay curve. The residual translates into the mathematically proven &amp;#39;Reach&amp;#39; ratio.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="547.5" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-19" edge="1" parent="1" source="WM4isf5iBtK8rN7JYO4I-7" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="WM4isf5iBtK8rN7JYO4I-10" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="430" y="350" as="sourcePoint" />
+            <mxPoint x="480" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-20" edge="1" parent="1" source="WM4isf5iBtK8rN7JYO4I-10" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="WM4isf5iBtK8rN7JYO4I-16" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="430" y="350" as="sourcePoint" />
+            <mxPoint x="480" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-34" edge="1" parent="1" source="WM4isf5iBtK8rN7JYO4I-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="WM4isf5iBtK8rN7JYO4I-26" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-21" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Query Creation" vertex="1">
+          <mxGeometry height="60" width="117.5" x="710" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-22" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;span style=&quot;font-size: 7px;&quot;&gt;The user selects questions and options that specify what they care about concerning the audit.&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 7px;&quot;&gt;E.g. legal compliance, Enviromental related incentives, Long-Term variable component focus...&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="717.5" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-23" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;The Scope Lock:&lt;/b&gt;&lt;br&gt;We do NOT support an open-ended chatbot. The system is restricted to evaluating predefined legal anomalies (e.g. Asymmetric Ratchets, § 87 AktG).&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="717.5" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-24" edge="1" parent="1" source="WM4isf5iBtK8rN7JYO4I-16" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="WM4isf5iBtK8rN7JYO4I-21" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="670" y="380" as="sourcePoint" />
+            <mxPoint x="720" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-26" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Creating JSON Context Payload" vertex="1">
+          <mxGeometry height="60" width="117.5" x="867.5" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-27" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;The Payload needs to include all metrics which are usefull to answer the&amp;nbsp; query. It also includes the query information as well (questions, value statements)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="867.5" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-28" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;EvidenceTrace Contract:&lt;/b&gt;&lt;br&gt;The backend generates a strict JSON payload of numeric anomalies. The LLM reads only this payload, ensuring a verifiable audit trail.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="867.5" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-29" edge="1" parent="1" source="WM4isf5iBtK8rN7JYO4I-5" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=27.5;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="WM4isf5iBtK8rN7JYO4I-16" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="180" />
+              <mxPoint x="410" y="170" />
+            </Array>
+            <mxPoint x="140" y="500" as="sourcePoint" />
+            <mxPoint x="190" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-30" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="WM4isf5iBtK8rN7JYO4I-10" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="410" y="170" as="sourcePoint" />
+            <mxPoint x="540" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-31" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Uses" vertex="1">
+          <mxGeometry height="30" width="70" x="310" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-32" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 10px;&quot;&gt;Fine Tuning and system prompting a thinking LLM to perform the task&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="810" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-33" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="WM4isf5iBtK8rN7JYO4I-26" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="830" y="230" as="sourcePoint" />
+            <mxPoint x="850" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-36" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="LLM provides structured audit answer" vertex="1">
+          <mxGeometry height="60" width="117.5" x="1020" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-38" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;The Dual-Lens Engine:&lt;/b&gt;&lt;br&gt;The LLM acts as a deterministic translator, dynamically switching between an Activist Auditor persona and a Corporate Defender persona.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="1023.75" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-39" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;font style=&quot;font-size: 7px;&quot;&gt;The LLM answers the questions based on the provided context. It referncecs it sources and provides understandable reasoning. It provides a final approve/dissaprove recommendation (Or scale ?)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="1023.75" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-40" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;The Output:&lt;/b&gt;&lt;br&gt;Instead of generic metrics, the dashboard displays actionable, Say-on-Pay voting recommendations directly aligned with ISS / Glass Lewis heuristics.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="1163.75" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-41" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;font style=&quot;font-size: 9px;&quot;&gt;We visualize relevant information about the proposed pay package and comparative data / metrics. This uses the intermediate data&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="1163.75" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-42" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Dashboard accompanying final output" vertex="1">
+          <mxGeometry height="60" width="117.5" x="1160" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-45" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Final report output" vertex="1">
+          <mxGeometry height="35" width="263.75" x="1016.25" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-46" edge="1" parent="1" source="WM4isf5iBtK8rN7JYO4I-26" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="WM4isf5iBtK8rN7JYO4I-36" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="939.5" y="140" as="sourcePoint" />
+            <mxPoint x="977.5" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WM4isf5iBtK8rN7JYO4I-47" parent="1" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=0;size=30;position=0;" value="" vertex="1">
+          <mxGeometry height="180" width="340" x="1280" y="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+<diagram name="Unified SML Architecture" id="proxyengine-unified">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=24;fontStyle=1;align=left;verticalAlign=middle;" value="ProxyEngine — Deterministic SML &amp; Dual-Lens Architecture" vertex="1">
+          <mxGeometry height="40" width="900" x="40" y="20" as="geometry" />
+        </mxCell>
+        
+        
+        <mxCell id="layer1_text" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;fontColor=#666666;" value="1. Data Ingestion &amp; POC Layer" vertex="1">
+          <mxGeometry height="30" width="400" x="40" y="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1" value="Web Scraping &amp; PDF POC&#10;(Scrape historical reports to expand dataset)&#10;&#10;LLM extracts Pay Components into&#10;Standardized JSON Schema" vertex="1">
+          <mxGeometry height="100" width="260" x="40" y="130" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1" value="Historical Data Panel&#10;(ORBIS 15-yr Financials +&#10;Compensation Targets)&#10;&#10;DAX / MDAX / SDAX" vertex="1">
+          <mxGeometry height="100" width="260" x="40" y="260" as="geometry" />
+        </mxCell>
+
+        
+        <mxCell id="layer2_text" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;fontColor=#666666;" value="2. Statistical Machine Learning (SML) Engine" vertex="1">
+          <mxGeometry height="30" width="400" x="380" y="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d2_a" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1" value="K-Means Clustering&#10;&#10;Groups 'Shadow Peers' by Scale (opre),&#10;Efficiency (roa), &amp; Risk (gear)" vertex="1">
+          <mxGeometry height="80" width="280" x="380" y="130" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d2_b" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1" value="Quantile Regression (τ=0.5)&#10;&#10;Calculates Expected Pay vs Size (β≈0.3)&#10;Outputs the 'Reach' Residual" vertex="1">
+          <mxGeometry height="80" width="280" x="380" y="230" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d2_c" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1" value="Dummy-Var Panel Regression&#10;&#10;Detects 'Asymmetric Ratchets'&#10;(Pay shielded from downside ROA)" vertex="1">
+          <mxGeometry height="80" width="280" x="380" y="330" as="geometry" />
+        </mxCell>
+
+        
+        <mxCell id="layer3_text" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;fontColor=#666666;" value="3. Strict Payload" vertex="1">
+          <mxGeometry height="30" width="240" x="720" y="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1" value="EvidenceTrace JSON&#10;(Strict, typed numeric payload.&#10;No Prose. No Hallucinations.)&#10;&#10;Fields:&#10;• isin, year, exec_id&#10;• size_elasticity (beta)&#10;• reach_ratio&#10;• lti_sti_balance&#10;• asymmetric_ratchet_beta&#10;• opting_out_flag" vertex="1">
+          <mxGeometry height="280" width="240" x="720" y="130" as="geometry" />
+        </mxCell>
+
+        
+        <mxCell id="layer4_text" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;fontColor=#666666;" value="4. Dual-Lens Interface &amp; Output" vertex="1">
+          <mxGeometry height="30" width="460" x="1020" y="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d4" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=14;fontStyle=1" value="UI Toggle&#10;(Select Lens)" vertex="1">
+          <mxGeometry height="100" width="160" x="1020" y="220" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="d5_a" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=1" value="Auditor Mode&#10;(Proxy Advisor / Activist)" vertex="1">
+          <mxGeometry height="60" width="220" x="1240" y="150" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d5_b" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=1" value="Compliance Mode&#10;(Corporate Reporting Board)" vertex="1">
+          <mxGeometry height="60" width="220" x="1240" y="330" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d6_a" parent="1" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1" value="Ruthless 'Vote Against'&#10;Proxy Recommendation" vertex="1">
+          <mxGeometry height="70" width="220" x="1520" y="145" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="d6_b" parent="1" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1" value="DCGK Compliance Warning&#10;&amp; Defense Strategy" vertex="1">
+          <mxGeometry height="70" width="220" x="1520" y="325" as="geometry" />
+        </mxCell>
+
+        
+        
+        <mxCell id="e0" edge="1" parent="1" source="d0" target="d2_a">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="340" y="180" />
+              <mxPoint x="340" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="d1" target="d2_a">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="340" y="310" />
+              <mxPoint x="340" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="d1" target="d2_b">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="340" y="310" />
+              <mxPoint x="340" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="d1" target="d2_c">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="340" y="310" />
+              <mxPoint x="340" y="370" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        
+        <mxCell id="e4" edge="1" parent="1" source="d2_a" target="d3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="170" />
+              <mxPoint x="690" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="d2_b" target="d3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="d2_c" target="d3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="370" />
+              <mxPoint x="690" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        
+        <mxCell id="e7" edge="1" parent="1" source="d3" target="d4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        
+        <mxCell id="e8" edge="1" parent="1" source="d4" target="d5_a" style="edgeStyle=orthogonalEdgeStyle;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry">
+             <Array as="points">
+                <mxPoint x="1100" y="180" />
+             </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="d4" target="d5_b" style="edgeStyle=orthogonalEdgeStyle;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry">
+             <Array as="points">
+                <mxPoint x="1100" y="360" />
+             </Array>
+          </mxGeometry>
+        </mxCell>
+
+        
+        <mxCell id="e10" edge="1" parent="1" source="d5_a" target="d6_a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="d5_b" target="d6_b">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

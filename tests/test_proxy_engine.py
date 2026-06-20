@@ -79,3 +79,19 @@ def test_dual_lens_report_generation():
     assert "STATUS: HIGH RISK" in compliance_report
     assert "Bayer AG" in compliance_report
     assert "DCGK" in compliance_report
+
+def test_kmeans_shadow_peer_quality():
+    """
+    Programmatic Quality Test: Shadow Peer Cohesion & Separation
+    Validation: Ensures K-Means on business-model physics (AT, ROA, Gearing) achieves
+    satisfactory mathematical separation, preventing arbitrary peer groupings.
+    """
+    from sklearn.metrics import silhouette_score
+    engine = ProxyEngineSML()
+    df = engine.run_full_pipeline()
+    
+    features = ['asset_turnover_scaled', 'roa_scaled', 'gear_scaled']
+    score = silhouette_score(df[features], df['shadow_peer_cluster'])
+    
+    # Asserts that the silhouette score is above the acceptable cohesion threshold
+    assert score >= 0.30, f"K-Means shadow peer clustering quality degraded! Silhouette score: {score:.4f}"

@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
+		<title>PayAudit</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 		<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -339,8 +340,7 @@
 								max-width: 620px;
 								text-wrap: pretty;
 							"
-							>Identify the firm and enter the proposed remuneration package for the executive under
-							review. These values seed the peer-matched evaluation.</p
+							>Load a firm and its proposed CEO package — PayAudit benchmarks it against a matched peer cluster and tests market fairness and compliance.</p
 						>
 
 						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start">
@@ -1434,6 +1434,79 @@
 								gap: 18px;
 							"
 						>
+							<!-- synthesized say-on-pay recommendation -->
+							<div
+								style="background:{{ recommendation.bg }};border:1.5px solid {{ recommendation.border }};border-radius:14px;padding:16px 18px;box-shadow:0 1px 2px rgba(16,24,40,.04)"
+							>
+								<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+									<div style="display: flex; align-items: center; gap: 13px; min-width: 0">
+										<div style="display: flex; flex-direction: column; line-height: 1">
+											<span
+												style="
+													font-size: 9.5px;
+													font-weight: 700;
+													letter-spacing: 0.08em;
+													text-transform: uppercase;
+													color: #6b7280;
+												"
+												>Synthesized Say-on-Pay</span
+											>
+											<span
+												style="font-size:26px;font-weight:800;letter-spacing:-0.01em;color:{{ recommendation.color }};margin-top:5px"
+												>{{ recommendation.word }}</span
+											>
+										</div>
+										<div style="width:1px;height:38px;background:{{ recommendation.border }}"></div>
+										<div style="min-width: 0"
+											><div
+												style="
+													font-size: 13px;
+													font-weight: 700;
+													color: #374151;
+													text-wrap: balance;
+												"
+												>{{ recommendation.sub }}</div
+											><div style="font-size: 11.5px; color: #6b7280; margin-top: 2px"
+												>{{ recommendation.summary }}</div
+											></div
+										>
+									</div>
+									<div
+										style="
+											margin-left: auto;
+											display: flex;
+											gap: 7px;
+											flex-wrap: wrap;
+											max-width: 46%;
+											justify-content: flex-end;
+										"
+									>
+										<sc-for list="{{ recommendation.drivers }}" as="d" hint-placeholder-count="3">
+											<span
+												style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid {{ d.color }};border-radius:8px;padding:5px 9px;font-size:11px;font-weight:600;color:#374151"
+												><span style="color:{{ d.color }};font-weight:800">{{ d.icon }}</span>{{
+												d.label }} · {{ d.value }}</span
+											>
+										</sc-for>
+										<sc-if value="{{ recommendation.allClear }}" hint-placeholder-val="{{ false }}"
+											><span style="font-size: 11.5px; color: #1e8e3e; font-weight: 600"
+												>No criteria flagged</span
+											></sc-if
+										>
+									</div>
+								</div>
+								<div
+									style="
+										font-size: 10px;
+										color: #9aa1ad;
+										margin-top: 12px;
+										line-height: 1.4;
+										text-wrap: pretty;
+									"
+									>{{ recommendation.note }}</div
+								>
+							</div>
+
 							<!-- ========================================== -->
 							<!-- 5-KPI CARD GRID (React-Inspired Synergy)    -->
 							<!-- ========================================== -->
@@ -1974,79 +2047,6 @@
 										</sc-for>
 									</div>
 								</div>
-							</div>
-
-							<!-- synthesized say-on-pay recommendation -->
-							<div
-								style="background:{{ recommendation.bg }};border:1.5px solid {{ recommendation.border }};border-radius:14px;padding:16px 18px;box-shadow:0 1px 2px rgba(16,24,40,.04)"
-							>
-								<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
-									<div style="display: flex; align-items: center; gap: 13px; min-width: 0">
-										<div style="display: flex; flex-direction: column; line-height: 1">
-											<span
-												style="
-													font-size: 9.5px;
-													font-weight: 700;
-													letter-spacing: 0.08em;
-													text-transform: uppercase;
-													color: #6b7280;
-												"
-												>Synthesized Say-on-Pay</span
-											>
-											<span
-												style="font-size:26px;font-weight:800;letter-spacing:-0.01em;color:{{ recommendation.color }};margin-top:5px"
-												>{{ recommendation.word }}</span
-											>
-										</div>
-										<div style="width:1px;height:38px;background:{{ recommendation.border }}"></div>
-										<div style="min-width: 0"
-											><div
-												style="
-													font-size: 13px;
-													font-weight: 700;
-													color: #374151;
-													text-wrap: balance;
-												"
-												>{{ recommendation.sub }}</div
-											><div style="font-size: 11.5px; color: #6b7280; margin-top: 2px"
-												>{{ recommendation.summary }}</div
-											></div
-										>
-									</div>
-									<div
-										style="
-											margin-left: auto;
-											display: flex;
-											gap: 7px;
-											flex-wrap: wrap;
-											max-width: 46%;
-											justify-content: flex-end;
-										"
-									>
-										<sc-for list="{{ recommendation.drivers }}" as="d" hint-placeholder-count="3">
-											<span
-												style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid {{ d.color }};border-radius:8px;padding:5px 9px;font-size:11px;font-weight:600;color:#374151"
-												><span style="color:{{ d.color }};font-weight:800">{{ d.icon }}</span>{{
-												d.label }} · {{ d.value }}</span
-											>
-										</sc-for>
-										<sc-if value="{{ recommendation.allClear }}" hint-placeholder-val="{{ false }}"
-											><span style="font-size: 11.5px; color: #1e8e3e; font-weight: 600"
-												>No criteria flagged</span
-											></sc-if
-										>
-									</div>
-								</div>
-								<div
-									style="
-										font-size: 10px;
-										color: #9aa1ad;
-										margin-top: 12px;
-										line-height: 1.4;
-										text-wrap: pretty;
-									"
-									>{{ recommendation.note }}</div
-								>
 							</div>
 
 							<!-- selected question supporting visualizations -->
@@ -3749,11 +3749,11 @@
 			  num(v) { const n = parseFloat(v); return isFinite(n) ? n : 0; }
 
 			  componentDidMount() {
-			    fetch("http://localhost:8000/api/model")
+			    fetch("/api/model")
 			      .then(res => res.ok ? res.json() : null)
 			      .then(info => { if (info && info.diagnostics) this.setState({ modelDiag: info.diagnostics, modelRatchet: info.ratchet || null }); })
 			      .catch(() => { /* backend offline — chart falls back to local OLS */ });
-			    fetch("http://localhost:8000/api/companies")
+			    fetch("/api/companies")
 			      .then(res => res.json())
 			      .then(cos => {
 			        this.allCompanies = cos;
@@ -3767,7 +3767,7 @@
 			  }
 			  componentDidUpdate() { const h = this.historyRef.current; if (h) h.scrollTop = h.scrollHeight; }
 			  _reload() { this.setState({ chartLoading: false }); }
-			  goStep(n) { this.setState({ step: n }, () => { if (n === 3) this.fetchInsights(); }); }
+			  goStep(n) { this.setState({ step: n }, () => { if (n === 2 || n === 3) this.fetchInsights(); }); }
 			  _currentTrace() {
 			    const f = this.state.focal;
 			    const bt = this.state.backendTrace || {};
@@ -3829,7 +3829,7 @@
 			      const results = await Promise.all(qIds.map(async qId => {
 			        const crit = mapping[qId];
 			        try {
-			          const res = await fetch('http://localhost:8000/api/insight', {
+			          const res = await fetch('/api/insight', {
 			            method: 'POST',
 			            headers: { 'Content-Type': 'application/json' },
 			            body: JSON.stringify({ criterion: crit, lens, trace })
@@ -3898,9 +3898,9 @@
 			    const isin = (id in this.D_fallback) ? this.D_fallback[id].isin : id;
 
 			    Promise.all([
-			      fetch(`http://localhost:8000/api/companies/${isin}/dashboard`).then(res => res.json()),
-			      fetch(`http://localhost:8000/api/companies/${isin}/peers`).then(res => res.json()),
-			      fetch(`http://localhost:8000/api/companies/${isin}/ratchet-panel`).then(res => res.ok ? res.json() : null).catch(() => null)
+			      fetch(`/api/companies/${isin}/dashboard`).then(res => res.json()),
+			      fetch(`/api/companies/${isin}/peers`).then(res => res.json()),
+			      fetch(`/api/companies/${isin}/ratchet-panel`).then(res => res.ok ? res.json() : null).catch(() => null)
 			    ])
 			    .then(([trace, peers, ratchetPanel]) => {
 			      const D = {};
@@ -4051,7 +4051,7 @@
 			    const prompt = `You are PayAudit, an executive-pay governance advisor. Firm ${f.name} (${f.isin}); executive ${f.exec}, FY${f.year}. Operating revenue €${f.opre}B, ROA ${f.roa}%. Proposed package: base €${f.base}M, short-term €${f.sti}M, long-term €${f.lti}M (total €${pay.toFixed(2)}M). Peer-median pay €${median.toFixed(2)}M, multiple-of-median ${mom.toFixed(2)}x. Pay-for-luck ratchet ${f.ratchet ? 'TRIGGERED' : 'not triggered'}, §87a AktG remuneration-system disclosure ${f.secrecy ? 'incomplete' : 'complete'}. Answer in 2-4 concise sentences, professional governance tone, citing figures. Question: ${t}`;
 			    const done = (a) => this.setState(s => ({ sending: false, msgs: { ...s.msgs, log: [...(s.msgs.log || []), { role: 'assistant', content: a }] } }));
 
-			    fetch("http://localhost:8000/api/chat", {
+			    fetch("/api/chat", {
 			      method: "POST",
 			      headers: { "Content-Type": "application/json" },
 			      body: JSON.stringify({
@@ -4362,7 +4362,7 @@
 			      ? this.allCompanies.map(c => ({
 			          ticker: c.name.split(' ').map(w => w[0]).join('').substring(0, 4).toUpperCase(),
 			          name: c.name,
-			          exec: c.id,
+			          exec: 'Executive Board · DAX panel',
 			          load: () => this.loadPreset(c.id)
 			        }))
 			      : this.order.map(k => ({ ticker: D[k].ticker, name: D[k].name, exec: D[k].exec, load: () => this.loadPreset(k) }));

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -23,7 +23,7 @@ from llm_wrapper import ProxyEngineDualLens
 app = FastAPI(title="ProxyEngine API", version="1.0.0")
 
 # Enable CORS for frontend connection (Restricted origins for security)
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000,http://localhost:5173,http://127.0.0.1:8000,http://127.0.0.1:5173,null,file://").split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000,http://localhost:8080,http://localhost:5173,http://127.0.0.1:8000,http://127.0.0.1:8080,http://127.0.0.1:5173,null,file://").split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -155,17 +155,16 @@ def get_company_dashboard(isin: str, year: int = 2024):
 
 @app.get("/api/companies/{isin}/peers")
 def get_company_peers(isin: str, year: int = 2024):
-    """Returns the peer companies in the same shadow peer cluster as the target company."""
+    """Returns all companies in the dataset, with a flag indicating if they are shadow peers."""
     try:
         trace = sml_engine.get_evidence_trace(isin, year)
         cluster_id = trace['cluster_id']
-        peers_df = sml_engine.data[sml_engine.data['shadow_peer_cluster'] == cluster_id]
         
-        # Group by ISIN to get unique/latest peer records to avoid duplicates across years
-        peers_latest = peers_df.sort_values('year', ascending=False).groupby('isin').first().reset_index()
+        # Get latest records for all unique ISINs in the dataset
+        latest_records = sml_engine.data.sort_values('year', ascending=False).groupby('isin').first().reset_index()
         
         peers_list = []
-        for _, row in peers_latest.iterrows():
+        for _, row in latest_records.iterrows():
             if str(row['isin']) == isin:
                 continue
                 
@@ -185,6 +184,8 @@ def get_company_peers(isin: str, year: int = 2024):
             if not sector or sector == 'nan':
                 sector = 'German Corporation'
                 
+            is_peer = int(row['shadow_peer_cluster']) == cluster_id
+            
             peers_list.append({
                 "isin": str(row['isin']),
                 "name": str(row.get('company_name', row['isin'])),
@@ -196,7 +197,8 @@ def get_company_peers(isin: str, year: int = 2024):
                 "lti": lti_m,
                 "total_comp": total_comp_m,
                 "sector": sector,
-                "year": int(row['year'])
+                "year": int(row['year']),
+                "is_peer": bool(is_peer)
             })
         return peers_list
     except Exception as e:
@@ -426,8 +428,8 @@ async def upload_remuneration_pdf(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Mount static frontend build & figures
-frontend_dist_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
+# Serve the standalone dashboard & figures
+frontend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
 figures_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Implementation", "outputs", "figures")
 
 from fastapi.staticfiles import StaticFiles
@@ -435,10 +437,18 @@ from fastapi.staticfiles import StaticFiles
 if os.path.exists(figures_path):
     app.mount("/figures", StaticFiles(directory=figures_path), name="figures")
 
-if os.path.exists(frontend_dist_path):
-    from fastapi.responses import FileResponse
-    # We mount the API routes first, so we mount static files last as catch-all
-    app.mount("/", StaticFiles(directory=frontend_dist_path, html=True), name="frontend")
+
+@app.get("/")
+async def serve_dashboard():
+    """Serves the standalone Pay Governance Dashboard. Must be accessed via this server
+    (not opened as a local file) since the dashboard's fetch calls are hardcoded to
+    http://localhost:8000."""
+    return FileResponse(os.path.join(frontend_dir, "Pay Governance Dashboard.dc.html"))
+
+
+@app.get("/support.js")
+async def serve_support_js():
+    return FileResponse(os.path.join(frontend_dir, "support.js"))
 
 if __name__ == "__main__":
     import uvicorn

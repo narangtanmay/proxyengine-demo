@@ -329,8 +329,8 @@
       <sc-if value="{{ qSel.q2 }}" hint-placeholder-val="{{ true }}">
       <div style="grid-column:span 2;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:17px 18px 14px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa1ad">Q2 · SML pay premium</div><div style="font-size:14px;font-weight:700;margin-top:2px;text-wrap:balance">Does pay exceed the size-fitted frontier?</div></div><button onClick="{{ reloadChart }}" style="font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;color:#2563eb;background:#eef2fb;border:none;border-radius:7px;padding:6px 11px;flex:none;transition-property:transform;transition-duration:.15s" style-active="transform:scale(0.96)">↻ Regenerate</button></div>
-        <div style="display:grid;grid-template-columns:minmax(0,1fr) 196px;gap:14px;align-items:center;margin-top:8px">
-          <div style="position:relative;width:100%;aspect-ratio:560 / 360">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 196px;gap:0;align-items:stretch;margin-top:8px;border:1px solid #eef0f3;border-radius:10px;overflow:hidden">
+          <div style="position:relative;width:100%;aspect-ratio:560 / 360;border-right:1px solid #eef0f3">
             <sc-if value="{{ chartLoading }}" hint-placeholder-val="{{ true }}">
               <div style="position:absolute;inset:0;border-radius:10px;background:#fbfbfc;border:1px solid #eef0f3;overflow:hidden;display:flex;align-items:center;justify-content:center">
                 <div style="position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(37,99,235,.07) 50%,transparent 70%);background-size:460px 100%;animation:mer-shimmer 1.25s linear infinite"></div>
@@ -338,13 +338,13 @@
               </div>
             </sc-if>
             <sc-if value="{{ chartReady }}" hint-placeholder-val="{{ false }}">
-              <div style="position:absolute;inset:0;animation:mer-fade .35s ease both;padding:12px;background:#ffffff">
+              <div style="position:absolute;inset:0;animation:mer-fade .35s ease both;padding:14px 10px 10px 4px;background:#ffffff">
                 <div ref="{{ bindChart }}" style="width:100%;height:100%"></div>
               </div>
             </sc-if>
           </div>
           <div>
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+            <div style="background:#f8fafc;border-left:1px solid #eef0f3;padding:12px;height:100%;display:flex;flex-direction:column;justify-content:space-between;box-sizing:border-box">
               <div style="font-size:11px;line-height:1.4;color:#475569;text-wrap:pretty">{{ smlInsight }}</div>
               <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;font-size:11px;color:#4b5563">
                 <div style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin-bottom:2px">Legend</div>
@@ -521,11 +521,33 @@ class Component extends DCLogic {
     const intercept = my - slope * mx;
     const predLog = (o) => slope * this.log10(o) + intercept;
     
-    const minOpre = Math.min(...cl.map(k => D[k].opre), this.num(f.opre) || 1);
-    const maxOpre = Math.max(...cl.map(k => D[k].opre), this.num(f.opre) || 1);
-    const xmin = this.log10(minOpre) - 0.06;
-    const xmax = this.log10(maxOpre) + 0.10;
-    
+    const pay = this.num(f.base) + this.num(f.sti) + this.num(f.lti);
+
+    // Axis range/ticks are scoped to the peer cluster + subject, not the full market
+    // backdrop — basing it on the full ~129-company candidate set lets a single
+    // outlier (e.g. a micro-cap holding company) blow the log axis out to several
+    // extra orders of magnitude, recreating the same "sea of whitespace" problem
+    // this is meant to fix, just from the opposite end.
+    const peerKeys = cl.filter(k => D[k].is_peer);
+    const axisKeys = peerKeys.length ? peerKeys : cl;
+    const minPeerOpre = Math.min(...axisKeys.map(k => D[k].opre), this.num(f.opre) || 1);
+    const maxPeerOpre = Math.max(...axisKeys.map(k => D[k].opre), this.num(f.opre) || 1);
+    const peerXMin = this.log10(minPeerOpre) - 0.06;
+    const peerXMax = this.log10(maxPeerOpre) + 0.10;
+    const minPay = Math.min(...axisKeys.map(k => D[k].base + D[k].sti + D[k].lti), pay || 1);
+    const maxPay = Math.max(...axisKeys.map(k => D[k].base + D[k].sti + D[k].lti), pay || 1);
+
+    const xPad = (peerXMax - peerXMin) * 0.12;
+    const axisXMin = peerXMin - xPad, axisXMax = peerXMax + xPad;
+    const yLogMin = this.log10(minPay), yLogMax = this.log10(maxPay);
+    const yPad = (yLogMax - yLogMin) * 0.18;
+    const axisYMin = yLogMin - yPad, axisYMax = yLogMax + yPad;
+
+    const xTickCandidates = [0.2, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 150, 200, 300, 500, 1000];
+    const xTicks = xTickCandidates.filter(v => { const l = this.log10(v); return l >= axisXMin && l <= axisXMax; });
+    const yTickCandidates = [0.2, 0.3, 0.5, 0.7, 1, 1.5, 2, 3, 5, 7, 10, 15, 20, 30, 50, 75, 100];
+    const yTicks = yTickCandidates.filter(v => { const l = this.log10(v); return l >= axisYMin && l <= axisYMax; });
+
     const alignedPeers = [];
     const premiumPeers = [];
     const otherClusters = [];
@@ -534,7 +556,7 @@ class Component extends DCLogic {
       const pPay = p.base + p.sti + p.lti;
       const resid = this.log10(pPay) - predLog(p.opre);
       const pt = { x: p.opre, y: pPay, label: p.short };
-      
+
       if (p.is_peer) {
         if (resid > 0.05) {
           premiumPeers.push(pt);
@@ -545,20 +567,19 @@ class Component extends DCLogic {
         otherClusters.push(pt);
       }
     });
-    
-    const pay = this.num(f.base) + this.num(f.sti) + this.num(f.lti);
+
     const subjectPt = { x: this.num(f.opre) || 1, y: pay, label: f.ticker + ' (Subject)' };
-    
+
     const traceBand = {
-      x: [Math.pow(10, xmin), Math.pow(10, xmax), Math.pow(10, xmax), Math.pow(10, xmin)],
+      x: [Math.pow(10, axisXMin), Math.pow(10, axisXMax), Math.pow(10, axisXMax), Math.pow(10, axisXMin)],
       y: [
-        Math.pow(10, slope * xmin + intercept - 0.085),
-        Math.pow(10, slope * xmax + intercept - 0.085),
-        Math.pow(10, slope * xmax + intercept + 0.085),
-        Math.pow(10, slope * xmin + intercept + 0.085)
+        Math.pow(10, slope * axisXMin + intercept - 0.085),
+        Math.pow(10, slope * axisXMax + intercept - 0.085),
+        Math.pow(10, slope * axisXMax + intercept + 0.085),
+        Math.pow(10, slope * axisXMin + intercept + 0.085)
       ],
       fill: 'toself',
-      fillcolor: 'rgba(37, 99, 235, 0.04)',
+      fillcolor: 'rgba(37, 99, 235, 0.06)',
       line: { color: 'transparent' },
       name: 'Interquartile Market Band (IQR)',
       hoverinfo: 'skip',
@@ -566,12 +587,12 @@ class Component extends DCLogic {
     };
 
     const traceLine = {
-      x: [Math.pow(10, xmin), Math.pow(10, xmax)],
-      y: [Math.pow(10, slope * xmin + intercept), Math.pow(10, slope * xmax + intercept)],
+      x: [Math.pow(10, axisXMin), Math.pow(10, axisXMax)],
+      y: [Math.pow(10, slope * axisXMin + intercept), Math.pow(10, slope * axisXMax + intercept)],
       mode: 'lines',
       line: {
         color: '#2563eb',
-        width: 2.2,
+        width: 2.5,
         dash: 'dash'
       },
       name: 'Fitted SML Frontier (q=0.5)',
@@ -586,7 +607,7 @@ class Component extends DCLogic {
       marker: {
         color: '#94a3b8',
         size: 7.5,
-        opacity: 0.18,
+        opacity: 0.25,
         line: {
           color: '#64748b',
           width: 0.6
@@ -604,7 +625,7 @@ class Component extends DCLogic {
       type: 'scatter',
       marker: {
         color: '#10b981',
-        size: 10,
+        size: 11,
         line: {
           color: '#ffffff',
           width: 1.5
@@ -622,7 +643,7 @@ class Component extends DCLogic {
       type: 'scatter',
       marker: {
         color: '#ef4444',
-        size: 10,
+        size: 11,
         line: {
           color: '#ffffff',
           width: 1.5
@@ -640,11 +661,11 @@ class Component extends DCLogic {
       type: 'scatter',
       marker: {
         color: '#2563eb',
-        size: 15,
+        size: 17,
         symbol: 'circle-dot',
         line: {
           color: '#ffffff',
-          width: 2.2
+          width: 3
         }
       },
       text: [subjectPt.label],
@@ -657,34 +678,36 @@ class Component extends DCLogic {
 
     const layout = {
       autosize: true,
-      margin: { l: 55, r: 25, t: 30, b: 50 },
+      margin: { l: 60, r: 22, t: 26, b: 54 },
       showlegend: false,
       plot_bgcolor: '#ffffff',
       paper_bgcolor: '#ffffff',
       xaxis: {
         type: 'log',
-        gridcolor: '#f1f5f9',
+        range: [axisXMin, axisXMax],
+        gridcolor: '#e8edf3',
         linecolor: '#475569',
         linewidth: 1.5,
-        tickvals: [1, 2, 5, 10, 20, 50, 100, 200, 500],
-        ticktext: ['€1B', '€2B', '€5B', '€10B', '€20B', '€50B', '€100B', '€200B', '€500B'],
-        tickfont: { family: 'SF Mono, ui-monospace, monospace', size: 9.5, color: '#475569' },
+        tickvals: xTicks,
+        ticktext: xTicks.map(v => '€' + v + 'B'),
+        tickfont: { family: 'SF Mono, ui-monospace, monospace', size: 10, color: '#475569' },
         title: {
           text: 'Operating Revenue (Scale, Log Scale)',
-          font: { size: 11, weight: 'bold', color: '#475569' }
+          font: { size: 11, weight: 'bold', color: '#334155' }
         }
       },
       yaxis: {
         type: 'log',
-        gridcolor: '#f1f5f9',
+        range: [axisYMin, axisYMax],
+        gridcolor: '#e8edf3',
         linecolor: '#475569',
         linewidth: 1.5,
-        tickvals: [1, 2, 3, 5, 10, 15, 20, 30],
-        ticktext: ['€1M', '€2M', '€3M', '€5M', '€10M', '€15M', '€20M', '€30M'],
-        tickfont: { family: 'SF Mono, ui-monospace, monospace', size: 9.5, color: '#475569' },
+        tickvals: yTicks,
+        ticktext: yTicks.map(v => '€' + v + 'M'),
+        tickfont: { family: 'SF Mono, ui-monospace, monospace', size: 10, color: '#475569' },
         title: {
           text: 'Executive Compensation (Log Scale)',
-          font: { size: 11, weight: 'bold', color: '#475569' }
+          font: { size: 11, weight: 'bold', color: '#334155' }
         }
       },
       annotations: [
@@ -698,8 +721,8 @@ class Component extends DCLogic {
           y: 0.95,
           bgcolor: 'rgba(255, 255, 255, 0.92)',
           bordercolor: '#cbd5e1',
-          borderwidth: 1.2,
-          font: { family: 'SF Mono, ui-monospace, monospace', size: 9, color: '#334155' }
+          borderwidth: 1.5,
+          font: { family: 'SF Mono, ui-monospace, monospace', size: 9.5, color: '#334155' }
         }
       ]
     };
@@ -711,15 +734,15 @@ class Component extends DCLogic {
   order = ['VW', 'STLA', 'MB', 'BMW', 'DT', 'REN', 'VOL', 'POR', 'CON', 'ZF'];
   D = {
     VW:   { ticker: 'VW', name: 'Volkswagen AG', short: 'Volkswagen', isin: 'DE0007664005', exec: 'Oliver Blume', sector: 'Automotive OEM', opre: 322.3, roa: 2.8, base: 2.00, sti: 3.34, lti: 4.80, ratchet: true, secrecy: false },
-    STLA: { ticker: 'STLA', name: 'Stellantis N.V.', short: 'Stellantis', isin: 'NL00150001Q9', exec: 'Carlos Tavares', sector: 'Automotive OEM', opre: 189.5, roa: 8.9, base: 2.00, sti: 8.40, lti: 26.10, ratchet: true, secrecy: true },
-    MB:   { ticker: 'MB', name: 'Mercedes-Benz Group', short: 'Mercedes', isin: 'DE0007100000', exec: 'Ola Källenius', sector: 'Automotive OEM', opre: 145.6, roa: 6.1, base: 2.10, sti: 3.60, lti: 6.60, ratchet: true, secrecy: false },
-    BMW:  { ticker: 'BMW', name: 'Bayerische Motoren Werke', short: 'BMW', isin: 'DE0005190003', exec: 'Oliver Zipse', sector: 'Automotive OEM', opre: 142.4, roa: 7.4, base: 1.90, sti: 2.50, lti: 3.80, ratchet: false, secrecy: false },
-    DT:   { ticker: 'DT', name: 'Daimler Truck Holding', short: 'Daimler Truck', isin: 'DE000DTR0CK8', exec: 'Martin Daum', sector: 'Commercial Veh.', opre: 53.8, roa: 5.6, base: 1.40, sti: 1.80, lti: 2.20, ratchet: false, secrecy: false },
-    REN:  { ticker: 'REN', name: 'Renault Group', short: 'Renault', isin: 'FR0000131906', exec: 'Luca de Meo', sector: 'Automotive OEM', opre: 52.4, roa: 4.2, base: 1.60, sti: 1.90, lti: 2.60, ratchet: false, secrecy: false },
-    VOL:  { ticker: 'VOL', name: 'Volvo Group', short: 'Volvo', isin: 'SE0000115446', exec: 'Martin Lundstedt', sector: 'Commercial Veh.', opre: 45.6, roa: 9.1, base: 1.55, sti: 1.85, lti: 2.40, ratchet: false, secrecy: false },
-    POR:  { ticker: 'POR', name: 'Porsche AG', short: 'Porsche', isin: 'DE000PAG9113', exec: 'Oliver Blume', sector: 'Automotive OEM', opre: 40.5, roa: 13.2, base: 1.70, sti: 2.30, lti: 3.40, ratchet: false, secrecy: true },
-    CON:  { ticker: 'CON', name: 'Continental AG', short: 'Continental', isin: 'DE0005439004', exec: 'Nikolai Setzer', sector: 'Auto Supplier', opre: 41.4, roa: 1.9, base: 1.30, sti: 1.40, lti: 1.50, ratchet: true, secrecy: false },
-    ZF:   { ticker: 'ZF', name: 'ZF Friedrichshafen', short: 'ZF', isin: '—  (private)', exec: 'Holger Klein', sector: 'Auto Supplier', opre: 46.6, roa: 1.1, base: 1.25, sti: 1.30, lti: 1.35, ratchet: false, secrecy: false },
+    STLA: { ticker: 'STLA', name: 'Stellantis N.V.', short: 'Stellantis', isin: 'NL00150001Q9', exec: 'Carlos Tavares', sector: 'Automotive OEM', opre: 189.5, roa: 8.9, base: 2.00, sti: 8.40, lti: 26.10, ratchet: true, secrecy: true, is_peer: true },
+    MB:   { ticker: 'MB', name: 'Mercedes-Benz Group', short: 'Mercedes', isin: 'DE0007100000', exec: 'Ola Källenius', sector: 'Automotive OEM', opre: 145.6, roa: 6.1, base: 2.10, sti: 3.60, lti: 6.60, ratchet: true, secrecy: false, is_peer: true },
+    BMW:  { ticker: 'BMW', name: 'Bayerische Motoren Werke', short: 'BMW', isin: 'DE0005190003', exec: 'Oliver Zipse', sector: 'Automotive OEM', opre: 142.4, roa: 7.4, base: 1.90, sti: 2.50, lti: 3.80, ratchet: false, secrecy: false, is_peer: true },
+    DT:   { ticker: 'DT', name: 'Daimler Truck Holding', short: 'Daimler Truck', isin: 'DE000DTR0CK8', exec: 'Martin Daum', sector: 'Commercial Veh.', opre: 53.8, roa: 5.6, base: 1.40, sti: 1.80, lti: 2.20, ratchet: false, secrecy: false, is_peer: true },
+    REN:  { ticker: 'REN', name: 'Renault Group', short: 'Renault', isin: 'FR0000131906', exec: 'Luca de Meo', sector: 'Automotive OEM', opre: 52.4, roa: 4.2, base: 1.60, sti: 1.90, lti: 2.60, ratchet: false, secrecy: false, is_peer: true },
+    VOL:  { ticker: 'VOL', name: 'Volvo Group', short: 'Volvo', isin: 'SE0000115446', exec: 'Martin Lundstedt', sector: 'Commercial Veh.', opre: 45.6, roa: 9.1, base: 1.55, sti: 1.85, lti: 2.40, ratchet: false, secrecy: false, is_peer: true },
+    POR:  { ticker: 'POR', name: 'Porsche AG', short: 'Porsche', isin: 'DE000PAG9113', exec: 'Oliver Blume', sector: 'Automotive OEM', opre: 40.5, roa: 13.2, base: 1.70, sti: 2.30, lti: 3.40, ratchet: false, secrecy: true, is_peer: true },
+    CON:  { ticker: 'CON', name: 'Continental AG', short: 'Continental', isin: 'DE0005439004', exec: 'Nikolai Setzer', sector: 'Auto Supplier', opre: 41.4, roa: 1.9, base: 1.30, sti: 1.40, lti: 1.50, ratchet: true, secrecy: false, is_peer: true },
+    ZF:   { ticker: 'ZF', name: 'ZF Friedrichshafen', short: 'ZF', isin: '—  (private)', exec: 'Holger Klein', sector: 'Auto Supplier', opre: 46.6, roa: 1.1, base: 1.25, sti: 1.30, lti: 1.35, ratchet: false, secrecy: false, is_peer: true },
   };
   questionDefs = [
     { id: 'q1', code: 'Q1', title: 'Is the package above the peer-cluster median?', desc: 'Benchmarks proposed pay against the matched peer median (Multiple-of-Median).' },
@@ -740,7 +763,7 @@ class Component extends DCLogic {
       .then(res => res.json())
       .then(cos => {
         this.allCompanies = cos;
-        this.loadPreset('DE0007664005');
+        this.loadPreset('DE000BAY0017');
       })
       .catch(err => {
         console.warn("Backend offline. Using default static companies in dropdown.", err);

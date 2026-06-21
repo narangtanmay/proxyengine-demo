@@ -200,6 +200,7 @@
         for (const node of renderNode(child, scope, document)) rendered.appendChild(node);
       }
 
+      const isFirstRender = firstRender;
       if (firstRender) {
         host.replaceChildren(rendered);
         firstRender = false;
@@ -218,10 +219,12 @@
         }
       }
       callRefs(host);
+      if (!isFirstRender) component.componentDidUpdate?.();
     };
 
     component.__mounted = true;
     component.__render();
+    component.componentDidMount?.();
     window.__dcComponent = component;
   }
 

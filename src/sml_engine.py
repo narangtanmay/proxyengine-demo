@@ -545,6 +545,40 @@ class ProxyEngineSML:
             "_traceability_map": self._build_traceability_map()
         }
 
+    def get_ratchet_panel(self, company_isin: str, year: int = None) -> dict:
+        """Return cluster-level ratchet scatter points and global asymmetry slopes."""
+        trace = self.get_evidence_trace(company_isin, year)
+        cluster_id = int(trace["cluster_id"])
+
+        if "delta_pay" not in self.data.columns or "delta_roa" not in self.data.columns:
+            self.detect_asymmetric_ratchets()
+
+        panel = self.data[self.data["shadow_peer_cluster"] == cluster_id].copy()
+        panel = panel.dropna(subset=["delta_roa", "delta_pay"])
+
+        points = []
+        subject_points = []
+        for _, row in panel.iterrows():
+            item = {
+                "isin": str(row["isin"]),
+                "company": str(row.get("company_name", row["isin"])),
+                "year": int(row["year"]),
+                "delta_roa": float(row["delta_roa"]),
+                "delta_pay": float(row["delta_pay"]),
+                "is_good_year": bool(row["delta_roa"] > 0),
+            }
+            points.append(item)
+            if str(row["isin"]) == str(company_isin):
+                subject_points.append(item)
+
+        return {
+            "isin": str(company_isin),
+            "cluster_id": cluster_id,
+            "points": points,
+            "subject_points": subject_points,
+            "global": self.asymmetric_ratchet_analysis(),
+        }
+
     def save_to_cache(self, cache_path: str = "sml_cache.json"):
         """Save fitted coefficients, centroid coordinates, and medians to static JSON cache."""
         if self.model is None:

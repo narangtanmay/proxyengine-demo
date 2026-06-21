@@ -7,10 +7,15 @@
       this.__renderQueued = false;
     }
 
-    setState(next) {
+    setState(next, callback) {
       const patch = typeof next === 'function' ? next(this.state, this.props) : next;
       this.state = { ...this.state, ...patch };
       this.forceUpdate();
+      if (typeof callback === 'function') {
+        queueMicrotask(() => {
+          if (this.__mounted) callback();
+        });
+      }
     }
 
     forceUpdate() {

@@ -44,8 +44,9 @@ def test_sml_engine_pipeline(shared_sml_engine):
         assert 'line' in t_map[metric]
         assert 'description' in t_map[metric]
 
-def test_pdf_extractor_fallback():
+def test_pdf_extractor_fallback(monkeypatch):
     """Verify that PDFExtractorPOC processes successfully and falls back on error/mock."""
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
     extractor = PDFExtractorPOC()
     data = extractor.process()
     
@@ -56,8 +57,9 @@ def test_pdf_extractor_fallback():
     assert data['esg_linked'] is True
 
 @pytest.mark.allow_fallback_mock
-def test_dual_lens_report_generation(shared_dual_lens):
+def test_dual_lens_report_generation(shared_dual_lens, monkeypatch):
     """Verify that dual lens wrapper produces well-formatted reports."""
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
     trace = {
         "company": "Bayer AG",
         "exec_id": "Bill Anderson",

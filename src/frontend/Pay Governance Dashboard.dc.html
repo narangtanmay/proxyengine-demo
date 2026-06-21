@@ -1640,149 +1640,6 @@
 								>
 							</div>
 
-							<!-- packages + insights row -->
-							<div
-								style="
-									display: grid;
-									grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-									gap: 18px;
-									align-items: start;
-								"
-							>
-								<!-- packages -->
-								<div style="display: flex; flex-direction: column; gap: 14px">
-									<div
-										style="
-											background: #fff;
-											border: 1px solid var(--color-border, #d9dce1);
-											border-radius: 14px;
-											padding: 16px 17px;
-											box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-										"
-									>
-										<div
-											style="
-												font-size: 10.5px;
-												font-weight: 700;
-												letter-spacing: 0.07em;
-												text-transform: uppercase;
-												color: #6b7280;
-											"
-											>Recommended Package</div
-										>
-										<div
-											style="
-												font-size: 23px;
-												font-weight: 800;
-												margin-top: 6px;
-												font-variant-numeric: tabular-nums;
-												letter-spacing: -0.01em;
-											"
-											>{{ baseline.total }}</div
-										>
-										<div style="font-size: 11.5px; color: #6b7280; margin-top: 1px"
-											>peer-cluster median package</div
-										>
-										<div
-											style="
-												display: flex;
-												height: 9px;
-												border-radius: 5px;
-												overflow: hidden;
-												margin-top: 13px;
-												background: #eef0f3;
-											"
-											><div style="width:{{ baseline.baseW }};background:#9aa6b8"></div
-											><div style="width:{{ baseline.stiW }};background:#5b6b85"></div
-											><div style="width:{{ baseline.ltiW }};background:#2f3b52"></div
-										></div>
-										<div
-											style="
-												display: flex;
-												justify-content: space-between;
-												margin-top: 10px;
-												font-size: 11.5px;
-												color: #4b5563;
-											"
-											><span>Base {{ baseline.base }}</span><span>STI {{ baseline.sti }}</span
-											><span>LTI {{ baseline.lti }}</span></div
-										>
-										<div
-											style="
-												font-size: 10px;
-												color: #9aa1ad;
-												margin-top: 9px;
-												line-height: 1.4;
-												text-wrap: pretty;
-											"
-											>Peer-cluster median package; component split is an illustrative
-											allocation.</div
-										>
-									</div>
-									<div
-										style="background:#fff;border:1.5px solid {{ verdictBorder }};border-radius:14px;padding:16px 17px;box-shadow:0 4px 14px {{ verdictGlow }}"
-									>
-										<div style="display: flex; align-items: center; justify-content: space-between"
-											><div
-												style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:{{ verdictColor }}"
-												>Proposed Package</div
-											><span
-												style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;font-weight:700;color:{{ verdictColor }};font-variant-numeric:tabular-nums"
-												>{{ premiumLabel }}</span
-											></div
-										>
-										<div
-											style="
-												font-size: 23px;
-												font-weight: 800;
-												margin-top: 6px;
-												font-variant-numeric: tabular-nums;
-												letter-spacing: -0.01em;
-											"
-											>{{ proposed.total }}</div
-										>
-										<div style="font-size: 11.5px; color: #6b7280; margin-top: 1px"
-											>{{ proposed.deltaVsBaseline }} vs recommended</div
-										>
-										<div
-											style="
-												display: flex;
-												height: 9px;
-												border-radius: 5px;
-												overflow: hidden;
-												margin-top: 13px;
-												background: #eef0f3;
-											"
-											><div style="width:{{ proposed.baseW }};background:#9bb4ec"></div
-											><div style="width:{{ proposed.stiW }};background:#4f80e8"></div
-											><div style="width:{{ proposed.ltiW }};background:#2563eb"></div
-										></div>
-										<div
-											style="
-												display: flex;
-												justify-content: space-between;
-												margin-top: 10px;
-												font-size: 11.5px;
-												color: #4b5563;
-											"
-											><span>Base {{ proposed.base }}</span><span>STI {{ proposed.sti }}</span
-											><span>LTI {{ proposed.lti }}</span></div
-										>
-										<div
-											style="
-												font-size: 10px;
-												color: #9aa1ad;
-												margin-top: 9px;
-												line-height: 1.4;
-												text-wrap: pretty;
-											"
-											>Total reflects disclosed pay. Base / STI / LTI is an
-											<strong>illustrative allocation</strong> — component-level disclosure is
-											sparse in the panel, so the split is modelled, not reported.</div
-										>
-									</div>
-								</div>
-
 								<!-- our insights (selected only) -->
 								<div
 									style="
@@ -1922,7 +1779,6 @@
 										</sc-for>
 									</div>
 								</div>
-							</div>
 
 							<!-- synthesized say-on-pay recommendation -->
 							<div
@@ -1996,6 +1852,22 @@
 									>{{ recommendation.note }}</div
 								>
 							</div>
+
+							<!-- ── TAB BAR ─────────────────────────────────── -->
+							<div style="display:flex;gap:8px;margin:6px 0 2px">
+								<button onClick="{{ setTabPerf }}"
+									style="font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:7px 16px;border-radius:20px;border:1.5px solid {{ activeTab === 'performance' ? '#2563eb' : '#d9dce1' }};background:{{ activeTab === 'performance' ? '#eef2fb' : '#fff' }};color:{{ activeTab === 'performance' ? '#2563eb' : '#374151' }};transition:all .15s"
+								>Performance Metrics</button>
+								<button onClick="{{ setTabPkg }}"
+									style="font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:7px 16px;border-radius:20px;border:1.5px solid {{ activeTab === 'packages' ? '#2563eb' : '#d9dce1' }};background:{{ activeTab === 'packages' ? '#eef2fb' : '#fff' }};color:{{ activeTab === 'packages' ? '#2563eb' : '#374151' }};transition:all .15s"
+								>Package Details</button>
+								<button onClick="{{ setTabInsights }}"
+									style="font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:7px 16px;border-radius:20px;border:1.5px solid {{ activeTab === 'insights' ? '#2563eb' : '#d9dce1' }};background:{{ activeTab === 'insights' ? '#eef2fb' : '#fff' }};color:{{ activeTab === 'insights' ? '#2563eb' : '#374151' }};transition:all .15s"
+								>Insights</button>
+							</div>
+
+							<!-- ── PERFORMANCE TAB ──────────────────────── -->
+							<sc-if value="{{ activeTab === 'performance' }}" hint-placeholder-val="{{ true }}">
 
 							<!-- selected question supporting visualizations -->
 							<div style="display: flex; align-items: center; gap: 11px; margin-top: 2px"
@@ -3312,6 +3184,80 @@
 									</div>
 								</div>
 							</div>
+
+							</sc-if>
+							<!-- ── PACKAGES TAB ─────────────────────────── -->
+							<sc-if value="{{ activeTab === 'packages' }}" hint-placeholder-val="{{ false }}">
+								<div style="display:flex;flex-direction:column;gap:14px;margin-top:4px">
+								<div
+									style="
+										background: #fff;
+										border: 1px solid var(--color-border, #d9dce1);
+										border-radius: 14px;
+										padding: 16px 17px;
+										box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+									"
+								>
+									<div
+										style="
+											font-size: 10.5px;
+											font-weight: 700;
+											letter-spacing: 0.07em;
+											text-transform: uppercase;
+											color: #6b7280;
+										"
+										>Recommended Package</div
+									>
+									<div
+										style="
+											font-size: 23px;
+											font-weight: 800;
+											margin-top: 6px;
+											font-variant-numeric: tabular-nums;
+											letter-spacing: -0.01em;
+										"
+										>{{ baseline.total }}</div
+									>
+									<div style="font-size: 11.5px; color: #6b7280; margin-top: 1px">peer-cluster median package</div>
+									<div style="display:flex;height:9px;border-radius:5px;overflow:hidden;margin-top:13px;background:#eef0f3"
+										><div style="width:{{ baseline.baseW }};background:#9aa6b8"></div
+										><div style="width:{{ baseline.stiW }};background:#5b6b85"></div
+										><div style="width:{{ baseline.ltiW }};background:#2f3b52"></div
+									></div>
+									<div style="display:flex;justify-content:space-between;margin-top:10px;font-size:11.5px;color:#4b5563"
+										><span>Base {{ baseline.base }}</span><span>STI {{ baseline.sti }}</span><span>LTI {{ baseline.lti }}</span></div>
+									<div style="font-size:10px;color:#9aa1ad;margin-top:9px;line-height:1.4;text-wrap:pretty">Peer-cluster median package; component split is an illustrative allocation.</div>
+								</div>
+								<div
+									style="background:#fff;border:1.5px solid {{ verdictBorder }};border-radius:14px;padding:16px 17px;box-shadow:0 4px 14px {{ verdictGlow }}"
+								>
+									<div style="display:flex;align-items:center;justify-content:space-between"
+										><div style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:{{ verdictColor }}"
+											>Proposed Package</div
+										><span style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;font-weight:700;color:{{ verdictColor }};font-variant-numeric:tabular-nums"
+											>{{ premiumLabel }}</span
+										></div>
+									<div style="font-size:23px;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-0.01em"
+										>{{ proposed.total }}</div>
+									<div style="font-size:11.5px;color:#6b7280;margin-top:1px">{{ proposed.deltaVsBaseline }} vs recommended</div>
+									<div style="display:flex;height:9px;border-radius:5px;overflow:hidden;margin-top:13px;background:#eef0f3"
+										><div style="width:{{ proposed.baseW }};background:#9bb4ec"></div
+										><div style="width:{{ proposed.stiW }};background:#4f80e8"></div
+										><div style="width:{{ proposed.ltiW }};background:#2563eb"></div
+									></div>
+									<div style="display:flex;justify-content:space-between;margin-top:10px;font-size:11.5px;color:#4b5563"
+										><span>Base {{ proposed.base }}</span><span>STI {{ proposed.sti }}</span><span>LTI {{ proposed.lti }}</span></div>
+									<div style="font-size:10px;color:#9aa1ad;margin-top:9px;line-height:1.4;text-wrap:pretty">Total reflects disclosed pay. Base / STI / LTI is an <strong>illustrative allocation</strong> — component-level disclosure is sparse in the panel, so the split is modelled, not reported.</div>
+								</div>
+								</div>
+							</sc-if>
+
+							<!-- ── INSIGHTS TAB ─────────────────────────── -->
+							<sc-if value="{{ activeTab === 'insights' }}" hint-placeholder-val="{{ false }}">
+								<div style="background:#fff;border:1px solid #d9dce1;border-radius:14px;padding:24px;margin-top:4px;text-align:center;color:#9aa1ad;font-size:13px">
+									Diagnostic Insights — coming in next step
+								</div>
+							</sc-if>
 						</main>
 					</div>
 				</sc-if>

@@ -64,9 +64,10 @@ class ChatRequest(BaseModel):
 
 class InsightRequest(BaseModel):
     criterion: str            # one of: reach, ratchet, mom, secrecy, ltiRatio, esg
-    lens: str                 # "auditor" or "compliance"
+    lens: str                 # "auditor", "compliance", or "neutral" (card caption)
     trace: dict               # the SML trace currently displayed
     proposal: dict | None = None  # the proposed package details (optional)
+    metric: dict | None = None    # card context for the neutral lens: {label, value, context}
 
 @app.get("/api/companies")
 def get_companies():
@@ -397,8 +398,15 @@ def chat_with_translator(request: ChatRequest):
 
 @app.post("/api/insight")
 def get_criterion_insight(request: InsightRequest):
-    """Returns a single-criterion, lens-specific narrative (Gemini, with deterministic fallback)."""
+    """Returns a single-criterion, lens-specific narrative (DeepSeek, with deterministic fallback).
+
+    The "neutral" lens returns a short one-line card caption and an empty string when DeepSeek
+    is unavailable, so the frontend can keep its own deterministic preset caption as the fallback.
+    """
     try:
+        if request.lens == "neutral":
+            content = dual_lens_translator.generate_card_insight(request.metric, request.trace)
+            return {"content": content}
         proposal = request.proposal or {
             "company_name": request.trace.get("company"),
             "exec_id": request.trace.get("exec_id"),

@@ -313,7 +313,7 @@
           <sc-for list="{{ selectedInsights }}" as="item" hint-placeholder-count="4">
             <div style="display:flex;align-items:flex-start;gap:11px;background:#fff;padding:11px 13px">
               <span style="display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:6px;background:{{ item.bg }};color:{{ item.color }};font-size:12px;font-weight:800;flex:none;margin-top:1px">{{ item.icon }}</span>
-              <div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px"><span style="font-size:12.5px;font-weight:600">{{ item.label }}</span><span style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;font-weight:700;color:{{ item.color }};font-variant-numeric:tabular-nums;flex:none">{{ item.value }}</span></div><div style="font-size:11.5px;color:#6b7280;margin-top:2px;text-wrap:pretty">{{ item.detail }}</div></div>
+              <div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px"><span style="font-size:12.5px;font-weight:600">{{ item.label }}</span><span style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;font-weight:700;color:{{ item.color }};font-variant-numeric:tabular-nums;flex:none">{{ item.value }}</span></div><div style="margin-top:4px;min-height:13px"><span style="display:{{ item.skelDisplay }};position:relative;width:85%;height:9px;border-radius:5px;background:#eef0f3;overflow:hidden;vertical-align:middle"><span style="position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(37,99,235,.10) 50%,transparent 70%);background-size:460px 100%;animation:mer-shimmer 1.25s linear infinite"></span></span><span style="display:{{ item.textDisplay }};font-size:11.5px;color:#6b7280;text-wrap:pretty;animation:mer-fade .3s ease both">{{ item.detail }}</span></div></div>
             </div>
           </sc-for>
         </div>
@@ -463,7 +463,7 @@
           <div style="display:flex;height:18px;border-radius:6px;overflow:hidden"><div style="width:{{ proposed.baseW }};background:#9bb4ec"></div><div style="width:{{ proposed.stiW }};background:#4f80e8"></div><div style="width:{{ proposed.ltiW }};background:#2563eb"></div></div>
           <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:#4b5563"><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#9bb4ec"></span>Base</span><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#4f80e8"></span>STI</span><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#2563eb"></span>LTI {{ mix.ltiShare }}</span></div>
         </div>
-        <div style="font-size:11.5px;color:#6b7280;margin-top:14px;text-wrap:pretty">{{ mix.insight }}</div>
+        <div style="margin-top:14px;min-height:14px"><span style="display:{{ mix.insightSkel }};position:relative;width:80%;height:9px;border-radius:5px;background:#eef0f3;overflow:hidden;vertical-align:middle"><span style="position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(37,99,235,.10) 50%,transparent 70%);background-size:460px 100%;animation:mer-shimmer 1.25s linear infinite"></span></span><span style="display:{{ mix.insightText }};font-size:11.5px;color:#6b7280;text-wrap:pretty;animation:mer-fade .3s ease both">{{ mix.insight }}</span></div>
       </div>
       </sc-if>
     </div>
@@ -930,6 +930,29 @@ class Component extends DCLogic {
     });
   }
 
+  // DeepSeek card caption: returns a cached caption for `sig`, or "" while it loads / when
+  // DeepSeek is unavailable. Fires the request once per signature and re-renders on arrival.
+  // The frontend's preset caption is always used as the fallback when this returns "".
+  _cardInsight(sig, payload) {
+    if (!this._aiCache) { this._aiCache = {}; this._aiPending = {}; }
+    if (this._aiCache[sig] !== undefined) return this._aiCache[sig];
+    if (this._aiPending[sig]) return "";
+    this._aiPending[sig] = true;
+    fetch("http://localhost:8000/api/insight", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.json())
+      .then(data => {
+        this._aiCache[sig] = (data && typeof data.content === 'string') ? data.content.trim() : "";
+        this._aiPending[sig] = false;
+        this.setState(s => ({ _aiV: (s._aiV || 0) + 1 }));
+      })
+      .catch(() => { this._aiCache[sig] = ""; this._aiPending[sig] = false; });
+    return "";
+  }
+
   renderVals() {
     const C = this.C, f = this.state.focal, D = this.D;
     const base = this.num(f.base), sti = this.num(f.sti), lti = this.num(f.lti), pay = base + sti + lti;
@@ -1033,6 +1056,41 @@ class Component extends DCLogic {
       q5: { label: '§286(5) HGB Disclosure', value: f.secrecy ? 'Opt-out' : 'Full', detail: f.secrecy ? 'Individual disclosure opt-out invoked — reduces transparency.' : 'No disclosure opt-out — full transparency on the package.', ...ic(f.secrecy ? 'fail' : 'pass') },
       q6: { label: 'LTI vs Base Salary', value: ltiRatioN.toFixed(1) + '×', detail: `LTI weighting of ${ltiRatioN.toFixed(1)}× base ${ltiRatioN >= 2 ? 'aligns pay with long-horizon value' : 'is light on long-term alignment'}.`, ...ic(ltiRatioN >= 2 ? 'pass' : 'warn') },
     };
+    // ---- DeepSeek card captions (async + cached; fall back to the preset detail above) ----
+    // We hand DeepSeek the already-displayed value plus grounding facts, so the generated
+    // sentence stays numerically consistent with what the card shows. Empty => keep preset.
+    // To avoid a jarring text-then-replace, a card shows a shimmer skeleton while its caption
+    // is in flight and fades the final sentence in once (DeepSeek text, or preset on miss).
+    Object.values(insightDefs).forEach(d => { d.skelDisplay = 'none'; d.textDisplay = 'block'; });
+    const reachR = this.num(f.opre) / medOpre;
+    const aiCtx = {
+      q1: { criterion: 'mom', context: `Proposed total pay €${pay.toFixed(2)}M is ${mom.toFixed(2)}x the peer-cluster median €${median.toFixed(2)}M.` },
+      q2: { criterion: 'reach', context: `Proposed pay sits ${(premiumFrac * 100).toFixed(0)}% ${premiumFrac >= 0 ? 'above' : 'below'} the SML size-fitted frontier after controlling for operating scale.` },
+      q3: { criterion: 'ratchet', context: `Pay-for-luck asymmetric ratchet is ${f.ratchet ? 'triggered' : 'not triggered'} in the incentive design.` },
+      q4: { criterion: 'reach', context: `Operating scale €${this.num(f.opre).toFixed(1)}B is ${reachR.toFixed(2)}x the cluster-median scale €${medOpre.toFixed(1)}B.` },
+      q5: { criterion: 'secrecy', context: `Section 286(5) HGB individual disclosure opt-out is ${f.secrecy ? 'invoked, reducing transparency' : 'absent, so the package is fully disclosed'}.` },
+      q6: { criterion: 'ltiRatio', context: `LTI weighting is ${ltiRatioN.toFixed(1)}x base salary (€${lti.toFixed(2)}M LTI vs €${base.toFixed(2)}M base).` },
+    };
+    if (this.state.step === 3) {
+      Object.keys(aiCtx).forEach(qid => {
+        const d = insightDefs[qid], ctx = aiCtx[qid];
+        if (!d) return;
+        const sig = `${f.isin}|${ctx.criterion}|${d.value}`;
+        const ai = this._cardInsight(sig, {
+          criterion: ctx.criterion,
+          lens: 'neutral',
+          trace: { company: f.name, exec_id: f.exec },
+          metric: { label: d.label, value: d.value, context: ctx.context }
+        });
+        const cached = this._aiCache ? this._aiCache[sig] : undefined;
+        const pending = this._aiPending ? this._aiPending[sig] : false;
+        const loading = (cached === undefined) && pending;
+        d.skelDisplay = loading ? 'inline-block' : 'none';
+        d.textDisplay = loading ? 'none' : 'block';
+        if (ai) d.detail = ai;
+      });
+    }
+
     const selIds = this.questionDefs.map(q => q.id).filter(id => this.state.selectedQ[id]);
     const selectedInsights = selIds.map(id => insightDefs[id]);
     const allItems = Object.values(insightDefs);
@@ -1057,7 +1115,7 @@ class Component extends DCLogic {
     const disclosure = f.secrecy
       ? { status: 'Disclosure opt-out invoked', icon: '✕', color: C.red, bg: C.redBg, border: '#f2c2c2', score: '60%', scoreW: '60%', insight: 'Individual figures withheld under §286(5) HGB.' }
       : { status: 'Full individual disclosure', icon: '✓', color: C.green, bg: C.greenBg, border: '#bfe3cb', score: '100%', scoreW: '100%', insight: 'All package components individually disclosed.' };
-    const mix = { color: ltiRatioN >= 2 ? C.green : '#c77700', ltiShare: (pay ? lti / pay * 100 : 0).toFixed(0) + '%', insight: insightDefs.q6.detail };
+    const mix = { color: ltiRatioN >= 2 ? C.green : '#c77700', ltiShare: (pay ? lti / pay * 100 : 0).toFixed(0) + '%', insight: insightDefs.q6.detail, insightSkel: insightDefs.q6.skelDisplay, insightText: insightDefs.q6.textDisplay };
 
     // ---- shadow rows ----
     const sortKey = this.props.peerSort || 'Revenue';

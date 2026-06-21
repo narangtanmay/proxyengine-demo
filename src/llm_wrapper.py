@@ -15,89 +15,94 @@ class ProxyEngineDualLens:
         """
         pass
 
-    def _generate_narrative_with_api(self, mode: str, trace: Dict[str, Any], proposal_data: Dict[str, Any], user_query: str = None) -> str:
+    def _deepseek_chat(self, system_prompt: str, user_content: str, max_tokens: int = None) -> str:
         """
-        Uses OpenAI or Anthropic API to generate tailored narrative reports if credentials exist.
-        """
-        openai_key = os.getenv("OPENAI_API_KEY")
-        anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-        
-        system_prompts = {
-            "auditor": (
-                "You are an activist institutional investor and proxy advisor (like ISS or Glass Lewis). "
-                "You write direct, mathematically grounded, and ruthless voting recommendations AGAINST executive compensation proposals "
-                "when they show signs of rent extraction (high Reach ratios, asymmetric ratcheting, high multiples of peer medians). "
-                "Use the provided econometric evidence trace and proposal details to construct a compelling recommendation. "
-                "Do not use conversational filler, get straight to the analysis and recommendation."
-            ),
-            "compliance": (
-                "You are corporate secretary and legal counsel defending a corporate board's remuneration system "
-                "against hostile activist shareholders. You frame statistical anomalies as strategic talent investments "
-                "and ensure everything conforms to DCGK (German Corporate Governance Code) principles. "
-                "Use the provided econometric evidence trace to anticipate shareholder attacks and draft the board's defensive compliance arguments."
-            )
-        }
-        
-        system_prompt = system_prompts[mode]
-        if user_query:
-            if mode == "auditor":
-                system_prompt += (
-                    f"\n\nAn investor has queried: \"{user_query}\". "
-                    "You MUST tailor your response to directly answer this question, grounding all arguments "
-                    "strictly in the SML Evidence Trace."
-                )
-            else:
-                system_prompt += (
-                    f"\n\nThe board/counsel has queried: \"{user_query}\". "
-                    "You MUST tailor your response to directly answer this question, grounding all arguments "
-                    "strictly in the SML Evidence Trace and DCGK guidelines."
-                )
-        
-        user_content = (
-            f"Econometric Evidence Trace (SML Output):\n"
-            f"{json.dumps(trace, indent=2)}\n\n"
-            f"Remuneration Proposal Details (PDF Parser Output):\n"
-            f"{json.dumps(proposal_data, indent=2)}"
-        )
-        
-        # Try OpenAI
-        if openai_key:
-            try:
-                from openai import OpenAI
-                client = OpenAI(api_key=openai_key)
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_content}
-                    ],
-                    temperature=0.2,
-                    max_tokens=1500
-                )
-                return response.choices[0].message.content
-            except Exception as e:
-                print(f"[LLM Dual-Lens] OpenAI call failed: {e}. Falling back to template generator.")
-                
-        # Try Anthropic
-        elif anthropic_key:
-            try:
-                import anthropic
-                client = anthropic.Anthropic(api_key=anthropic_key)
-                response = client.messages.create(
-                    model="claude-3-5-sonnet-20241022",
-                    max_tokens=1500,
-                    system=system_prompt,
-                    messages=[{"role": "user", "content": user_content}],
-                    temperature=0.2
-                )
-                return response.content[0].text
-            except Exception as e:
-                print(f"[LLM Dual-Lens] Anthropic call failed: {e}. Falling back to template generator.")
+        Single DeepSeek Chat Completions call. Returns "" on any miss (no key, network
+        error, or empty response) so every caller can fall back to a deterministic template.
 
-        return ""
+        DeepSeek exposes an OpenAI-compatible API, so we reuse the already-installed
+        `openai` SDK and just point it at DeepSeek's base URL. Configured purely via env:
+          DEEPSEEK_API_KEY      - required to enable DeepSeek at all
+          DEEPSEEK_MODEL        - model id (default: deepseek-chat; deepseek-reasoner for R1)
+          DEEPSEEK_BASE_URL     - API base URL (default: https://api.deepseek.com)
+          DEEPSEEK_TEMPERATURE  - sampling temperature (default: 0.3)
+          DEEPSEEK_MAX_TOKENS   - default max output tokens (default: 600)
+        """
+        api_key = os.getenv("DEEPSEEK_API_KEY")
+        if not api_key:
+            return ""
+
+        model_name = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
+        base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+        try:
+            temperature = float(os.getenv("DEEPSEEK_TEMPERATURE", "0.3"))
+        except ValueError:
+            temperature = 0.3
+        if max_tokens is None:
+            try:
+                max_tokens = int(os.getenv("DEEPSEEK_MAX_TOKENS", "600"))
+            except ValueError:
+                max_tokens = 600
+
+        try:
+            from openai import OpenAI  # lazy import: only needed when key is present
+
+            client = OpenAI(api_key=api_key, base_url=base_url)
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_content},
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            return (response.choices[0].message.content or "").strip()
+        except Exception as e:  # noqa: BLE001 - any failure must degrade gracefully
+            print(f"[LLM Dual-Lens] DeepSeek call failed: {e}. Falling back to deterministic template.")
+            return ""
+
+    # Concise, lens-specific system prompts for conversational drill-down answers.
+    # Deliberately mirror the per-criterion insight style: short, grounded, prefixed.
+    NARRATIVE_SYSTEM_PROMPTS = {
+        "auditor": (
+            "You are an activist institutional investor and proxy advisor (in the mould of ISS or "
+            "Glass Lewis). Answer the investor's question about ONE executive-pay proposal with a "
+            "direct, mathematically grounded critique that builds toward a VOTE AGAINST when the "
+            "evidence shows rent extraction. Open with the prefix '\U0001f50d Activist Advisor Analysis:'. "
+            "Use ONLY the numbers provided in the evidence trace - never invent figures. "
+            "Keep it to 2-4 sentences, no headings, no bullet lists, no conversational filler."
+        ),
+        "compliance": (
+            "You are corporate secretary and legal counsel defending a German supervisory board's "
+            "remuneration system against hostile activist shareholders. Answer the board's question "
+            "by framing the relevant statistical findings as defensible, strategically justified "
+            "decisions compliant with the DCGK (German Corporate Governance Code). "
+            "Open with the prefix '\U0001f6e1️ Corporate Board Counsel Defense:'. "
+            "Use ONLY the numbers provided in the evidence trace - never invent figures. "
+            "Keep it to 2-4 sentences, no headings, no bullet lists, no conversational filler."
+        ),
+    }
+
+    def _generate_narrative_with_deepseek(self, mode: str, trace: Dict[str, Any], proposal_data: Dict[str, Any], user_query: str = None) -> str:
+        """
+        Generates a concise, lens-specific conversational answer with DeepSeek, grounded in the
+        SML evidence trace. Mirrors the per-criterion insight style (short, prefixed, grounded).
+        Returns "" so callers fall back to deterministic templates when DeepSeek is unavailable.
+        """
+        system_prompt = self.NARRATIVE_SYSTEM_PROMPTS.get(mode, self.NARRATIVE_SYSTEM_PROMPTS["auditor"])
+        query_line = f"The user asks: \"{user_query}\". Answer this directly.\n\n" if user_query else ""
+        user_content = (
+            f"{query_line}"
+            f"Company: {trace.get('company', proposal_data.get('company_name', 'the company'))}\n"
+            f"Executive scope: {trace.get('exec_id', 'Executive Board')}\n\n"
+            f"Deterministic SML evidence trace:\n{json.dumps(trace, indent=2)}\n\n"
+            f"Remuneration proposal details:\n{json.dumps(proposal_data, indent=2)}"
+        )
+        return self._deepseek_chat(system_prompt, user_content)
 
     # ------------------------------------------------------------------ #
-    # Per-criterion AI insights (Gemini)                                 #
+    # Per-criterion AI insights (DeepSeek)                               #
     # ------------------------------------------------------------------ #
 
     # One short, lens-neutral description of what each checklist criterion is asking,
@@ -167,63 +172,56 @@ class ProxyEngineDualLens:
             f"Remuneration proposal details:\n{json.dumps(proposal_data, indent=2)}"
         )
 
-    def _generate_with_gemini(self, criterion: str, lens: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
+    def _generate_with_deepseek(self, criterion: str, lens: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
         """
-        Generate a single-criterion insight with Google Gemini, if GEMINI_API_KEY is set
-        and the SDK is installed. Returns "" on any miss so callers fall back to templates.
-
-        Configurable purely via environment variables:
-          GEMINI_API_KEY      - required to enable Gemini at all
-          GEMINI_MODEL        - model id (default: gemini-2.0-flash)
-          GEMINI_TEMPERATURE  - sampling temperature (default: 0.3)
-          GEMINI_MAX_TOKENS   - max output tokens (default: 600)
+        Generate a single-criterion reasoning justification with DeepSeek, if
+        DEEPSEEK_API_KEY is set. Returns "" on any miss so callers fall back to templates.
+        Thin wrapper over `_deepseek_chat` (which handles all DeepSeek env config).
         """
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            return ""
-
-        model_name = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
-        try:
-            temperature = float(os.getenv("GEMINI_TEMPERATURE", "0.3"))
-        except ValueError:
-            temperature = 0.3
-        try:
-            max_tokens = int(os.getenv("GEMINI_MAX_TOKENS", "600"))
-        except ValueError:
-            max_tokens = 600
-
         system_prompt = self.SYSTEM_PROMPTS.get(lens, self.SYSTEM_PROMPTS["auditor"])
         user_content = self._build_insight_user_content(criterion, trace, proposal_data)
-
-        try:
-            import google.generativeai as genai  # lazy import: only needed when key is present
-
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel(
-                model_name=model_name,
-                system_instruction=system_prompt,
-            )
-            response = model.generate_content(
-                user_content,
-                generation_config={
-                    "temperature": temperature,
-                    "max_output_tokens": max_tokens,
-                },
-            )
-            return (response.text or "").strip()
-        except Exception as e:  # noqa: BLE001 - any failure must degrade gracefully
-            print(f"[LLM Dual-Lens] Gemini call failed: {e}. Falling back to deterministic template.")
-            return ""
+        return self._deepseek_chat(system_prompt, user_content)
 
     def generate_criterion_insight(self, criterion: str, lens: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
         """
-        Public entry point for a single checklist criterion. Tries Gemini first, then
+        Public entry point for a single checklist criterion. Tries DeepSeek first, then
         falls back to a deterministic, grounded template so the UI always has an answer.
         """
-        ai_text = self._generate_with_gemini(criterion, lens, trace, proposal_data)
+        ai_text = self._generate_with_deepseek(criterion, lens, trace, proposal_data)
         if ai_text:
             return ai_text
         return self._fallback_insight(criterion, lens, trace, proposal_data)
+
+    # Single short, plain, neutral caption used under each metric card on Page 3.
+    # Deliberately matches the terse, factual style of the hardcoded frontend presets.
+    NEUTRAL_SYSTEM_PROMPT = (
+        "You are an executive-pay governance analyst writing the one-line caption shown under a "
+        "single metric on a dashboard card. Output EXACTLY one short, plain, neutral sentence "
+        "(under 22 words) stating what the metric value means for the proposed pay package. "
+        "Use ONLY the figures supplied - never invent or recompute numbers. "
+        "No prefix, no emoji, no heading, no bullet, no vote recommendation, no hedging."
+    )
+
+    def generate_card_insight(self, metric: Dict[str, Any], trace: Dict[str, Any] = None) -> str:
+        """
+        Produce the one-line DeepSeek caption for a single Page-3 metric card. Returns "" when
+        DeepSeek is unavailable so the frontend keeps its deterministic preset caption.
+
+        The caller passes the already-displayed value plus grounding facts, so the sentence is
+        always consistent with the number the user sees on the card.
+        """
+        metric = metric or {}
+        label = metric.get("label", "this metric")
+        value = metric.get("value", "")
+        context = metric.get("context", "")
+        company = (trace or {}).get("company", "the company")
+        user_content = (
+            f"Company: {company}\n"
+            f"Metric: {label} = {value}\n"
+            f"Grounding facts (use these exact figures, do not change them): {context}\n\n"
+            f"Write the one-line caption."
+        )
+        return self._deepseek_chat(self.NEUTRAL_SYSTEM_PROMPT, user_content, max_tokens=80)
 
     def _fallback_insight(self, criterion: str, lens: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
         """Deterministic, offline templates mirroring the original UI answers (grounded in trace values)."""
@@ -378,8 +376,8 @@ We recommend that institutional shareholders vote **AGAINST** the proposed remun
         Generates the Activist Investor / Proxy Advisor audit report (VOTE AGAINST).
         Supports custom conversational queries with intelligent keyword fallback routing.
         """
-        # Try API first
-        api_report = self._generate_narrative_with_api("auditor", trace, proposal_data, user_query)
+        # Try DeepSeek first
+        api_report = self._generate_narrative_with_deepseek("auditor", trace, proposal_data, user_query)
         if api_report:
             return api_report
             
@@ -448,8 +446,8 @@ The remuneration proposal for **{company}**'s Executive Board is highly likely t
         Generates the Corporate Board / Defense report.
         Supports custom conversational queries with intelligent keyword fallback routing.
         """
-        # Try API first
-        api_report = self._generate_narrative_with_api("compliance", trace, proposal_data, user_query)
+        # Try DeepSeek first
+        api_report = self._generate_narrative_with_deepseek("compliance", trace, proposal_data, user_query)
         if api_report:
             return api_report
             

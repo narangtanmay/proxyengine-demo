@@ -16,10 +16,10 @@ matplotlib
 seaborn
 
 # PDF parsing + LLM translation layer
+# DeepSeek is OpenAI-API-compatible, so the `openai` SDK is the only client needed.
 PyPDF2
 python-dotenv
 openai
-anthropic
 
 # Optional UI / prototyping
 streamlit

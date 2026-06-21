@@ -49,64 +49,47 @@ class PDFExtractorPOC:
     def extract_structured_data(self, text: str) -> dict:
         """
         Extracts structured JSON matching the RemunerationProposal schema.
-        Uses OpenAI or Anthropic if keys are present in the environment;
-        otherwise, falls back to a realistic mock representation of Volkswagen's 2024 system.
+
+        Uses DeepSeek if DEEPSEEK_API_KEY is present in the environment; otherwise,
+        falls back to a realistic mock representation of Volkswagen's 2024 system.
         """
-        openai_key = os.getenv("OPENAI_API_KEY")
-        anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-        
-        if openai_key:
-            print("[LLM] OpenAI API Key found. Initiating real structured extraction...")
+        deepseek_key = os.getenv("DEEPSEEK_API_KEY")
+
+        if deepseek_key:
+            print("[LLM] DeepSeek API Key found. Initiating real structured extraction...")
             try:
+                # DeepSeek exposes an OpenAI-compatible API, so we reuse the `openai` SDK
+                # and just point it at DeepSeek's base URL. JSON mode guarantees parseable output.
                 from openai import OpenAI
-                client = OpenAI(api_key=openai_key)
-                
-                # Using beta chat completions with response_format for guaranteed JSON schema conformance
-                response = client.beta.chat.completions.parse(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": "You are an expert compensation analyst. Extract the proposed remuneration system details from the provided text."},
-                        {"role": "user", "content": f"Extract compensation details from this proxy report text:\n\n{text[:15000]}"}
-                    ],
-                    response_format=RemunerationProposal,
+                client = OpenAI(
+                    api_key=deepseek_key,
+                    base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
                 )
-                parsed = response.choices[0].message.parsed
-                if parsed:
-                    return parsed.model_dump()
-            except Exception as e:
-                print(f"[LLM WARNING] OpenAI structured extraction failed: {e}. Falling back to mock extraction.")
-        
-        elif anthropic_key:
-            print("[LLM] Anthropic API Key found. Initiating structured extraction...")
-            try:
-                import anthropic
-                client = anthropic.Anthropic(api_key=anthropic_key)
-                
+
                 prompt = (
-                    f"You are an expert compensation analyst. Ingest the following text and extract the remuneration system "
-                    f"details. You must respond with a raw JSON object that EXACTLY fits this JSON schema:\n"
+                    f"You are an expert compensation analyst. Ingest the following text and extract the "
+                    f"remuneration system details. Respond with a raw JSON object that EXACTLY fits this "
+                    f"JSON schema (keys and types must match):\n"
                     f"{json.dumps(RemunerationProposal.model_json_schema(), indent=2)}\n\n"
                     f"Text:\n{text[:15000]}"
                 )
-                
-                response = client.messages.create(
-                    model="claude-3-5-sonnet-20241022",
+
+                response = client.chat.completions.create(
+                    model=os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
+                    messages=[
+                        {"role": "system", "content": "You are an expert compensation analyst that outputs only valid JSON."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    response_format={"type": "json_object"},
+                    temperature=0.0,
                     max_tokens=1000,
-                    messages=[{"role": "user", "content": prompt}]
                 )
-                
-                # Parse JSON out of Claude's response
-                content = response.content[0].text
-                # Clean up markdown code blocks if any
-                if "```json" in content:
-                    content = content.split("```json")[1].split("```")[0].strip()
-                elif "```" in content:
-                    content = content.split("```")[1].split("```")[0].strip()
-                
-                return json.loads(content)
+                content = response.choices[0].message.content or ""
+                # Validate/coerce against the schema before returning.
+                return RemunerationProposal(**json.loads(content)).model_dump()
             except Exception as e:
-                print(f"[LLM WARNING] Anthropic extraction failed: {e}. Falling back to mock extraction.")
-        
+                print(f"[LLM WARNING] DeepSeek structured extraction failed: {e}. Falling back to mock extraction.")
+
         # --- WIZARD OF OZ FALLBACK ---
         # Highly realistic, deterministic mock representation of Volkswagen's 2024 remuneration proposal
         # to ensure the app works beautifully during live judging even without active api keys.

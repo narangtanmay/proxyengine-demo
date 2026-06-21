@@ -473,6 +473,12 @@ async def serve_support_js():
         headers={"Cache-Control": "no-cache, no-store, must-revalidate, max-age=0"}
     )
 
+
+@app.get("/image.png")
+async def serve_logo():
+    """Serves the PayAudit logo used in the dashboard header."""
+    return FileResponse(os.path.join(frontend_dir, "image.png"), media_type="image/png")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

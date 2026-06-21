@@ -6,6 +6,8 @@ import pandas as pd
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 import io
@@ -21,7 +23,7 @@ from llm_wrapper import ProxyEngineDualLens
 app = FastAPI(title="ProxyEngine API", version="1.0.0")
 
 # Enable CORS for frontend connection (Restricted origins for security)
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000,http://localhost:5173,http://127.0.0.1:8000,http://127.0.0.1:5173").split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000,http://localhost:5173,http://127.0.0.1:8000,http://127.0.0.1:5173,null,file://").split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,6 +34,7 @@ app.add_middleware(
 )
 
 # Initialize engines
+os.environ.setdefault("USE_PORTABLE_PANEL", "1")
 sml_engine = ProxyEngineSML()
 cache_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sml_cache.json")
 
@@ -148,6 +151,56 @@ def get_company_dashboard(isin: str, year: int = 2024):
         return trace
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.get("/api/companies/{isin}/peers")
+def get_company_peers(isin: str, year: int = 2024):
+    """Returns the peer companies in the same shadow peer cluster as the target company."""
+    try:
+        trace = sml_engine.get_evidence_trace(isin, year)
+        cluster_id = trace['cluster_id']
+        peers_df = sml_engine.data[sml_engine.data['shadow_peer_cluster'] == cluster_id]
+        
+        # Group by ISIN to get unique/latest peer records to avoid duplicates across years
+        peers_latest = peers_df.sort_values('year', ascending=False).groupby('isin').first().reset_index()
+        
+        peers_list = []
+        for _, row in peers_latest.iterrows():
+            if str(row['isin']) == isin:
+                continue
+                
+            total_comp_raw = float(row.get('total_comp', 0.0))
+            salary_raw = row.get('salary', np.nan)
+            sti_raw = row.get('sti', np.nan)
+            lti_raw = row.get('lti', np.nan)
+            
+            # Divide by 1e6 to convert from raw EUR to millions for the HTML expected €M scale
+            total_comp_m = total_comp_raw / 1e6
+            salary_m = float(salary_raw) / 1e6 if pd.notna(salary_raw) else (total_comp_m * 0.30)
+            sti_m = float(sti_raw) / 1e6 if pd.notna(sti_raw) else (total_comp_m * 0.35)
+            lti_m = float(lti_raw) / 1e6 if pd.notna(lti_raw) else (total_comp_m * 0.35)
+            
+            # Map index_listing directly as the high-fidelity sector attribute
+            sector = str(row.get('index_listing', 'German Corporation'))
+            if not sector or sector == 'nan':
+                sector = 'German Corporation'
+                
+            peers_list.append({
+                "isin": str(row['isin']),
+                "name": str(row.get('company_name', row['isin'])),
+                "exec": str(row.get('exec_id', "Executive Board")),
+                "opre": float(row.get('opre', 0.0)) / 1e9, # converts raw database EUR to HTML's expected €B scale
+                "roa": float(row.get('roa', 0.0)) * 100.0 if pd.notna(row.get('roa')) else 0.0, # in %
+                "base": salary_m,
+                "sti": sti_m,
+                "lti": lti_m,
+                "total_comp": total_comp_m,
+                "sector": sector,
+                "year": int(row['year'])
+            })
+        return peers_list
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/companies/{isin}/chart.png")
 def get_company_chart(isin: str, year: int = 2024):

@@ -62,6 +62,9 @@ test.describe('ProxyEngine Frontend SML Verification Suite', () => {
     const offlineBanner = page.locator('text=Dynamic Graph Rendering Offline');
     await expect(offlineBanner).not.toBeVisible();
 
+    // Wait for the SML image generation and loading to finish (display becomes 'block')
+    await page.waitForSelector('text=Constructing Regression Grid...', { state: 'detached', timeout: 20000 });
+
     // 11. Assert that the live image is visible on the screen
     const liveChartImage = page.locator('img[alt="SML Regression Scatterplot"]');
     await expect(liveChartImage).toBeVisible();

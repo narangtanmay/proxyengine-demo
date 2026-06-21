@@ -48,7 +48,7 @@ class ProxyEngineSML:
         comp_file = os.path.join(raw_base_path, "2008-2020", "company_year.csv")
         orbis_file = os.path.join(raw_base_path, "ORBIS_Abzug_DE_2005_2024.csv")
 
-        if os.path.exists(comp_file) and os.path.exists(orbis_file):
+        if os.path.exists(comp_file) and os.path.exists(orbis_file) and os.getenv("USE_PORTABLE_PANEL") != "1":
             print("Loading raw scientific datasets for high-rigor joins...")
             df_comp = pd.read_csv(comp_file, sep="|")
             df_orbis = pd.read_csv(orbis_file, sep=",", low_memory=False)
@@ -532,6 +532,9 @@ class ProxyEngineSML:
             "ratchet_triggered": bool(row.get('ratchet_flag', False)),
             "secrecy_premium_flag": bool(row.get('opting_out', 0) == 1),
             "lti_vs_salary_ratio": lti_vs_salary_ratio,
+            "roa": float(row.get('roa', 0.0)) * 100.0 if pd.notna(row.get('roa')) else 0.0,
+            "gear": float(row.get('gear', 0.0)) if pd.notna(row.get('gear')) else 0.0,
+            "sector": str(row.get('index_listing', 'German Corporation')) if pd.notna(row.get('index_listing')) and str(row.get('index_listing')) != 'nan' else 'German Corporation',
             "salary_benchmark": float(salary_bench),
             "sti_benchmark": float(sti_bench),
             "lti_benchmark": float(lti_bench),

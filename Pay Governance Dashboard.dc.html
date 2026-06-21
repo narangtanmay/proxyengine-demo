@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/CL1nu5/tum-science-hackathon-air2@d4e139b52b931fd6dd09ff7450d7147e4cd082c3/src/frontend/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0}
+  *{box-sizing:border-box}
+  :root{--color-bg:#f6f7f9;--color-surface:#fff;--color-border:#d9dce1;--color-text:#1f2430;--color-muted:#6b7280;--color-accent:#2563eb;--color-accent-contrast:#fff;--radius:8px;--space:16px}
+  @keyframes mer-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes mer-shimmer{0%{background-position:-460px 0}100%{background-position:460px 0}}
+  @keyframes mer-spin{to{transform:rotate(360deg)}}
+  @keyframes mer-knob{0%,100%{box-shadow:0 3px 10px rgba(15,23,42,.22),0 0 0 6px rgba(37,99,235,.10)}50%{box-shadow:0 3px 12px rgba(15,23,42,.26),0 0 0 9px rgba(37,99,235,.05)}}
+  .mer-tip{opacity:0;transition-property:opacity;transition-duration:.16s;transition-timing-function:ease}
+  .mer-tick:hover .mer-tip{opacity:1}
+  input::placeholder,textarea::placeholder{color:#aab0bb}
+  input[type=number]::-webkit-inner-spin-button{opacity:.4}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#cdd2da;border-radius:8px;border:3px solid #fff}
+  ::-webkit-scrollbar-thumb:hover{background:#b6bcc7}
+</style>
+</helmet>
+
+<div style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh;background:var(--color-bg,#f6f7f9);color:var(--color-text,#1f2430);-webkit-font-smoothing:antialiased">
+
+  <!-- ===== TOP BAR + STEPPER ===== -->
+  <header data-screen-label="Pay Governance Workflow" style="position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:20px;height:60px;padding:0 24px;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--color-border,#d9dce1)">
+    <div style="display:flex;align-items:center;gap:11px;min-width:170px">
+      <div style="position:relative;width:32px;height:32px;border-radius:9px;background:var(--color-text,#1f2430);display:flex;align-items:center;justify-content:center;flex:none">
+        <div style="width:12px;height:12px;border-radius:3px;background:var(--color-accent,#2563eb);transform:rotate(45deg)"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;line-height:1.1">
+        <span style="font-size:14.5px;font-weight:700;letter-spacing:0.14em;color:var(--color-text,#1f2430)">AEQUITAS</span>
+        <span style="font-size:10.5px;color:var(--color-muted,#6b7280)">Executive Pay Governance</span>
+      </div>
+    </div>
+
+    <!-- stepper -->
+    <div style="display:flex;align-items:center;gap:6px">
+      <sc-for list="{{ steps }}" as="st" hint-placeholder-count="3">
+        <button onClick="{{ st.go }}" style="display:flex;align-items:center;gap:9px;font:inherit;cursor:pointer;background:{{ st.bg }};border:1px solid {{ st.border }};border-radius:22px;padding:6px 14px 6px 7px;transition-property:transform,background-color,border-color;transition-duration:.15s" style-active="transform:scale(0.97)">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:{{ st.dotBg }};color:{{ st.dotColor }};font-size:11px;font-weight:700;flex:none">{{ st.mark }}</span>
+          <span style="font-size:12.5px;font-weight:600;color:{{ st.labelColor }};white-space:nowrap">{{ st.label }}</span>
+        </button>
+        <sc-if value="{{ st.sep }}" hint-placeholder-val="{{ true }}"><span style="width:18px;height:1.5px;background:#d9dce1;flex:none"></span></sc-if>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;min-width:170px;justify-content:flex-end">
+      <button onClick="{{ toggleDrawer }}" style="display:flex;align-items:center;gap:8px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--color-accent-contrast,#fff);background:var(--color-accent,#2563eb);border:none;border-radius:9px;padding:9px 15px;transition-property:transform,background-color;transition-duration:.15s;transition-timing-function:ease-out" style-hover="background:#1e54c9" style-active="transform:scale(0.96)">
+        <span style="width:8px;height:8px;border-radius:2px;background:#fff;transform:rotate(45deg)"></span>Ask AEQUITAS
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- STEP 1 · FIRM INFORMATION & PACKAGE SPECIFICATION            -->
+  <!-- ============================================================ -->
+  <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ true }}">
+  <main style="max-width:1080px;margin:0 auto;padding:30px 28px 70px;animation:mer-fade .35s ease both">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:6px">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent,#2563eb)">Step 1 · Data Entry</div>
+        <h1 style="margin:6px 0 0;font-size:24px;font-weight:800;letter-spacing:-0.02em;text-wrap:balance">Firm Information &amp; Package Specification</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px">
+        <span style="font-size:12px;color:var(--color-muted,#6b7280)">Quick-load a profile</span>
+        <div style="position:relative">
+          <button onClick="{{ togglePicker }}" style="display:flex;align-items:center;gap:9px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:9px;padding:8px 12px;transition-property:transform,border-color;transition-duration:.15s" style-hover="border-color:#b9c0cc" style-active="transform:scale(0.97)">{{ focal.name }} <span style="font-size:9px;color:#6b7280">▼</span></button>
+          <sc-if value="{{ pickerOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closePicker }}" style="position:fixed;inset:0;z-index:45"></div>
+            <div style="position:absolute;top:42px;right:0;z-index:46;width:300px;max-height:340px;overflow-y:auto;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:11px;box-shadow:0 18px 40px rgba(16,24,40,.16);padding:6px;animation:mer-fade .14s ease both">
+              <sc-for list="{{ presets }}" as="pr" hint-placeholder-count="10">
+                <button onClick="{{ pr.load }}" style="display:flex;align-items:center;gap:10px;width:100%;font:inherit;text-align:left;cursor:pointer;background:transparent;border:none;border-radius:8px;padding:8px 9px;transition-property:background-color;transition-duration:.12s" style-hover="background:#f3f5f8">
+                  <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#eef2fb;font-size:9.5px;font-weight:700;color:var(--color-accent,#2563eb);flex:none">{{ pr.ticker }}</span>
+                  <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:600">{{ pr.name }}</span><span style="display:block;font-size:11px;color:#6b7280">{{ pr.exec }}</span></span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+    <p style="margin:8px 0 22px;font-size:13.5px;color:var(--color-muted,#6b7280);max-width:620px;text-wrap:pretty">Identify the firm and enter the proposed remuneration package for the executive under review. These values seed the peer-matched evaluation.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start">
+      <!-- firm identity -->
+      <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:20px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:16px">Firm Identifier</div>
+        <label style="display:block;margin-bottom:14px"><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:6px">Firm name</span><input value="{{ focal.name }}" onInput="{{ onName }}" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;color:#1f2430" style-focus="border-color:#2563eb;outline:none"></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+          <label><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:6px">ISIN</span><input value="{{ focal.isin }}" onInput="{{ onIsin }}" style="width:100%;font:inherit;font-size:13px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;color:#1f2430;font-variant-numeric:tabular-nums" style-focus="border-color:#2563eb;outline:none"></label>
+          <label><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:6px">Fiscal year</span><input value="{{ focal.year }}" onInput="{{ onYear }}" type="number" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;color:#1f2430;font-variant-numeric:tabular-nums" style-focus="border-color:#2563eb;outline:none"></label>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <label><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:6px">Executive</span><input value="{{ focal.exec }}" onInput="{{ onExec }}" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;color:#1f2430" style-focus="border-color:#2563eb;outline:none"></label>
+          <label><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:6px">Sector cluster</span><input value="{{ focal.sector }}" onInput="{{ onSector }}" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;color:#1f2430" style-focus="border-color:#2563eb;outline:none"></label>
+        </div>
+      </div>
+
+      <!-- firm metrics -->
+      <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:20px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:16px">Firm Information</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <label><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:6px">Operating revenue (€B)</span><input value="{{ focal.opre }}" onInput="{{ onOpre }}" type="number" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;color:#1f2430;font-variant-numeric:tabular-nums" style-focus="border-color:#2563eb;outline:none"></label>
+          <label><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:6px">Return on assets (%)</span><input value="{{ focal.roa }}" onInput="{{ onRoa }}" type="number" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;color:#1f2430;font-variant-numeric:tabular-nums" style-focus="border-color:#2563eb;outline:none"></label>
+        </div>
+        <div style="margin-top:16px;padding:14px;background:#f7f8fa;border:1px solid #eceef1;border-radius:10px">
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280">Matched against</div>
+          <div style="font-size:14px;font-weight:700;margin-top:4px">{{ clusterCount }} peer firms · {{ focal.sector }}</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:2px">Median package €{{ medianLabel }} · revenue €{{ medOpreLabel }}B</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- package spec table -->
+    <div style="margin-top:18px;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:20px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+      <div style="font-size:13px;font-weight:700;margin-bottom:4px">Remuneration Package Specification</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:16px;text-wrap:pretty">Per board-position class, in € millions. The executive under review drives the evaluation.</div>
+      <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 1fr 1fr 1fr 96px;gap:12px;align-items:end">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280">Board position class</span>
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280">Fixed base</span>
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280">Short-term var.</span>
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280">Long-term var.</span>
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;text-align:right">Total</span>
+
+        <div style="display:flex;align-items:center;gap:9px;padding:10px 0"><span style="width:4px;height:30px;border-radius:3px;background:var(--color-accent,#2563eb)"></span><div style="line-height:1.2"><div style="font-size:13.5px;font-weight:600">Chair of Mgmt Board</div><div style="font-size:11px;color:#6b7280">{{ focal.exec }} · under review</div></div></div>
+        <input value="{{ focal.base }}" onInput="{{ onBase }}" type="number" step="0.05" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;font-variant-numeric:tabular-nums" style-focus="border-color:#2563eb;outline:none">
+        <input value="{{ focal.sti }}" onInput="{{ onSti }}" type="number" step="0.05" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;font-variant-numeric:tabular-nums" style-focus="border-color:#2563eb;outline:none">
+        <input value="{{ focal.lti }}" onInput="{{ onLti }}" type="number" step="0.05" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;font-variant-numeric:tabular-nums" style-focus="border-color:#2563eb;outline:none">
+        <span style="text-align:right;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">€{{ pkgTotalLabel }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid #f0f1f4;font-size:12px;color:#6b7280">
+        <span>Variable share <strong style="color:#1f2430;font-variant-numeric:tabular-nums">{{ varShareLabel }}</strong></span>
+        <span>·</span>
+        <span>LTI / base <strong style="color:#1f2430;font-variant-numeric:tabular-nums">{{ ltiRatio }}</strong></span>
+        <span>·</span>
+        <span>vs peer median <strong style="color:{{ verdictColor }};font-variant-numeric:tabular-nums">{{ momLabel }}</strong></span>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;margin-top:22px">
+      <button onClick="{{ goStep2 }}" style="display:flex;align-items:center;gap:9px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;color:#fff;background:var(--color-accent,#2563eb);border:none;border-radius:10px;padding:12px 22px;transition-property:transform,background-color;transition-duration:.15s;transition-timing-function:ease-out" style-hover="background:#1e54c9" style-active="transform:scale(0.97)">Continue to Evaluation Criteria →</button>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ============================================================ -->
+  <!-- STEP 2 · EVALUATION CRITERIA                                  -->
+  <!-- ============================================================ -->
+  <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+  <main style="max-width:1000px;margin:0 auto;padding:30px 28px 70px;animation:mer-fade .35s ease both">
+    <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent,#2563eb)">Step 2 · Query Specification</div>
+    <h1 style="margin:6px 0 6px;font-size:24px;font-weight:800;letter-spacing:-0.02em;text-wrap:balance">What do you want to know about the proposal?</h1>
+    <p style="margin:0 0 22px;font-size:13.5px;color:var(--color-muted,#6b7280);max-width:600px;text-wrap:pretty">Select the governance questions to evaluate for <strong style="color:#374151">{{ focal.exec }}</strong> at {{ focal.name }}. Each selection loads a dedicated supporting visualization in the report.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <sc-for list="{{ questions }}" as="q" hint-placeholder-count="6">
+        <button onClick="{{ q.toggle }}" style="display:flex;align-items:flex-start;gap:13px;text-align:left;font:inherit;cursor:pointer;background:{{ q.cardBg }};border:1.5px solid {{ q.cardBorder }};border-radius:13px;padding:16px;transition-property:transform,border-color,background-color,box-shadow;transition-duration:.15s;box-shadow:{{ q.cardShadow }}" style-active="transform:scale(0.99)">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:{{ q.boxBg }};border:1.5px solid {{ q.boxBorder }};color:#fff;font-size:13px;font-weight:800;flex:none;margin-top:1px">{{ q.check }}</span>
+          <span style="flex:1;min-width:0">
+            <span style="display:flex;align-items:center;gap:8px"><span style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:10px;font-weight:700;color:#9aa1ad">{{ q.code }}</span></span>
+            <span style="display:block;font-size:14px;font-weight:700;color:#1f2430;margin-top:3px;text-wrap:balance">{{ q.title }}</span>
+            <span style="display:block;font-size:12px;color:#6b7280;margin-top:4px;text-wrap:pretty">{{ q.desc }}</span>
+          </span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px">
+      <button onClick="{{ goStep1 }}" style="font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;color:#374151;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:10px;padding:11px 18px;transition-property:transform,background-color;transition-duration:.15s" style-hover="background:#f3f5f8" style-active="transform:scale(0.97)">← Back</button>
+      <div style="display:flex;align-items:center;gap:16px">
+        <span style="font-size:13px;color:#6b7280;font-variant-numeric:tabular-nums">{{ selectedCount }} of {{ questionCount }} selected</span>
+        <button onClick="{{ submitCriteria }}" style="display:flex;align-items:center;gap:9px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;color:#fff;background:{{ submitBg }};border:none;border-radius:10px;padding:12px 22px;opacity:{{ submitOpacity }};pointer-events:{{ submitPE }};transition-property:transform,background-color,opacity;transition-duration:.15s" style-active="transform:scale(0.97)">Submit Evaluation Criteria →</button>
+      </div>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ============================================================ -->
+  <!-- STEP 3 · AUTOMATED REPORT                                     -->
+  <!-- ============================================================ -->
+  <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+  <div style="animation:mer-fade .35s ease both">
+  <!-- verdict hero -->
+  <section style="border-bottom:1px solid var(--color-border,#d9dce1);background:#fff">
+    <div style="max-width:1440px;margin:0 auto;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+      <div style="display:flex;gap:15px;align-items:center;min-width:0">
+        <div style="width:50px;height:50px;border-radius:12px;background:var(--color-text,#1f2430);display:flex;align-items:center;justify-content:center;flex:none"><span style="font-size:14px;font-weight:700;color:#fff">{{ focal.ticker }}</span></div>
+        <div style="min-width:0">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1 style="margin:0;font-size:21px;font-weight:800;letter-spacing:-0.015em;text-wrap:balance">{{ focal.name }}</h1><span style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:10.5px;font-weight:600;color:#6b7280;background:#f3f5f8;border:1px solid #d9dce1;border-radius:6px;padding:3px 8px">{{ focal.isin }}</span></div>
+          <div style="margin-top:4px;font-size:12.5px;color:#6b7280">{{ focal.exec }} · FY{{ focal.year }} · {{ focal.sector }}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:13px;flex-wrap:wrap">
+        <div style="text-align:right;padding-right:13px;border-right:1px solid #d9dce1"><div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b7280">Proposed</div><div style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">{{ proposed.total }}</div></div>
+        <div style="text-align:right;padding-right:13px;border-right:1px solid #d9dce1"><div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b7280">Peer Median</div><div style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">{{ baseline.total }}</div></div>
+        <div style="display:flex;align-items:center;gap:11px;background:{{ verdictBg }};border:1px solid {{ verdictBorder }};border-radius:12px;padding:9px 15px"><div><div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:{{ verdictColor }}">Multiple of Median</div><div style="display:flex;align-items:baseline;gap:8px;margin-top:2px"><span style="font-size:24px;font-weight:800;color:{{ verdictColor }};font-variant-numeric:tabular-nums">{{ momLabel }}</span><span style="font-size:12.5px;font-weight:700;color:{{ verdictColor }}">{{ verdictWord }}</span></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <main style="max-width:1440px;margin:0 auto;padding:20px 28px 64px;display:flex;flex-direction:column;gap:18px">
+
+    <!-- profile toolbar -->
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:12px;padding:11px 14px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;margin-right:4px">Enumeration profile</span>
+      <button onClick="{{ pfBest }}" style="font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;color:#374151;background:#f3f5f8;border:1px solid #e6e8ec;border-radius:8px;padding:7px 13px;transition-property:transform,background-color,border-color;transition-duration:.14s" style-hover="background:#fff;border-color:#2563eb;color:#2563eb" style-active="transform:scale(0.96)">✦ Auto best-practice</button>
+      <button onClick="{{ pfStored }}" style="font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;color:#374151;background:#f3f5f8;border:1px solid #e6e8ec;border-radius:8px;padding:7px 13px;transition-property:transform,background-color,border-color;transition-duration:.14s" style-hover="background:#fff;border-color:#2563eb;color:#2563eb" style-active="transform:scale(0.96)">↺ Load stored profile</button>
+      <button onClick="{{ pfMax }}" style="font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;color:#374151;background:#f3f5f8;border:1px solid #e6e8ec;border-radius:8px;padding:7px 13px;transition-property:transform,background-color,border-color;transition-duration:.14s" style-hover="background:#fff;border-color:#2563eb;color:#2563eb" style-active="transform:scale(0.96)">▲ Maximum set</button>
+      <button onClick="{{ pfExpected }}" style="font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;color:#374151;background:#f3f5f8;border:1px solid #e6e8ec;border-radius:8px;padding:7px 13px;transition-property:transform,background-color,border-color;transition-duration:.14s" style-hover="background:#fff;border-color:#2563eb;color:#2563eb" style-active="transform:scale(0.96)">≈ Expected amount</button>
+      <span style="margin-left:auto;font-size:11.5px;color:#9aa1ad">{{ profileNote }}</span>
+    </div>
+
+    <!-- packages + insights row -->
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:18px;align-items:start">
+      <!-- packages -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:16px 17px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#6b7280">Recommended Package</div>
+          <div style="font-size:23px;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-0.01em">{{ baseline.total }}</div>
+          <div style="font-size:11.5px;color:#6b7280;margin-top:1px">peer-cluster median package</div>
+          <div style="display:flex;height:9px;border-radius:5px;overflow:hidden;margin-top:13px;background:#eef0f3"><div style="width:{{ baseline.baseW }};background:#9aa6b8"></div><div style="width:{{ baseline.stiW }};background:#5b6b85"></div><div style="width:{{ baseline.ltiW }};background:#2f3b52"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:11.5px;color:#4b5563"><span>Base {{ baseline.base }}</span><span>STI {{ baseline.sti }}</span><span>LTI {{ baseline.lti }}</span></div>
+        </div>
+        <div style="background:#fff;border:1.5px solid {{ verdictBorder }};border-radius:14px;padding:16px 17px;box-shadow:0 4px 14px {{ verdictGlow }}">
+          <div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:{{ verdictColor }}">Proposed Package</div><span style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;font-weight:700;color:{{ verdictColor }};font-variant-numeric:tabular-nums">{{ premiumLabel }}</span></div>
+          <div style="font-size:23px;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-0.01em">{{ proposed.total }}</div>
+          <div style="font-size:11.5px;color:#6b7280;margin-top:1px">{{ proposed.deltaVsBaseline }} vs recommended</div>
+          <div style="display:flex;height:9px;border-radius:5px;overflow:hidden;margin-top:13px;background:#eef0f3"><div style="width:{{ proposed.baseW }};background:#9bb4ec"></div><div style="width:{{ proposed.stiW }};background:#4f80e8"></div><div style="width:{{ proposed.ltiW }};background:#2563eb"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:11.5px;color:#4b5563"><span>Base {{ proposed.base }}</span><span>STI {{ proposed.sti }}</span><span>LTI {{ proposed.lti }}</span></div>
+        </div>
+      </div>
+
+      <!-- our insights (selected only) -->
+      <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:17px 18px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-size:14px;font-weight:700">Our Insights</div><div style="display:flex;gap:9px;font-size:11px;color:#6b7280"><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#1e8e3e"></span>{{ tally.pass }}</span><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#f29900"></span>{{ tally.warn }}</span><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#d32f2f"></span>{{ tally.fail }}</span></div></div>
+        <div style="display:flex;flex-direction:column;gap:1px;background:#eceef1;border:1px solid #eceef1;border-radius:10px;overflow:hidden">
+          <sc-for list="{{ selectedInsights }}" as="item" hint-placeholder-count="4">
+            <div style="display:flex;align-items:flex-start;gap:11px;background:#fff;padding:11px 13px">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:6px;background:{{ item.bg }};color:{{ item.color }};font-size:12px;font-weight:800;flex:none;margin-top:1px">{{ item.icon }}</span>
+              <div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px"><span style="font-size:12.5px;font-weight:600">{{ item.label }}</span><span style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;font-weight:700;color:{{ item.color }};font-variant-numeric:tabular-nums;flex:none">{{ item.value }}</span></div><div style="font-size:11.5px;color:#6b7280;margin-top:2px;text-wrap:pretty">{{ item.detail }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <!-- selected question supporting visualizations -->
+    <div style="display:flex;align-items:center;gap:11px;margin-top:2px"><div style="font-size:13px;font-weight:700;color:#374151">Question-Specific Supporting Visualizations</div><div style="flex:1;height:1px;background:#e6e8ec"></div><div style="font-size:11.5px;color:#9aa1ad">{{ selectedCount }} loaded from your selection</div></div>
+
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start">
+
+      <!-- Q2 SML scatter (span 2) -->
+      <sc-if value="{{ qSel.q2 }}" hint-placeholder-val="{{ true }}">
+      <div style="grid-column:span 2;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:17px 18px 14px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa1ad">Q2 · SML pay premium</div><div style="font-size:14px;font-weight:700;margin-top:2px;text-wrap:balance">Does pay exceed the size-fitted frontier?</div></div><button onClick="{{ reloadChart }}" style="font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;color:#2563eb;background:#eef2fb;border:none;border-radius:7px;padding:6px 11px;flex:none;transition-property:transform;transition-duration:.15s" style-active="transform:scale(0.96)">↻ Regenerate</button></div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 196px;gap:14px;align-items:center;margin-top:8px">
+          <div style="position:relative;width:100%;aspect-ratio:560 / 360">
+            <sc-if value="{{ chartLoading }}" hint-placeholder-val="{{ true }}">
+              <div style="position:absolute;inset:0;border-radius:10px;background:#fbfbfc;border:1px solid #eef0f3;overflow:hidden;display:flex;align-items:center;justify-content:center">
+                <div style="position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(37,99,235,.07) 50%,transparent 70%);background-size:460px 100%;animation:mer-shimmer 1.25s linear infinite"></div>
+                <div style="position:relative;display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.85);border:1px solid #e6e8ec;border-radius:20px;padding:7px 14px;box-shadow:0 4px 14px rgba(16,24,40,.06)"><span style="width:13px;height:13px;border-radius:50%;border:2px solid #c7d2ec;border-top-color:#2563eb;animation:mer-spin .8s linear infinite;display:inline-block"></span><span style="font-size:12.5px;font-weight:600;color:#4b5563">Generating SML frontier…</span></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ chartReady }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;inset:0;animation:mer-fade .35s ease both">
+                <svg viewBox="0 0 560 360" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
+                  <line x1="58" y1="30" x2="58" y2="300" stroke="#e3e6eb" stroke-width="1"></line>
+                  <line x1="58" y1="300" x2="470" y2="300" stroke="#e3e6eb" stroke-width="1"></line>
+                  <sc-for list="{{ gridY }}" as="g" hint-placeholder-count="4"><line x1="58" y1="{{ g.y }}" x2="470" y2="{{ g.y }}" stroke="#f0f1f4" stroke-width="1"></line></sc-for>
+                  <polygon points="{{ bandPoints }}" fill="rgba(37,99,235,.07)"></polygon>
+                  <line x1="{{ frontier.x1 }}" y1="{{ frontier.y1 }}" x2="{{ frontier.x2 }}" y2="{{ frontier.y2 }}" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 4"></line>
+                  <sc-for list="{{ leaders }}" as="l" hint-placeholder-count="5"><line x1="{{ l.x1 }}" y1="{{ l.y1 }}" x2="{{ l.x2 }}" y2="{{ l.y2 }}" stroke="{{ l.color }}" stroke-width="1" stroke-opacity="0.45"></line></sc-for>
+                  <sc-for list="{{ points }}" as="p" hint-placeholder-count="10"><circle cx="{{ p.cx }}" cy="{{ p.cy }}" r="{{ p.ring }}" fill="{{ p.color }}" fill-opacity="0.14"></circle><circle cx="{{ p.cx }}" cy="{{ p.cy }}" r="{{ p.r }}" fill="{{ p.color }}" stroke="#fff" stroke-width="{{ p.sw }}"></circle></sc-for>
+                </svg>
+                <sc-for list="{{ xTicks }}" as="t" hint-placeholder-count="4"><span style="position:absolute;left:{{ t.left }};top:84%;transform:translateX(-50%);font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:10px;color:#9aa1ad;font-variant-numeric:tabular-nums">{{ t.label }}</span></sc-for>
+                <sc-for list="{{ yTicks }}" as="t" hint-placeholder-count="4"><span style="position:absolute;right:89%;top:{{ t.top }};transform:translateY(-50%);font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:10px;color:#9aa1ad;font-variant-numeric:tabular-nums">{{ t.label }}</span></sc-for>
+                <sc-for list="{{ chips }}" as="ch" hint-placeholder-count="5"><div style="position:absolute;left:{{ ch.left }};top:{{ ch.top }};transform:translateY(-50%);display:flex;flex-direction:column;line-height:1.15;background:#fff;border:1px solid {{ ch.border }};border-radius:6px;padding:3px 7px;box-shadow:0 2px 6px rgba(16,24,40,.08);white-space:nowrap;pointer-events:none"><span style="font-size:10px;font-weight:700">{{ ch.name }}</span><span style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:9px;font-weight:600;color:{{ ch.color }};font-variant-numeric:tabular-nums">{{ ch.value }}</span></div></sc-for>
+                <span style="position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);font-size:10px;font-weight:600;color:#6b7280">Operating Revenue — log (€B)</span>
+              </div>
+            </sc-if>
+          </div>
+          <div>
+            <div style="font-size:11.5px;color:#6b7280;text-wrap:pretty">{{ smlInsight }}</div>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:7px;font-size:11.5px;color:#4b5563">
+              <span style="display:flex;align-items:center;gap:7px"><span style="width:18px;height:0;border-top:2px dashed #2563eb"></span>Fitted frontier</span>
+              <span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#d32f2f"></span>Above frontier</span>
+              <span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#1e8e3e"></span>At / below</span>
+              <span style="display:flex;align-items:center;gap:7px"><span style="width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #2563eb"></span>{{ focal.ticker }} (subject)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- Q1 MoM slider (span 2) -->
+      <sc-if value="{{ qSel.q1 }}" hint-placeholder-val="{{ true }}">
+      <div style="grid-column:span 2;position:relative;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:17px 18px 20px;box-shadow:0 1px 2px rgba(16,24,40,.04);overflow:hidden">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between"><div><div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa1ad">Q1 · Multiple of median</div><div style="font-size:14px;font-weight:700;margin-top:2px">Is the package above the peer-cluster median?</div></div><div style="text-align:right"><div style="font-size:24px;font-weight:800;color:{{ verdictColor }};font-variant-numeric:tabular-nums">{{ momLabel }}</div><div style="font-size:11px;font-weight:700;color:{{ verdictColor }}">{{ verdictWord }}</div></div></div>
+        <div style="position:relative;margin:42px 6px 8px">
+          <div style="position:relative;height:18px;border-radius:10px;background:linear-gradient(90deg,#7fce9b 0%,#bfe6c8 30%,#fbe6a0 52%,#f6c878 70%,#ef9a9a 86%,#e57373 100%);box-shadow:inset 0 1px 3px rgba(16,24,40,.12),inset 0 0 0 1px rgba(255,255,255,.35)">
+            <div style="position:absolute;inset:0;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 55%);pointer-events:none"></div>
+            <sc-for list="{{ sliderTicks }}" as="tk" hint-placeholder-count="4"><div class="mer-tick" style="position:absolute;left:{{ tk.left }};top:-4px;bottom:-4px;width:14px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;cursor:default"><div style="width:2px;height:26px;border-radius:2px;background:rgba(31,36,48,.28)"></div><div class="mer-tip" style="position:absolute;top:-25px;left:50%;transform:translateX(-50%);background:#1f2430;color:#fff;font-size:10px;font-weight:600;padding:3px 7px;border-radius:5px;white-space:nowrap;font-variant-numeric:tabular-nums">{{ tk.tip }}</div></div></sc-for>
+            <div style="position:absolute;top:50%;left:{{ knobPct }};transform:translate(-50%,-50%);z-index:3">
+              <div style="position:absolute;top:-44px;left:50%;transform:translateX(-50%);background:rgba(31,36,48,.92);color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:7px;white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 4px 12px rgba(16,24,40,.2)">{{ momLabel }} median<span style="position:absolute;left:50%;bottom:-4px;transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:rgba(31,36,48,.92)"></span></div>
+              <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.78);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.9);animation:mer-knob 2.6s ease-in-out infinite;display:flex;align-items:center;justify-content:center"><div style="width:9px;height:9px;border-radius:50%;background:{{ verdictColor }}"></div></div>
+            </div>
+          </div>
+          <div style="position:relative;height:16px;margin-top:8px"><sc-for list="{{ sliderTicks }}" as="tk" hint-placeholder-count="4"><span style="position:absolute;left:{{ tk.left }};transform:translateX(-50%);font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:10px;color:#9aa1ad;font-variant-numeric:tabular-nums">{{ tk.label }}</span></sc-for></div>
+          <div style="position:relative;height:16px;margin-top:2px"><span style="position:absolute;left:18%;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#2e7d32">Low Concern</span><span style="position:absolute;left:57%;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#ef8f00">Caution</span><span style="position:absolute;left:86%;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#d32f2f">High Concern</span></div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- Q3 ratchet -->
+      <sc-if value="{{ qSel.q3 }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:17px 18px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+        <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa1ad">Q3 · Pay-for-luck ratchet</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px"><div style="font-size:14px;font-weight:700;text-wrap:balance">Is there pay-for-luck asymmetry?</div><span style="font-size:11px;font-weight:700;color:{{ ratchet.color }};background:{{ ratchet.bg }};border-radius:6px;padding:3px 9px;flex:none">{{ ratchet.tag }}</span></div>
+        <div style="margin-top:18px;display:flex;flex-direction:column;gap:14px">
+          <div><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px"><span style="color:#4b5563">Upside capture (out-performance)</span><span style="font-family:ui-monospace,monospace;font-weight:700;font-variant-numeric:tabular-nums">{{ ratchet.up }}</span></div><div style="height:12px;border-radius:7px;background:#eef0f3;overflow:hidden"><div style="height:100%;width:{{ ratchet.upW }};border-radius:7px;background:#2563eb"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px"><span style="color:#4b5563">Downside sensitivity (under-perf.)</span><span style="font-family:ui-monospace,monospace;font-weight:700;font-variant-numeric:tabular-nums">{{ ratchet.down }}</span></div><div style="height:12px;border-radius:7px;background:#eef0f3;overflow:hidden"><div style="height:100%;width:{{ ratchet.downW }};border-radius:7px;background:{{ ratchet.downColor }}"></div></div></div>
+        </div>
+        <div style="font-size:11.5px;color:#6b7280;margin-top:14px;text-wrap:pretty">{{ ratchet.insight }}</div>
+      </div>
+      </sc-if>
+
+      <!-- Q4 reach -->
+      <sc-if value="{{ qSel.q4 }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:17px 18px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+        <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa1ad">Q4 · Size / reach premium</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px"><div style="font-size:14px;font-weight:700;text-wrap:balance">Does firm scale justify the level?</div><span style="font-family:ui-monospace,monospace;font-size:15px;font-weight:800;color:#2563eb;font-variant-numeric:tabular-nums;flex:none">{{ reach.ratio }}</span></div>
+        <div style="margin-top:30px;position:relative;height:14px;border-radius:8px;background:linear-gradient(90deg,#eef0f3,#dbe3f5)">
+          <div style="position:absolute;top:50%;left:{{ reach.medPct }};transform:translate(-50%,-50%);width:2px;height:24px;background:#9aa6b8"></div>
+          <div style="position:absolute;top:-22px;left:{{ reach.medPct }};transform:translateX(-50%);font-size:9.5px;color:#9aa1ad;white-space:nowrap">median</div>
+          <div style="position:absolute;top:50%;left:{{ reach.focalPct }};transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:#2563eb;border:2px solid #fff;box-shadow:0 2px 6px rgba(37,99,235,.4)"></div>
+          <div style="position:absolute;top:22px;left:{{ reach.focalPct }};transform:translateX(-50%);font-size:9.5px;font-weight:700;color:#2563eb;white-space:nowrap">{{ focal.ticker }}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:30px;font-family:ui-monospace,monospace;font-size:10px;color:#9aa1ad;font-variant-numeric:tabular-nums"><span>€{{ reach.min }}B</span><span>operating revenue (cluster range)</span><span>€{{ reach.max }}B</span></div>
+        <div style="font-size:11.5px;color:#6b7280;margin-top:12px;text-wrap:pretty">{{ reach.insight }}</div>
+      </div>
+      </sc-if>
+
+      <!-- Q5 disclosure -->
+      <sc-if value="{{ qSel.q5 }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:17px 18px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+        <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa1ad">Q5 · §286(5) HGB disclosure</div>
+        <div style="font-size:14px;font-weight:700;margin-top:2px;text-wrap:balance">Is the package fully disclosed?</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:18px;padding:14px;background:{{ disclosure.bg }};border:1px solid {{ disclosure.border }};border-radius:11px">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:{{ disclosure.color }};color:#fff;font-size:18px;font-weight:800;flex:none">{{ disclosure.icon }}</span>
+          <div><div style="font-size:14px;font-weight:700;color:{{ disclosure.color }}">{{ disclosure.status }}</div><div style="font-size:11.5px;color:#6b7280;margin-top:1px;text-wrap:pretty">{{ disclosure.insight }}</div></div>
+        </div>
+        <div style="margin-top:14px"><div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:5px"><span>Disclosure transparency</span><span style="font-family:ui-monospace,monospace;font-weight:700;color:{{ disclosure.color }}">{{ disclosure.score }}</span></div><div style="height:8px;border-radius:5px;background:#eef0f3;overflow:hidden"><div style="height:100%;width:{{ disclosure.scoreW }};border-radius:5px;background:{{ disclosure.color }}"></div></div></div>
+      </div>
+      </sc-if>
+
+      <!-- Q6 LTI mix -->
+      <sc-if value="{{ qSel.q6 }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:17px 18px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+        <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa1ad">Q6 · LTI vs base salary</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px"><div style="font-size:14px;font-weight:700;text-wrap:balance">Is long-term alignment adequate?</div><span style="font-family:ui-monospace,monospace;font-size:15px;font-weight:800;color:{{ mix.color }};font-variant-numeric:tabular-nums;flex:none">{{ ltiRatio }}</span></div>
+        <div style="margin-top:18px">
+          <div style="font-size:11px;color:#6b7280;margin-bottom:6px">Proposed pay mix</div>
+          <div style="display:flex;height:18px;border-radius:6px;overflow:hidden"><div style="width:{{ proposed.baseW }};background:#9bb4ec"></div><div style="width:{{ proposed.stiW }};background:#4f80e8"></div><div style="width:{{ proposed.ltiW }};background:#2563eb"></div></div>
+          <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:#4b5563"><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#9bb4ec"></span>Base</span><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#4f80e8"></span>STI</span><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#2563eb"></span>LTI {{ mix.ltiShare }}</span></div>
+        </div>
+        <div style="font-size:11.5px;color:#6b7280;margin-top:14px;text-wrap:pretty">{{ mix.insight }}</div>
+      </div>
+      </sc-if>
+    </div>
+
+    <!-- shadow peer universe -->
+    <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:17px 18px 8px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div style="font-size:14px;font-weight:700">Shadow Peer Universe</div><div style="font-size:11px;color:#6b7280">{{ clusterCount }} matched firms · high-level descriptive view</div></div>
+      <div style="font-size:11.5px;color:#6b7280;margin-bottom:10px;text-wrap:pretty">Econometric cluster used to fit the frontier and median.</div>
+      <div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.4fr) 64px 86px;gap:0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b7280;padding:0 8px 8px;border-bottom:1px solid #d9dce1"><span>Company</span><span>Revenue (scale)</span><span style="text-align:right">ROA</span><span style="text-align:right">Total Payout</span></div>
+      <div style="max-height:236px;overflow-y:auto;margin:0 -2px">
+        <sc-for list="{{ shadowRows }}" as="row" hint-placeholder-count="9">
+          <div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.4fr) 64px 86px;gap:0;align-items:center;padding:9px 8px;border-bottom:1px solid #f0f1f4">
+            <div style="display:flex;align-items:center;gap:9px;min-width:0"><span style="width:4px;height:26px;border-radius:3px;background:{{ row.accent }};flex:none"></span><div style="line-height:1.2;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ row.name }}</span><span style="display:block;font-size:10.5px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ row.exec }}</span></div></div>
+            <div style="display:flex;align-items:center;gap:8px;padding-right:10px"><div style="flex:1;height:6px;border-radius:4px;background:#eef0f3;overflow:hidden"><div style="height:100%;width:{{ row.revW }};border-radius:4px;background:#c2cbdb"></div></div><span style="font-family:ui-monospace,monospace;font-size:11px;color:#374151;font-variant-numeric:tabular-nums;flex:none">{{ row.rev }}</span></div>
+            <span style="font-family:ui-monospace,monospace;font-size:11.5px;font-weight:600;text-align:right;color:{{ row.roaColor }};font-variant-numeric:tabular-nums">{{ row.roa }}</span>
+            <span style="font-family:ui-monospace,monospace;font-size:11.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums">{{ row.pay }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </main>
+  </div>
+  </sc-if>
+
+  <!-- ===== ADVISOR SCRIM + DRAWER ===== -->
+  <div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;z-index:55;background:rgba(20,28,42,.18);opacity:{{ scrimOp }};pointer-events:{{ scrimPE }};transition-property:opacity;transition-duration:.26s"></div>
+  <aside style="position:fixed;top:0;right:0;bottom:0;z-index:60;width:420px;max-width:100vw;background:#fff;border-left:1px solid var(--color-border,#d9dce1);box-shadow:-14px 0 48px rgba(16,24,40,.14);display:flex;flex-direction:column;transform:translateX({{ drawerX }});transition-property:transform;transition-duration:.28s;transition-timing-function:cubic-bezier(.4,0,.2,1)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #eceef1">
+      <div style="display:flex;align-items:center;gap:11px"><div style="width:32px;height:32px;border-radius:9px;background:var(--color-text,#1f2430);display:flex;align-items:center;justify-content:center;flex:none"><div style="width:11px;height:11px;border-radius:2px;background:var(--color-accent,#2563eb);transform:rotate(45deg)"></div></div><div style="line-height:1.2"><div style="font-size:13px;font-weight:700;letter-spacing:.04em">AEQUITAS ADVISOR</div><div style="font-size:11px;color:#6b7280">Reviewing {{ focal.name }}</div></div></div>
+      <button onClick="{{ closeDrawer }}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font:inherit;font-size:15px;cursor:pointer;color:#6b7280;background:transparent;border:1px solid #d9dce1;border-radius:8px;transition-property:transform,background-color;transition-duration:.15s" style-hover="background:#f3f5f8;color:#1f2430" style-active="transform:scale(0.96)">✕</button>
+    </div>
+    <div ref="{{ historyRef }}" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:13px">
+      <sc-for list="{{ messages }}" as="m" hint-placeholder-count="2">
+        <div style="display:flex;flex-direction:column;align-items:{{ m.align }};gap:5px">
+          <sc-if value="{{ m.isBot }}" hint-placeholder-val="{{ false }}"><span style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa1ad;padding-left:2px">Advisor</span></sc-if>
+          <div style="max-width:88%;padding:10px 13px;font-size:13px;line-height:1.5;border:1px solid {{ m.border }};border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};white-space:pre-wrap;word-break:break-word;text-wrap:pretty">{{ m.content }}</div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ sending }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:8px;align-self:flex-start;padding:10px 13px;background:#eceef1;border-radius:12px 12px 12px 4px"><span style="font-size:12px;color:#6b7280">Analysing</span><span style="display:flex;gap:3px"><span style="width:5px;height:5px;border-radius:50%;background:#2563eb"></span><span style="width:5px;height:5px;border-radius:50%;background:#2563eb;opacity:.55"></span><span style="width:5px;height:5px;border-radius:50%;background:#2563eb;opacity:.3"></span></span></div></sc-if>
+    </div>
+    <div style="padding:12px 16px 16px;border-top:1px solid #eceef1">
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px"><sc-for list="{{ quicks }}" as="q" hint-placeholder-count="4"><button onClick="{{ q.run }}" style="font:inherit;font-size:12px;cursor:pointer;color:#374151;background:#f3f5f8;border:1px solid #e6e8ec;border-radius:18px;padding:6px 12px;transition-property:transform,background-color,border-color;transition-duration:.14s" style-hover="background:#fff;border-color:#2563eb;color:#1f2430" style-active="transform:scale(0.96)">{{ q.label }}</button></sc-for></div>
+      <div style="display:flex;align-items:flex-end;gap:9px;background:#fff;border:1px solid #d9dce1;border-radius:12px;padding:8px 8px 8px 13px" style-focus-within="border-color:#2563eb">
+        <textarea value="{{ input }}" onInput="{{ onInput }}" onKeyDown="{{ onKey }}" rows="1" placeholder="Ask about the verdict, peers, risks…" style="flex:1;font:inherit;font-size:13px;line-height:1.45;resize:none;border:none;outline:none;background:transparent;color:#1f2430;max-height:120px;padding:5px 0"></textarea>
+        <button onClick="{{ send }}" style="flex:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font:inherit;font-size:15px;cursor:pointer;color:#fff;background:var(--color-accent,#2563eb);border:none;border-radius:9px;transition-property:transform,background-color;transition-duration:.15s" style-hover="background:#1e54c9" style-active="transform:scale(0.92)">↑</button>
+      </div>
+    </div>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024},&quot;chatOpenDefault&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;peerSort&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Revenue&quot;,&quot;ROA&quot;,&quot;Total Payout&quot;],&quot;default&quot;:&quot;Revenue&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {
+    step: 1, pickerOpen: false, drawerOpen: null, input: '', sending: false, msgs: {}, chartLoading: true, profileNote: '',
+    focal: { sourceId: 'VW', ticker: 'VW', name: 'Volkswagen AG', isin: 'DE0007664005', exec: 'Oliver Blume', sector: 'Automotive OEM', year: 2024, opre: 322.3, roa: 2.8, base: 2.00, sti: 3.34, lti: 4.80, ratchet: true, secrecy: false },
+    selectedQ: { q1: true, q2: true, q3: true, q4: true, q5: true, q6: true },
+  };
+  historyRef = React.createRef();
+
+  // peer cluster (subject firm sits outside; presets below can swap it in)
+  order = ['VW', 'STLA', 'MB', 'BMW', 'DT', 'REN', 'VOL', 'POR', 'CON', 'ZF'];
+  D = {
+    VW:   { ticker: 'VW', name: 'Volkswagen AG', short: 'Volkswagen', isin: 'DE0007664005', exec: 'Oliver Blume', sector: 'Automotive OEM', opre: 322.3, roa: 2.8, base: 2.00, sti: 3.34, lti: 4.80, ratchet: true, secrecy: false },
+    STLA: { ticker: 'STLA', name: 'Stellantis N.V.', short: 'Stellantis', isin: 'NL00150001Q9', exec: 'Carlos Tavares', sector: 'Automotive OEM', opre: 189.5, roa: 8.9, base: 2.00, sti: 8.40, lti: 26.10, ratchet: true, secrecy: true },
+    MB:   { ticker: 'MB', name: 'Mercedes-Benz Group', short: 'Mercedes', isin: 'DE0007100000', exec: 'Ola Källenius', sector: 'Automotive OEM', opre: 145.6, roa: 6.1, base: 2.10, sti: 3.60, lti: 6.60, ratchet: true, secrecy: false },
+    BMW:  { ticker: 'BMW', name: 'Bayerische Motoren Werke', short: 'BMW', isin: 'DE0005190003', exec: 'Oliver Zipse', sector: 'Automotive OEM', opre: 142.4, roa: 7.4, base: 1.90, sti: 2.50, lti: 3.80, ratchet: false, secrecy: false },
+    DT:   { ticker: 'DT', name: 'Daimler Truck Holding', short: 'Daimler Truck', isin: 'DE000DTR0CK8', exec: 'Martin Daum', sector: 'Commercial Veh.', opre: 53.8, roa: 5.6, base: 1.40, sti: 1.80, lti: 2.20, ratchet: false, secrecy: false },
+    REN:  { ticker: 'REN', name: 'Renault Group', short: 'Renault', isin: 'FR0000131906', exec: 'Luca de Meo', sector: 'Automotive OEM', opre: 52.4, roa: 4.2, base: 1.60, sti: 1.90, lti: 2.60, ratchet: false, secrecy: false },
+    VOL:  { ticker: 'VOL', name: 'Volvo Group', short: 'Volvo', isin: 'SE0000115446', exec: 'Martin Lundstedt', sector: 'Commercial Veh.', opre: 45.6, roa: 9.1, base: 1.55, sti: 1.85, lti: 2.40, ratchet: false, secrecy: false },
+    POR:  { ticker: 'POR', name: 'Porsche AG', short: 'Porsche', isin: 'DE000PAG9113', exec: 'Oliver Blume', sector: 'Automotive OEM', opre: 40.5, roa: 13.2, base: 1.70, sti: 2.30, lti: 3.40, ratchet: false, secrecy: true },
+    CON:  { ticker: 'CON', name: 'Continental AG', short: 'Continental', isin: 'DE0005439004', exec: 'Nikolai Setzer', sector: 'Auto Supplier', opre: 41.4, roa: 1.9, base: 1.30, sti: 1.40, lti: 1.50, ratchet: true, secrecy: false },
+    ZF:   { ticker: 'ZF', name: 'ZF Friedrichshafen', short: 'ZF', isin: '—  (private)', exec: 'Holger Klein', sector: 'Auto Supplier', opre: 46.6, roa: 1.1, base: 1.25, sti: 1.30, lti: 1.35, ratchet: false, secrecy: false },
+  };
+  questionDefs = [
+    { id: 'q1', code: 'Q1', title: 'Is the package above the peer-cluster median?', desc: 'Benchmarks proposed pay against the matched peer median (Multiple-of-Median).' },
+    { id: 'q2', code: 'Q2', title: 'Does pay exceed the size-fitted frontier?', desc: 'Tests pay against an SML quantile-regression frontier controlling for firm scale.' },
+    { id: 'q3', code: 'Q3', title: 'Is there pay-for-luck asymmetry?', desc: 'Checks whether upside rewards exceed symmetric downside sensitivity (ratchet).' },
+    { id: 'q4', code: 'Q4', title: 'Does firm scale justify the level?', desc: 'Quantifies the econometric size / reach premium relative to the cluster.' },
+    { id: 'q5', code: 'Q5', title: 'Is the package fully disclosed?', desc: 'Flags any §286(5) HGB individual disclosure opt-out reducing transparency.' },
+    { id: 'q6', code: 'Q6', title: 'Is long-term incentive weighting adequate?', desc: 'Assesses the LTI-to-base ratio and overall fixed / variable pay mix.' },
+  ];
+  C = { accent: '#2563eb', text: '#1f2430', muted: '#6b7280', green: '#1e8e3e', amber: '#f29900', red: '#d32f2f', greenBg: '#e6f4ea', amberBg: '#fef7e0', redBg: '#fce8e6' };
+
+  log10(n) { return Math.log(n) / Math.LN10; }
+  num(v) { const n = parseFloat(v); return isFinite(n) ? n : 0; }
+
+  componentDidMount() {
+    this._reload();
+    fetch("http://localhost:8000/api/companies")
+      .then(res => res.json())
+      .then(cos => {
+        this.allCompanies = cos;
+        this.loadPreset('DE0007664005');
+      })
+      .catch(err => {
+        console.warn("Backend offline. Using default static companies in dropdown.", err);
+        this.allCompanies = Object.keys(this.D).map(k => ({ id: this.D[k].isin, name: this.D[k].name }));
+        this.loadPreset('VW');
+      });
+  }
+  componentDidUpdate() { const h = this.historyRef.current; if (h) h.scrollTop = h.scrollHeight; }
+  _reload() { if (this._t) clearTimeout(this._t); this.setState({ chartLoading: true }); this._t = setTimeout(() => this.setState({ chartLoading: false }), 1400); }
+  goStep(n) { this.setState({ step: n }); if (n === 3) this._reload(); }
+  setFocal(field, val) { this.setState(s => ({ focal: { ...s.focal, [field]: val } })); }
+  toggleQ(id) { this.setState(s => ({ selectedQ: { ...s.selectedQ, [id]: !s.selectedQ[id] } })); }
+  loadPreset(id) {
+    if (this.D_fallback === undefined) {
+      this.D_fallback = Object.assign({}, this.D);
+      this.order_fallback = this.order.slice();
+    }
+    this.setState({ pickerOpen: false, chartLoading: true });
+    
+    // Resolve correct isin code if static ID is passed (e.g. 'VW')
+    const isin = (id in this.D_fallback) ? this.D_fallback[id].isin : id;
+    
+    Promise.all([
+      fetch(`http://localhost:8000/api/companies/${isin}/dashboard`).then(res => res.json()),
+      fetch(`http://localhost:8000/api/companies/${isin}/peers`).then(res => res.json())
+    ])
+    .then(([trace, peers]) => {
+      const D = {};
+      const order = [];
+      
+      D[trace.isin] = {
+        ticker: trace.company.split(' ').map(w => w[0]).join('').substring(0, 4).toUpperCase(),
+        name: trace.company,
+        short: trace.company.split(' ')[0],
+        isin: trace.isin,
+        exec: trace.exec_id,
+        sector: trace.sector || 'German Corporation',
+        opre: trace.opre / 1e9,
+        roa: trace.roa,
+        base: (trace.salary_benchmark || trace.actual_pay * 0.25) / 1e6,
+        sti: (trace.sti_benchmark || trace.actual_pay * 0.35) / 1e6,
+        lti: (trace.lti_benchmark || trace.actual_pay * 0.40) / 1e6,
+        ratchet: trace.ratchet_triggered,
+        secrecy: trace.secrecy_premium_flag
+      };
+      order.push(trace.isin);
+      
+      peers.forEach(p => {
+        const ticker = p.name.split(' ').map(w => w[0]).join('').substring(0, 4).toUpperCase();
+        D[p.isin] = {
+          ticker: ticker,
+          name: p.name,
+          short: p.name.split(' ')[0],
+          isin: p.isin,
+          exec: p.exec,
+          sector: p.sector,
+          opre: p.opre,
+          roa: p.roa,
+          base: p.base,
+          sti: p.sti,
+          lti: p.lti,
+          ratchet: false,
+          secrecy: false
+        };
+        order.push(p.isin);
+      });
+      
+      this.D = D;
+      this.order = order;
+      
+      this.setState({
+        chartLoading: false,
+        focal: {
+          sourceId: trace.isin,
+          ticker: D[trace.isin].ticker,
+          name: trace.company,
+          isin: trace.isin,
+          exec: trace.exec_id,
+          sector: trace.sector || 'German Corporation',
+          year: trace.year,
+          opre: trace.opre / 1e9,
+          roa: trace.roa,
+          base: trace.actual_pay * 0.25 / 1e6,
+          sti: trace.actual_pay * 0.35 / 1e6,
+          lti: trace.actual_pay * 0.40 / 1e6,
+          ratchet: trace.ratchet_triggered,
+          secrecy: trace.secrecy_premium_flag
+        }
+      });
+    })
+    .catch(err => {
+      console.warn("Failed to load company preset from backend, falling back to static stubs:", err);
+      this.D = this.D_fallback;
+      this.order = this.order_fallback;
+      const fallbackId = (id in this.D) ? id : 'VW';
+      const p = this.D[fallbackId];
+      this.setState({
+        chartLoading: false,
+        focal: {
+          sourceId: fallbackId,
+          ticker: p.ticker,
+          name: p.name,
+          isin: p.isin,
+          exec: p.exec,
+          sector: p.sector,
+          year: 2024,
+          opre: p.opre,
+          roa: p.roa,
+          base: p.base,
+          sti: p.sti,
+          lti: p.lti,
+          ratchet: p.ratchet,
+          secrecy: p.secrecy
+        }
+      });
+    });
+  }
+
+  _cluster() { const f = this.state.focal; return this.order.filter(k => k !== f.sourceId); }
+  _median(a) { const s = a.slice().sort((x, y) => x - y); const n = s.length; return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; }
+  _peerPay(k) { const p = this.D[k]; return p.base + p.sti + p.lti; }
+  _regression(cl) {
+    const xs = cl.map(k => this.log10(this.D[k].opre)), ys = cl.map(k => this.log10(this._peerPay(k)));
+    const n = xs.length, mx = xs.reduce((a, b) => a + b) / n, my = ys.reduce((a, b) => a + b) / n;
+    let nu = 0, de = 0; for (let i = 0; i < n; i++) { nu += (xs[i] - mx) * (ys[i] - my); de += (xs[i] - mx) ** 2; }
+    const slope = nu / de; return { slope, intercept: my - slope * mx };
+  }
+  _bk(base, sti, lti) { const t = base + sti + lti || 1; return { total: '€' + t.toFixed(2) + 'M', base: '€' + base.toFixed(2) + 'M', sti: '€' + sti.toFixed(2) + 'M', lti: '€' + lti.toFixed(2) + 'M', baseW: (base / t * 100) + '%', stiW: (sti / t * 100) + '%', ltiW: (lti / t * 100) + '%' }; }
+
+  fallback(f, mom) { return `${f.name}'s proposed €${(this.num(f.base) + this.num(f.sti) + this.num(f.lti)).toFixed(2)}M is ${mom.toFixed(2)}× the peer median. With ROA at ${this.num(f.roa).toFixed(1)}% and the firm's operating scale, the level is ${mom < 1.15 ? 'broadly aligned' : mom < 1.6 ? 'elevated but explainable' : 'materially above the cluster'}.${f.ratchet ? ' A pay-for-luck ratchet is flagged, so the variable structure warrants review.' : ''}`; }
+  send(text) {
+    const t = (text != null ? text : this.state.input).trim(); if (!t || this.state.sending) return;
+    const f = this.state.focal, cl = this._cluster(); const median = this._median(cl.map(k => this._peerPay(k)));
+    const pay = this.num(f.base) + this.num(f.sti) + this.num(f.lti), mom = pay / median;
+    this.setState(s => ({ input: '', sending: true, msgs: { ...s.msgs, log: [...(s.msgs.log || []), { role: 'user', content: t }] } }));
+    const prompt = `You are AEQUITAS, an executive-pay governance advisor. Firm ${f.name} (${f.isin}); executive ${f.exec}, FY${f.year}. Operating revenue €${f.opre}B, ROA ${f.roa}%. Proposed package: base €${f.base}M, short-term €${f.sti}M, long-term €${f.lti}M (total €${pay.toFixed(2)}M). Peer-median pay €${median.toFixed(2)}M, multiple-of-median ${mom.toFixed(2)}x. Pay-for-luck ratchet ${f.ratchet ? 'TRIGGERED' : 'not triggered'}, §286(5) HGB opt-out ${f.secrecy ? 'present' : 'absent'}. Answer in 2-4 concise sentences, professional governance tone, citing figures. Question: ${t}`;
+    const done = (a) => this.setState(s => ({ sending: false, msgs: { ...s.msgs, log: [...(s.msgs.log || []), { role: 'assistant', content: a }] } }));
+    
+    fetch("http://localhost:8000/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        company_id: f.isin,
+        message: t,
+        lens: "auditor"
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      done(data.content);
+    })
+    .catch(() => {
+      try { if (window.claude && window.claude.complete) { window.claude.complete(prompt).then(r => done((r || '').trim() || this.fallback(f, mom))).catch(() => done(this.fallback(f, mom))); } else { setTimeout(() => done(this.fallback(f, mom)), 650); } }
+      catch (e) { setTimeout(() => done(this.fallback(f, mom)), 300); }
+    });
+  }
+
+  renderVals() {
+    const C = this.C, f = this.state.focal, D = this.D;
+    const base = this.num(f.base), sti = this.num(f.sti), lti = this.num(f.lti), pay = base + sti + lti;
+    const cl = this._cluster();
+    const peerPays = cl.map(k => this._peerPay(k)), peerOpres = cl.map(k => D[k].opre);
+    const median = this._median(peerPays), medOpre = this._median(peerOpres), maxOpre = Math.max(...peerOpres), minOpre = Math.min(...peerOpres);
+    const mom = pay / median;
+    const { slope, intercept } = this._regression(cl);
+    const predLog = (o) => slope * this.log10(o) + intercept;
+    const premiumFrac = Math.pow(10, this.log10(pay || 0.01) - predLog(this.num(f.opre) || 1)) - 1;
+
+    const verdict = mom < 1.15 ? { word: 'Aligned', color: C.green, bg: C.greenBg, border: '#bfe3cb', glow: 'rgba(30,142,62,.10)' }
+      : mom < 1.6 ? { word: 'Elevated', color: '#c77700', bg: C.amberBg, border: '#f3dca0', glow: 'rgba(242,153,0,.12)' }
+        : { word: 'Excessive', color: C.red, bg: C.redBg, border: '#f2c2c2', glow: 'rgba(211,47,47,.12)' };
+
+    const proposed = this._bk(base, sti, lti);
+    proposed.deltaVsBaseline = (pay >= median ? '+' : '−') + '€' + Math.abs(pay - median).toFixed(2) + 'M';
+    const medLti = this._median(cl.map(k => D[k].lti)), medBase = this._median(cl.map(k => D[k].base)), medSti = this._median(cl.map(k => D[k].sti));
+    const baseline = this._bk(medBase, medSti, medLti);
+
+    // ---- chart geometry (560 x 360) ----
+    const X0 = 58, X1 = 470, Y0 = 300, Y1 = 30;
+    const allO = [...peerOpres, this.num(f.opre) || 1].map(v => this.log10(v));
+    const allP = [...peerPays, pay || 0.01].map(v => this.log10(v));
+    const xmin = Math.min(...allO) - 0.06, xmax = Math.max(...allO) + 0.10, ymin = Math.min(...allP) - 0.09, ymax = Math.max(...allP) + 0.13;
+    const sx = v => X0 + (X1 - X0) * (v - xmin) / (xmax - xmin), sy = v => Y0 - (Y0 - Y1) * (v - ymin) / (ymax - ymin);
+    const pc = (px, sp) => (px / sp * 100) + '%';
+    const mkPoint = (lx, ly, sel) => { const cx = sx(lx), cy = sy(ly), resid = ly - predLog(Math.pow(10, lx)); const color = sel ? C.accent : resid > 0.05 ? C.red : resid > 0 ? C.amber : C.green; return { cx, cy, r: sel ? 6.5 : 5, ring: sel ? 13 : 9, sw: sel ? 2.5 : 1.5, color, resid }; };
+    const points = cl.map(k => mkPoint(this.log10(D[k].opre), this.log10(this._peerPay(k)), false));
+    const focalPt = mkPoint(this.log10(this.num(f.opre) || 1), this.log10(pay || 0.01), true);
+    points.push(focalPt);
+
+    // annotation chips (curated + de-collided)
+    const named = cl.map(k => ({ k, ...mkPoint(this.log10(D[k].opre), this.log10(this._peerPay(k)), false), short: D[k].short, pay: this._peerPay(k) }));
+    named.sort((a, b) => b.pay - a.pay);
+    let chipSrc = named.slice(0, 4).concat([{ k: f.sourceId, cx: focalPt.cx, cy: focalPt.cy, color: C.accent, short: f.ticker, pay }]);
+    chipSrc.sort((a, b) => a.cy - b.cy);
+    let lastY = -100; const chipX = 482;
+    chipSrc.forEach(cp => { let ly = cp.cy; if (ly - lastY < 42) ly = lastY + 42; lastY = ly; cp.ly = Math.max(Y1 + 4, Math.min(Y0 + 32, ly)); });
+    const chips = chipSrc.map(cp => ({ left: pc(chipX, 560), top: pc(cp.ly, 360), name: cp.short, value: '€' + cp.pay.toFixed(1) + 'M', color: cp.color, border: cp.k === f.sourceId ? C.accent : '#e6e8ec' }));
+    const leaders = chipSrc.map(cp => ({ x1: cp.cx, y1: cp.cy, x2: chipX - 4, y2: cp.ly, color: cp.color }));
+    const fy1 = sy(slope * xmin + intercept), fy2 = sy(slope * xmax + intercept), off = 0.085;
+    const frontier = { x1: sx(xmin), y1: fy1, x2: sx(xmax), y2: fy2 };
+    const bandPoints = [sx(xmin) + ',' + sy(slope * xmin + intercept + off), sx(xmax) + ',' + sy(slope * xmax + intercept + off), sx(xmax) + ',' + sy(slope * xmax + intercept - off), sx(xmin) + ',' + sy(slope * xmin + intercept - off)].join(' ');
+    const gridY = [4, 8, 16, 32].map(v => ({ y: sy(this.log10(v)) }));
+    const xTicks = [50, 100, 200, 400].map(v => ({ left: pc(sx(this.log10(v)), 560), label: '€' + v + 'B' }));
+    const yTicks = [4, 8, 16, 32].map(v => ({ top: pc(sy(this.log10(v)), 360), label: '€' + v + 'M' }));
+    const smlInsight = `Pay sits ${premiumFrac >= 0 ? '+' + (premiumFrac * 100).toFixed(0) + '% above' : (premiumFrac * 100).toFixed(0) + '% below'} the size-fitted frontier after controlling for operating scale.`;
+
+    // ---- checklist / insights ----
+    const ic = s => s === 'pass' ? { icon: '✓', color: C.green, bg: C.greenBg } : s === 'warn' ? { icon: '!', color: '#c77700', bg: C.amberBg } : { icon: '✕', color: C.red, bg: C.redBg };
+    const ltiRatioN = base ? lti / base : 0, varShare = pay ? (sti + lti) / pay : 0;
+    const momS = mom < 1.15 ? 'pass' : mom < 1.6 ? 'warn' : 'fail';
+    const premS = premiumFrac > 0.25 ? 'fail' : premiumFrac > 0.05 ? 'warn' : 'pass';
+    const insightDefs = {
+      q1: { label: 'Multiple of Median', value: mom.toFixed(2) + '×', detail: `Proposed pay is ${((mom - 1) * 100).toFixed(0)}% ${mom >= 1 ? 'above' : 'below'} the median of €${median.toFixed(2)}M.`, ...ic(momS) },
+      q2: { label: 'SML Pay Premium', value: (premiumFrac >= 0 ? '+' : '') + (premiumFrac * 100).toFixed(0) + '%', detail: smlInsight, ...ic(premS) },
+      q3: { label: 'Pay-for-Luck Ratchet', value: f.ratchet ? 'Triggered' : 'Clear', detail: f.ratchet ? 'Asymmetric payout sensitivity detected — upside not matched by downside.' : 'No asymmetric pay-for-luck sensitivity in the incentive design.', ...ic(f.ratchet ? 'fail' : 'pass') },
+      q4: { label: 'Size / Reach Premium', value: (this.num(f.opre) / medOpre).toFixed(2) + '×', detail: `Operating scale is ${(this.num(f.opre) / medOpre).toFixed(2)}× the cluster median — ${this.num(f.opre) / medOpre > 1.3 ? 'partially justifies' : 'limited effect on'} the level.`, ...ic(this.num(f.opre) / medOpre > 1.5 ? 'warn' : 'pass') },
+      q5: { label: '§286(5) HGB Disclosure', value: f.secrecy ? 'Opt-out' : 'Full', detail: f.secrecy ? 'Individual disclosure opt-out invoked — reduces transparency.' : 'No disclosure opt-out — full transparency on the package.', ...ic(f.secrecy ? 'fail' : 'pass') },
+      q6: { label: 'LTI vs Base Salary', value: ltiRatioN.toFixed(1) + '×', detail: `LTI weighting of ${ltiRatioN.toFixed(1)}× base ${ltiRatioN >= 2 ? 'aligns pay with long-horizon value' : 'is light on long-term alignment'}.`, ...ic(ltiRatioN >= 2 ? 'pass' : 'warn') },
+    };
+    const selIds = this.questionDefs.map(q => q.id).filter(id => this.state.selectedQ[id]);
+    const selectedInsights = selIds.map(id => insightDefs[id]);
+    const allItems = Object.values(insightDefs);
+    const tally = { pass: allItems.filter(i => i.icon === '✓').length, warn: allItems.filter(i => i.icon === '!').length, fail: allItems.filter(i => i.icon === '✕').length };
+
+    // ---- per-question viz ----
+    const ratchet = (() => { const up = 100, down = f.ratchet ? 35 : 88; return { tag: f.ratchet ? 'Asymmetric' : 'Symmetric', color: f.ratchet ? C.red : C.green, bg: f.ratchet ? C.redBg : C.greenBg, up: up + '%', down: down + '%', upW: '100%', downW: down + '%', downColor: f.ratchet ? C.red : C.green, insight: f.ratchet ? 'Bonus accrues on out-performance, but pay shows little symmetric reduction when results fall short — a pay-for-luck ratchet.' : 'Incentive payouts move symmetrically with performance in both directions.' }; })();
+    const reachRatio = this.num(f.opre) / medOpre;
+    const lo = Math.min(minOpre, this.num(f.opre)), hi = Math.max(maxOpre, this.num(f.opre));
+    const reach = { ratio: reachRatio.toFixed(2) + '×', medPct: ((medOpre - lo) / (hi - lo) * 100) + '%', focalPct: ((this.num(f.opre) - lo) / (hi - lo) * 100) + '%', min: lo.toFixed(0), max: hi.toFixed(0), insight: insightDefs.q4.detail };
+    const disclosure = f.secrecy
+      ? { status: 'Disclosure opt-out invoked', icon: '✕', color: C.red, bg: C.redBg, border: '#f2c2c2', score: '60%', scoreW: '60%', insight: 'Individual figures withheld under §286(5) HGB.' }
+      : { status: 'Full individual disclosure', icon: '✓', color: C.green, bg: C.greenBg, border: '#bfe3cb', score: '100%', scoreW: '100%', insight: 'All package components individually disclosed.' };
+    const mix = { color: ltiRatioN >= 2 ? C.green : '#c77700', ltiShare: (pay ? lti / pay * 100 : 0).toFixed(0) + '%', insight: insightDefs.q6.detail };
+
+    // ---- shadow rows ----
+    const sortKey = this.props.peerSort || 'Revenue';
+    const sf = sortKey === 'ROA' ? (a, b) => D[b].roa - D[a].roa : sortKey === 'Total Payout' ? (a, b) => this._peerPay(b) - this._peerPay(a) : (a, b) => D[b].opre - D[a].opre;
+    const shadowRows = cl.slice().sort(sf).map(k => { const p = D[k], pp = this._peerPay(k); const roaColor = p.roa >= 8 ? C.green : p.roa >= 4 ? C.text : C.amber; return { name: p.name, exec: p.exec, accent: '#cdd2da', rev: '€' + p.opre.toFixed(0) + 'B', revW: (p.opre / hi * 100) + '%', roa: p.roa.toFixed(1) + '%', roaColor, pay: '€' + pp.toFixed(2) + 'M' }; });
+
+    // ---- steps ----
+    const step = this.state.step;
+    const stepDefs = [{ n: 1, label: 'Firm & Package' }, { n: 2, label: 'Criteria' }, { n: 3, label: 'Report' }];
+    const steps = stepDefs.map((s, i) => { const active = s.n === step, done = s.n < step; return { label: s.label, mark: done ? '✓' : String(s.n), go: () => this.goStep(s.n), sep: i < 2, bg: active ? '#eef2fb' : '#fff', border: active ? '#bcd0f7' : '#e6e8ec', dotBg: active ? C.accent : done ? C.green : '#eceef1', dotColor: active || done ? '#fff' : '#6b7280', labelColor: active ? C.accent : '#374151' }; });
+
+    // ---- questions (step 2) ----
+    const questions = this.questionDefs.map(q => { const sel = !!this.state.selectedQ[q.id]; return { code: q.code, title: q.title, desc: q.desc, toggle: () => this.toggleQ(q.id), check: sel ? '✓' : '', cardBg: sel ? '#fbfcff' : '#fff', cardBorder: sel ? C.accent : '#e6e8ec', cardShadow: sel ? '0 4px 14px rgba(37,99,235,.10)' : '0 1px 2px rgba(16,24,40,.04)', boxBg: sel ? C.accent : '#fff', boxBorder: sel ? C.accent : '#cdd2da' }; });
+    const selectedCount = selIds.length;
+
+    // ---- presets / chat ----
+    const presets = (this.allCompanies || []).length > 0
+      ? this.allCompanies.map(c => ({
+          ticker: c.name.split(' ').map(w => w[0]).join('').substring(0, 4).toUpperCase(),
+          name: c.name,
+          exec: c.id,
+          load: () => this.loadPreset(c.id)
+        }))
+      : this.order.map(k => ({ ticker: D[k].ticker, name: D[k].name, exec: D[k].exec, load: () => this.loadPreset(k) }));
+    const drawerEff = this.state.drawerOpen != null ? this.state.drawerOpen : (this.props.chatOpenDefault || false);
+    const log = this.state.msgs.log || [{ role: 'assistant', content: 'I can explain any part of this evaluation — the multiple-of-median verdict, the SML frontier, ratchet detection, or peer comparisons. Ask away.' }];
+    const messages = log.map(m => ({ content: m.content, isBot: m.role === 'assistant', align: m.role === 'user' ? 'flex-end' : 'flex-start', bg: m.role === 'user' ? C.accent : '#eceef1', fg: m.role === 'user' ? '#fff' : C.text, border: m.role === 'user' ? 'transparent' : '#e3e6eb', radius: m.role === 'user' ? '13px 13px 4px 13px' : '13px 13px 13px 4px' }));
+    const quicks = ['Why this verdict?', 'Biggest risk here', 'Compare to peers', 'Is the structure sound?'].map(l => ({ label: l, run: () => this.send(l) }));
+
+    return {
+      steps, isStep1: step === 1, isStep2: step === 2, isStep3: step === 3,
+      focal: { ...f }, clusterCount: cl.length, medianLabel: median.toFixed(2) + 'M', medOpreLabel: medOpre.toFixed(0),
+      pkgTotalLabel: pay.toFixed(2) + 'M', varShareLabel: (varShare * 100).toFixed(0) + '%', ltiRatio: ltiRatioN.toFixed(1) + '×',
+      momLabel: mom.toFixed(2) + '×', verdictWord: verdict.word, verdictColor: verdict.color, verdictBg: verdict.bg, verdictBorder: verdict.border, verdictGlow: verdict.glow,
+      premiumLabel: (premiumFrac >= 0 ? '+' : '') + (premiumFrac * 100).toFixed(0) + '% vs frontier',
+      baseline, proposed,
+      questions, questionCount: this.questionDefs.length, selectedCount,
+      submitBg: selectedCount ? C.accent : '#aab4c4', submitOpacity: selectedCount ? '1' : '.6', submitPE: selectedCount ? 'auto' : 'none',
+      qSel: this.state.selectedQ, selectedInsights, tally,
+      points, chips, leaders, frontier, bandPoints, gridY, xTicks, yTicks, smlInsight,
+      chartLoading: this.state.chartLoading, chartReady: !this.state.chartLoading,
+      knobPct: Math.min(98, Math.max(2, mom * 45)) + '%', sliderTicks: [0.5, 1, 1.5, 2].map(v => ({ left: Math.min(98, Math.max(2, v * 45)) + '%', label: v.toFixed(1) + '×', tip: '€' + (v * median).toFixed(1) + 'M' })),
+      ratchet, reach, disclosure, mix,
+      shadowRows,
+      presets, pickerOpen: this.state.pickerOpen, profileNote: this.state.profileNote,
+      messages, quicks, sending: this.state.sending, input: this.state.input, historyRef: this.historyRef,
+      drawerX: drawerEff ? '0%' : '100%', scrimOp: drawerEff ? '1' : '0', scrimPE: drawerEff ? 'auto' : 'none',
+      // handlers
+      togglePicker: () => this.setState(s => ({ pickerOpen: !s.pickerOpen })), closePicker: () => this.setState({ pickerOpen: false }),
+      goStep1: () => this.goStep(1), goStep2: () => this.goStep(2), submitCriteria: () => { if (selectedCount) this.goStep(3); },
+      onName: e => this.setFocal('name', e.target.value), onIsin: e => this.setFocal('isin', e.target.value), onExec: e => this.setFocal('exec', e.target.value), onSector: e => this.setFocal('sector', e.target.value), onYear: e => this.setFocal('year', e.target.value), onOpre: e => this.setFocal('opre', e.target.value), onRoa: e => this.setFocal('roa', e.target.value), onBase: e => this.setFocal('base', e.target.value), onSti: e => this.setFocal('sti', e.target.value), onLti: e => this.setFocal('lti', e.target.value),
+      reloadChart: () => this._reload(),
+      pfBest: () => this.setState(s => ({ profileNote: 'Loaded best-practice profile', focal: { ...s.focal, base: +(median * 0.32).toFixed(2), sti: +(median * 0.28).toFixed(2), lti: +(median * 0.40).toFixed(2), ratchet: false } })),
+      pfStored: () => this.loadPreset(this.state.focal.sourceId || 'VW'),
+      pfMax: () => { const topK = cl.slice().sort((a, b) => this._peerPay(b) - this._peerPay(a))[0]; const p = this.D[topK]; this.setState(s => ({ profileNote: 'Loaded maximum-set enumeration', focal: { ...s.focal, base: p.base, sti: p.sti, lti: p.lti } })); },
+      pfExpected: () => this.setState(s => ({ profileNote: 'Applied expected (risk-adjusted) STI', focal: { ...s.focal, sti: +(this.num(s.focal.sti) * 0.7).toFixed(2) } })),
+      toggleDrawer: () => this.setState(s => ({ drawerOpen: !(s.drawerOpen != null ? s.drawerOpen : (this.props.chatOpenDefault || false)) })), closeDrawer: () => this.setState({ drawerOpen: false }),
+      onInput: e => this.setState({ input: e.target.value }), onKey: e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.send(); } }, send: () => this.send(),
+    };
+  }
+}
+</script>
+</body>
+</html>

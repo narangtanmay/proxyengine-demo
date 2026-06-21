@@ -204,6 +204,15 @@ def get_company_peers(isin: str, year: int = 2024):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.get("/api/companies/{isin}/ratchet-panel")
+def get_company_ratchet_panel(isin: str, year: int = 2024):
+    """Returns cluster ratchet panel points + global asymmetry slopes."""
+    try:
+        return sml_engine.get_ratchet_panel(isin, year)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/companies/{isin}/chart.png")
 def get_company_chart(isin: str, year: int = 2024):
     """Generates the SML Quantile Regression Baseline scatterplot dynamically and returns as PNG."""

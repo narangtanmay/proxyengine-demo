@@ -107,3 +107,16 @@ This prevents integration tests from passing while the LLM layer degrades to loc
 5. Add the test to `tests/test_historical_revolts.py` with a docstring citing the AGM ground truth.
 
 Do **not** reference removed helpers such as `generate_background_market_data()` — they are not part of this codebase.
+
+---
+
+## 6. Demo Script (5 Minutes)
+
+Use this walkthrough for the live "Demo-Ready Pay Governance Dashboard" flow:
+
+1. Start the app, load **Bayer AG** (`DE000BAY0017`), and go to Step 3.
+2. Walk the KPI row and confirm consistency: MoM, pay premium, reach ratio, and the recommended package bar all align.
+3. Toggle **Activist** vs **Board** lens and show both narratives track the same numeric trace.
+4. Use the Step 3 quick picker to switch to **SAP SE** (`DE0007164600`) without leaving the report page.
+5. Show that verdict and support visuals update: peer distribution marker, decomposition bridge, and ratchet panel.
+6. Close with explicit caveats: component split is illustrative, ESG is review-only unless verified in filings, no TSR/RDA synthetic charting.

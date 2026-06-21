@@ -149,7 +149,7 @@
 								>PayAudit</span
 							>
 							<span style="font-size: 10.5px; color: var(--color-muted, #6b7280)"
-								>Executive Pay Governance</span
+								>Automating Executive Pay Audits</span
 							>
 						</div>
 					</div>
@@ -691,30 +691,6 @@
 								"
 							>
 								<div style="font-size: 13px; font-weight: 700">Remuneration Package Specification</div>
-								<label
-									style="
-										display: inline-flex;
-										align-items: center;
-										gap: 7px;
-										font: inherit;
-										font-size: 12px;
-										font-weight: 600;
-										cursor: pointer;
-										color: #2563eb;
-										background: #eef2fb;
-										border: 1px solid #d6e0fb;
-										border-radius: 8px;
-										padding: 7px 12px;
-										transition-property: transform, background-color;
-										transition-duration: 0.15s;
-									"
-									style-hover="background:#e2eafd"
-									style-active="transform:scale(0.97)"
-								>
-									<span style="font-size: 13px">📄</span>
-									Upload PDF
-									<input type="file" accept="application/pdf" style="display: none" />
-								</label>
 							</div>
 							<div style="font-size: 12px; color: #6b7280; margin-bottom: 16px; text-wrap: pretty"
 								>Per board-position class, in € millions. The executive under review drives the
@@ -1143,9 +1119,9 @@
 								max-width: 600px;
 								text-wrap: pretty;
 							"
-							>Select the governance questions to evaluate for
-							<strong style="color: #374151">{{ focal.exec }}</strong> at {{ focal.name }}. Each selection
-							loads a dedicated supporting visualization in the report.</p
+							>Prove this package is fair to the market and compliant — select the audit criteria for
+							<strong style="color: #374151">{{ focal.exec }}</strong> at {{ focal.name }}. Each criterion
+							generates auditable evidence for AGM voting and board review.</p
 						>
 
 						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px">
@@ -1160,24 +1136,12 @@
 										>{{ q.check }}</span
 									>
 									<span style="flex: 1; min-width: 0">
-										<span style="display: flex; align-items: center; gap: 8px"
-											><span
-												style="
-													font-family: ui-monospace, &quot;SF Mono&quot;, Menlo, monospace;
-													font-size: 10px;
-													font-weight: 700;
-													color: #9aa1ad;
-												"
-												>{{ q.code }}</span
-											></span
-										>
 										<span
 											style="
 												display: block;
 												font-size: 14px;
 												font-weight: 700;
 												color: #1f2430;
-												margin-top: 3px;
 												text-wrap: balance;
 											"
 											>{{ q.title }}</span
@@ -3274,7 +3238,7 @@
 										justify-content: space-between;
 										margin-bottom: 4px;
 									"
-									><div style="font-size: 14px; font-weight: 700">Shadow Peer Universe</div
+									><div style="font-size: 14px; font-weight: 700">Peer Analysis</div
 									><div style="font-size: 11px; color: #6b7280"
 										>{{ clusterCount }} matched firms · high-level descriptive view</div
 									></div
@@ -3862,20 +3826,22 @@
 
 			    try {
 			      const qIds = Object.keys(selectedQ).filter(k => selectedQ[k]);
-			      for (const qId of qIds) {
+			      const results = await Promise.all(qIds.map(async qId => {
 			        const crit = mapping[qId];
-			        const res = await fetch('http://localhost:8000/api/insight', {
-			          method: 'POST',
-			          headers: { 'Content-Type': 'application/json' },
-			          body: JSON.stringify({ criterion: crit, lens, trace })
-			        });
-			        if (res.ok) {
-			          const data = await res.json();
-			          currentResults[qId] = data.content;
-			        } else {
-			          currentResults[qId] = (lens === 'auditor') ? `[Auditor Warning] Significant concerns regarding ${crit}.` : `[Compliance Note] This ${crit} is fully aligned with market practice.`;
-			        }
-			      }
+			        try {
+			          const res = await fetch('http://localhost:8000/api/insight', {
+			            method: 'POST',
+			            headers: { 'Content-Type': 'application/json' },
+			            body: JSON.stringify({ criterion: crit, lens, trace })
+			          });
+			          if (res.ok) {
+			            const data = await res.json();
+			            return [qId, data.content];
+			          }
+			        } catch (_) { /* fall through to template */ }
+			        return [qId, (lens === 'auditor') ? `[Auditor Warning] Significant concerns regarding ${crit}.` : `[Compliance Note] This ${crit} is fully aligned with market practice.`];
+			      }));
+			      results.forEach(([qId, text]) => { currentResults[qId] = text; });
 			    } catch (e) {
 			      // Fallback
 			      for (const qId of Object.keys(selectedQ).filter(k => selectedQ[k])) {

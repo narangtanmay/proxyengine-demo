@@ -112,9 +112,28 @@ export default function App() {
 
   const [lens, setLens] = useState<string>("auditor"); // auditor or compliance
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [peers, setPeers] = useState<any[]>([]);
   const [modelInfo, setModelInfo] = useState<ModelInfo>(FALLBACK_MODEL_INFO);
   const [chartUrl, setChartUrl] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
+
+  // Fetch real-time peers whenever the active company changes
+  useEffect(() => {
+    const isin = dashboardData?.isin || selectedCompanyId;
+    if (!isin) return;
+    const fetchPeers = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/companies/${isin}/peers`);
+        if (response.ok) {
+          const data = await response.json();
+          setPeers(data);
+        }
+      } catch (err) {
+        console.warn("Peers API offline. Using fallback visual generation.", err);
+      }
+    };
+    fetchPeers();
+  }, [selectedCompanyId, dashboardData?.isin]);
 
   // Page 2 -> 3 Progress loader states
   const [isCalculating, setIsCalculating] = useState(false);
@@ -363,7 +382,8 @@ export default function App() {
         body: JSON.stringify({
           company_id: selectedCompanyId,
           message: trimmed,
-          lens: lens
+          lens: lens,
+          year: dashboardData?.year || 2024
         })
       });
 
@@ -411,6 +431,38 @@ export default function App() {
 
   return (
     <div className="app-shell" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <style>{`
+        .glossary-term {
+          position: relative;
+          border-bottom: 1px dotted #1f4287;
+          cursor: help;
+        }
+        .glossary-term::after {
+          content: attr(data-tooltip);
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%) translateY(-6px);
+          background-color: #0f172a;
+          color: #ffffff;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: normal;
+          line-height: 1.4;
+          white-space: normal;
+          width: 220px;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+          opacity: 0;
+          pointer-events: none;
+          transition: all 0.15s ease-in-out;
+          z-index: 1000;
+        }
+        .glossary-term:hover::after {
+          opacity: 1;
+          transform: translateX(-50%) translateY(-10px);
+        }
+      `}</style>
       <Header 
         companies={companies}
         selectedId={selectedCompanyId}
@@ -561,9 +613,9 @@ export default function App() {
                 <label style={{ fontWeight: "bold", fontSize: "0.85rem", display: "block", marginBottom: "0.5rem" }}>Expected Amount (unrealized estimate - €)</label>
                 <input 
                   type="number"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ced4da" }}
-                  value={expectedAmount}
-                  onChange={(e) => setExpectedAmount(Number(e.target.value))}
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: (proposedBase + proposedSti + proposedLti) > maxEnumeration ? "2px solid #ef4444" : "1px solid #ced4da", transition: "all 0.15s ease" }}
+                  value={expectedAmount || ""}
+                  onChange={(e) => setExpectedAmount(Math.max(0, parseFloat(e.target.value) || 0))}
                 />
                 <span style={{ fontSize: "0.75rem", color: "#6c757d" }}>Target expectation baseline (not realized yet / hypothetical)</span>
               </div>
@@ -576,9 +628,9 @@ export default function App() {
                 <label style={{ fontWeight: "bold", fontSize: "0.85rem", display: "block", marginBottom: "0.5rem" }}>Fixed Base Component (€)</label>
                 <input 
                   type="number"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ced4da" }}
-                  value={proposedBase}
-                  onChange={(e) => setProposedSalary(Number(e.target.value))}
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: (proposedBase + proposedSti + proposedLti) > maxEnumeration ? "2px solid #ef4444" : "1px solid #ced4da", transition: "all 0.15s ease" }}
+                  value={proposedBase || ""}
+                  onChange={(e) => setProposedSalary(Math.max(0, parseFloat(e.target.value) || 0))}
                 />
               </div>
 
@@ -586,9 +638,9 @@ export default function App() {
                 <label style={{ fontWeight: "bold", fontSize: "0.85rem", display: "block", marginBottom: "0.5rem" }}>Short-Term Variable STV (€)</label>
                 <input 
                   type="number"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ced4da" }}
-                  value={proposedSti}
-                  onChange={(e) => setProposedSti(Number(e.target.value))}
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: (proposedBase + proposedSti + proposedLti) > maxEnumeration ? "2px solid #ef4444" : "1px solid #ced4da", transition: "all 0.15s ease" }}
+                  value={proposedSti || ""}
+                  onChange={(e) => setProposedSti(Math.max(0, parseFloat(e.target.value) || 0))}
                 />
               </div>
 
@@ -596,9 +648,9 @@ export default function App() {
                 <label style={{ fontWeight: "bold", fontSize: "0.85rem", display: "block", marginBottom: "0.5rem" }}>Long-Term Variable LTI (€)</label>
                 <input 
                   type="number"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ced4da" }}
-                  value={proposedLti}
-                  onChange={(e) => setProposedLti(Number(e.target.value))}
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: (proposedBase + proposedSti + proposedLti) > maxEnumeration ? "2px solid #ef4444" : "1px solid #ced4da", transition: "all 0.15s ease" }}
+                  value={proposedLti || ""}
+                  onChange={(e) => setProposedLti(Math.max(0, parseFloat(e.target.value) || 0))}
                 />
               </div>
 
@@ -606,12 +658,19 @@ export default function App() {
                 <label style={{ fontWeight: "bold", fontSize: "0.85rem", display: "block", marginBottom: "0.5rem" }}>Maximum Cap Enumeration (€)</label>
                 <input 
                   type="number"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ced4da" }}
-                  value={maxEnumeration}
-                  onChange={(e) => setMaxEnumeration(Number(e.target.value))}
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: (proposedBase + proposedSti + proposedLti) > maxEnumeration ? "2px solid #ef4444" : "1px solid #ced4da", transition: "all 0.15s ease" }}
+                  value={maxEnumeration || ""}
+                  onChange={(e) => setMaxEnumeration(Math.max(0, parseFloat(e.target.value) || 0))}
                 />
               </div>
             </div>
+
+            {(proposedBase + proposedSti + proposedLti) > maxEnumeration && (
+              <div style={{ marginBottom: "1.5rem", padding: "10px 14px", backgroundColor: "#fef2f2", border: "1px solid #fca5a5", borderRadius: "6px", color: "#b91c1c", fontSize: "0.85rem", fontWeight: "bold", display: "flex", gap: "8px", alignItems: "center" }}>
+                <span>⚠️</span>
+                <span>Statutory Cap Imbalance: Proposed total compensation sum (€M) exceeds the maximum statutory cap limit! Please adjust values to maintain board room compliance.</span>
+              </div>
+            )}
 
             <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "2rem" }}>
               <input 
@@ -777,6 +836,7 @@ export default function App() {
                 chartUrl={chartUrl}
                 modelInfo={modelInfo}
                 layout="cards-only"
+                peers={peers}
               />
             </div>
 
@@ -953,7 +1013,7 @@ export default function App() {
                                   <div>&bull; Good Years Slope (&beta;<sub style={{ fontSize: "0.6rem" }}>&uarr;</sub>) = {modelInfo.ratchet.good_year_slope.toFixed(4)}</div>
                                   <div>&bull; Bad Years Slope (&beta;<sub style={{ fontSize: "0.6rem" }}>&darr;</sub>) = {modelInfo.ratchet.bad_year_slope.toFixed(4)}</div>
                                   <div style={{ fontWeight: "bold", color: "#0f172a" }}>
-                                    &bull; Asymmetry Test (&beta;<sub style={{ fontSize: "0.6rem" }}>&uarr;</sub> &ge; 2.0 &times; |&beta;<sub style={{ fontSize: "0.6rem" }}>&darr;</sub>|): {modelInfo.ratchet.good_year_slope >= 2.0 * Math.abs(modelInfo.ratchet.bad_year_slope) ? "TRIGGERED (Asymmetric Pay-for-Luck)" : "PASSED (Symmetric Sensitivity)"}
+                                    &bull; Asymmetry Test (&beta;<sub style={{ fontSize: "0.6rem" }}>&uarr;</sub> &ge; 2.0 &times; |&beta;<sub style={{ fontSize: "0.6rem" }}>&darr;</sub>|): {modelInfo.ratchet.fires ? "TRIGGERED (Asymmetric Pay-for-Luck)" : "PASSED (Symmetric Sensitivity)"}
                                   </div>
                                 </div>
                               </div>
@@ -1063,41 +1123,46 @@ export default function App() {
                       </div>
                     )}
 
-                    {criteria.ltiRatio && (
-                      <div 
-                        style={{ 
-                          border: activeCriterion === "ltiRatio" ? `2px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}` : "1px solid #dee2e6", 
-                          borderRadius: "6px", 
-                          padding: "0.75rem", 
-                          cursor: "pointer", 
-                          backgroundColor: activeCriterion === "ltiRatio" ? "#f8f9fa" : "#ffffff",
-                          transition: "all 0.2s ease"
-                        }}
-                        onClick={() => setActiveCriterion("ltiRatio")}
-                      >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontWeight: "bold", fontSize: "0.9rem", display: "flex", alignItems: "center", gap: "8px" }}>
-                            <span>{activeCriterion === "ltiRatio" ? "▼" : "▶"}</span>
-                            <span>DCGK G.1 Compliant Incentive Balance check</span>
-                          </span>
-                          {renderStatusBadge((proposedLti / proposedBase) > 4.0 ? "warning" : "pass")}
-                        </div>
-                        {activeCriterion === "ltiRatio" && (
-                          <div style={{ 
-                            marginTop: "0.75rem", 
-                            paddingTop: "0.75rem", 
-                            borderTop: "1px dashed #dee2e6", 
-                            fontSize: "0.85rem", 
-                            color: "#333333",
-                            lineHeight: "1.4",
-                            borderLeft: `3px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}`,
-                            paddingLeft: "0.75rem"
-                          }}>
-                            {renderInsight("ltiRatio")}
-                          </div>
-                        )}
-                      </div>
-                    )}
+                     {criteria.ltiRatio && (() => {
+                       const ltiRatioVal = (dashboardData && dashboardData.lti_vs_salary_ratio !== undefined && dashboardData.lti_vs_salary_ratio !== null)
+                         ? dashboardData.lti_vs_salary_ratio
+                         : (proposedBase > 0 ? proposedLti / proposedBase : 0);
+                       return (
+                         <div 
+                           style={{ 
+                             border: activeCriterion === "ltiRatio" ? `2px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}` : "1px solid #dee2e6", 
+                             borderRadius: "6px", 
+                             padding: "0.75rem", 
+                             cursor: "pointer", 
+                             backgroundColor: activeCriterion === "ltiRatio" ? "#f8f9fa" : "#ffffff",
+                             transition: "all 0.2s ease"
+                           }}
+                           onClick={() => setActiveCriterion("ltiRatio")}
+                         >
+                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                             <span style={{ fontWeight: "bold", fontSize: "0.9rem", display: "flex", alignItems: "center", gap: "8px" }}>
+                               <span>{activeCriterion === "ltiRatio" ? "▼" : "▶"}</span>
+                               <span>DCGK G.1 Compliant Incentive Balance check</span>
+                             </span>
+                             {renderStatusBadge(ltiRatioVal > 4.0 ? "warning" : "pass")}
+                           </div>
+                           {activeCriterion === "ltiRatio" && (
+                             <div style={{ 
+                               marginTop: "0.75rem", 
+                               paddingTop: "0.75rem", 
+                               borderTop: "1px dashed #dee2e6", 
+                               fontSize: "0.85rem", 
+                               color: "#333333",
+                               lineHeight: "1.4",
+                               borderLeft: `3px solid ${lens === "auditor" ? "#1f4287" : "#ff7600"}`,
+                               paddingLeft: "0.75rem"
+                             }}>
+                               {renderInsight("ltiRatio")}
+                             </div>
+                           )}
+                         </div>
+                       );
+                     })()}
 
                     {criteria.esg && (
                       <div 
@@ -1143,13 +1208,14 @@ export default function App() {
                {/* Right Column: High Level Descriptive & Supporting Visualizations */}
               <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 
-                {/* 1. High Level Descriptive Visualizations */}
-                <Dashboard
-                  data={dashboardData}
-                  chartUrl={chartUrl}
-                  modelInfo={modelInfo}
-                  layout="visuals-only"
-                />
+                 {/* 1. High Level Descriptive Visualizations */}
+                 <Dashboard
+                   data={dashboardData}
+                   chartUrl={chartUrl}
+                   modelInfo={modelInfo}
+                   layout="visuals-only"
+                   peers={peers}
+                 />
 
                 {/* 2. Question Specific Supporting Visualizations (Dynamic) */}
                 <div style={{ border: "1px solid #dee2e6", borderRadius: "6px", padding: "1.25rem", backgroundColor: "#ffffff" }}>
@@ -1255,11 +1321,11 @@ export default function App() {
                       </p>
                       <div style={{ height: "16px", background: "linear-gradient(90deg, #10b981 0%, #f59e0b 55%, #ef4444 100%)", borderRadius: "10px", position: "relative", margin: "2.5rem 0 1.5rem 0", overflow: "visible", boxShadow: "inset 0 2px 4px rgba(0,0,0,0.1)", border: "1px solid rgba(0,0,0,0.05)" }}>
                         {/* Safe Zone label */}
-                        <div style={{ position: "absolute", left: "15%", top: "50%", transform: "translate(-50%, -50%)", fontSize: "0.65rem", color: "#065f46", fontWeight: "bold", backgroundColor: "rgba(255,255,255,0.85)", padding: "2px 6px", borderRadius: "4px", backdropFilter: "blur(4px)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>Low Concern</div>
+                        <div style={{ position: "absolute", left: "25%", top: "50%", transform: "translate(-50%, -50%)", fontSize: "0.65rem", color: "#065f46", fontWeight: "bold", backgroundColor: "rgba(255,255,255,0.85)", padding: "2px 6px", borderRadius: "4px", backdropFilter: "blur(4px)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>Low Concern</div>
                         {/* Caution Zone label */}
-                        <div style={{ position: "absolute", left: "56.5%", top: "50%", transform: "translate(-50%, -50%)", fontSize: "0.65rem", color: "#92400e", fontWeight: "bold", backgroundColor: "rgba(255,255,255,0.85)", padding: "2px 6px", borderRadius: "4px", backdropFilter: "blur(4px)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>Caution</div>
+                        <div style={{ position: "absolute", left: "78.75%", top: "50%", transform: "translate(-50%, -50%)", fontSize: "0.65rem", color: "#92400e", fontWeight: "bold", backgroundColor: "rgba(255,255,255,0.85)", padding: "2px 6px", borderRadius: "4px", backdropFilter: "blur(4px)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>Caution</div>
                         {/* High Concern Zone label */}
-                        <div style={{ position: "absolute", left: "84%", top: "50%", transform: "translate(-50%, -50%)", fontSize: "0.65rem", color: "#991b1b", fontWeight: "bold", backgroundColor: "rgba(255,255,255,0.85)", padding: "2px 6px", borderRadius: "4px", backdropFilter: "blur(4px)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>High Concern</div>
+                        <div style={{ position: "absolute", left: "95%", top: "50%", transform: "translate(-50%, -50%)", fontSize: "0.65rem", color: "#991b1b", fontWeight: "bold", backgroundColor: "rgba(255,255,255,0.85)", padding: "2px 6px", borderRadius: "4px", backdropFilter: "blur(4px)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>High Concern</div>
                         
                         {/* Liquid Glass Slider Marker Pointer */}
                         <div style={{ 
@@ -1307,10 +1373,10 @@ export default function App() {
                           </div>
                         </div>
                       </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "#6c757d" }}>
-                        <span>Median Peer (1.0x)</span>
-                        <span>ISS Concern limit (1.5x)</span>
-                        <span>High Risk Limit (2.0x)</span>
+                      <div style={{ position: "relative", height: "20px", fontSize: "0.75rem", color: "#6c757d", marginTop: "4px" }}>
+                        <span style={{ position: "absolute", left: "45%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}>Median Peer (1.0x)</span>
+                        <span style={{ position: "absolute", left: "67.5%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}>ISS Concern limit (1.5x)</span>
+                        <span style={{ position: "absolute", left: "90%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}>High Risk Limit (2.0x)</span>
                       </div>
                     </div>
                   )}
@@ -1323,7 +1389,7 @@ export default function App() {
                       <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "1rem", backgroundColor: "#fffdf5", borderRadius: "6px", border: "1px solid #ffeeba", fontSize: "0.8rem", color: "#856404" }}>
                         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                           <span style={{ fontSize: "1.2rem" }}>⚖️</span>
-                          <strong>German Commercial Code Transparency (§ 286 Abs. 5 HGB):</strong>
+                          <strong>German Commercial Code Transparency (<span className="glossary-term" data-tooltip="Under German corporate law, a corporation can opt out of individual executive board compensation disclosures via a supermajority shareholder resolution under § 286 Abs. 5 HGB.">§ 286 Abs. 5 HGB</span>):</strong>
                         </div>
                         <p style={{ margin: 0, lineHeight: "1.4" }}>
                           Under German corporate law, a corporation can opt out of individual executive compensation disclosure via supermajority shareholder vote. Doing so prevents proxy advisors from running automated size regressions.

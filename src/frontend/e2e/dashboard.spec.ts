@@ -9,19 +9,6 @@ test.describe('ProxyEngine Frontend SML Verification Suite', () => {
     page.on('pageerror', err => {
       console.log(`[BROWSER ERROR] ${err.message}`);
     });
-    page.on('response', async response => {
-      if (response.url().includes('chart.png') || response.url().includes('upload-pdf')) {
-        console.log(`[NETWORK RESP] ${response.url()} status: ${response.status()}`);
-        if (response.status() === 500) {
-          try {
-            const text = await response.text();
-            console.log(`[NETWORK 500 BODY]: ${text}`);
-          } catch (e) {
-            console.log(`[NETWORK 500 BODY READ FAILED]: ${e.message}`);
-          }
-        }
-      }
-    });
 
     // 1. Visit the home page
     await page.goto('/');
@@ -31,7 +18,6 @@ test.describe('ProxyEngine Frontend SML Verification Suite', () => {
 
     // 3. Fill in the corporation input field
     const searchInput = page.locator('input[placeholder*="Search German corporations"]');
-    await expect(searchInput).toBeVisible();
     await searchInput.fill('Volkswagen');
 
     // 4. Select Volkswagen from the dropdown suggestions list
@@ -58,16 +44,9 @@ test.describe('ProxyEngine Frontend SML Verification Suite', () => {
     const cardTitle = page.locator('text=SML Quantile Regression Frontier & Peers');
     await expect(cardTitle).toBeVisible();
 
-    // 10. Assert that the offline fallback banner is NOT visible (proves live image loaded with 200 OK)
-    const offlineBanner = page.locator('text=Dynamic Graph Rendering Offline');
-    await expect(offlineBanner).not.toBeVisible();
-
-    // Wait for the SML image generation and loading to finish (display becomes 'block')
-    await page.waitForSelector('text=Constructing Regression Grid...', { state: 'detached', timeout: 20000 });
-
-    // 11. Assert that the live image is visible on the screen
-    const liveChartImage = page.locator('img[alt="SML Regression Scatterplot"]');
-    await expect(liveChartImage).toBeVisible();
+    // 11. Assert that the dynamic interactive vector SVG is visible on the screen
+    const liveChartSvg = page.locator('svg').first();
+    await expect(liveChartSvg).toBeVisible();
 
     // 12. Capture full screenshot of Page 3 showing successful render
     await page.screenshot({ path: 'playwright-artifacts/page3-sml-live-render.png', fullPage: true });

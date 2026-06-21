@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/CL1nu5/tum-science-hackathon-air2@d4e139b52b931fd6dd09ff7450d7147e4cd082c3/src/frontend/support.js"></script>
+<script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
@@ -55,9 +55,7 @@
     </div>
 
     <div style="display:flex;align-items:center;gap:12px;min-width:170px;justify-content:flex-end">
-      <button onClick="{{ toggleDrawer }}" style="display:flex;align-items:center;gap:8px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--color-accent-contrast,#fff);background:var(--color-accent,#2563eb);border:none;border-radius:9px;padding:9px 15px;transition-property:transform,background-color;transition-duration:.15s;transition-timing-function:ease-out" style-hover="background:#1e54c9" style-active="transform:scale(0.96)">
-        <span style="width:8px;height:8px;border-radius:2px;background:#fff;transform:rotate(45deg)"></span>Ask AEQUITAS
-      </button>
+      <!-- Chat trigger button removed -->
     </div>
   </header>
 
@@ -113,6 +111,10 @@
           <label><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:6px">Operating revenue (€B)</span><input value="{{ focal.opre }}" onInput="{{ onOpre }}" type="number" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;color:#1f2430;font-variant-numeric:tabular-nums" style-focus="border-color:#2563eb;outline:none"></label>
           <label><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:6px">Return on assets (%)</span><input value="{{ focal.roa }}" onInput="{{ onRoa }}" type="number" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;color:#1f2430;font-variant-numeric:tabular-nums" style-focus="border-color:#2563eb;outline:none"></label>
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <label><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:6px">Max statutory cap (€M)</span><input value="{{ focal.maxEnumeration }}" onInput="{{ onMaxEnumeration }}" type="number" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;color:#1f2430;font-variant-numeric:tabular-nums" style-focus="border-color:#2563eb;outline:none"></label>
+          <label><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:6px">Expected amount (€M)</span><input value="{{ focal.expectedAmount }}" onInput="{{ onExpectedAmount }}" type="number" style="width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid #d9dce1;border-radius:8px;background:#fff;color:#1f2430;font-variant-numeric:tabular-nums" style-focus="border-color:#2563eb;outline:none"></label>
+        </div>
         <div style="margin-top:16px;padding:14px;background:#f7f8fa;border:1px solid #eceef1;border-radius:10px">
           <div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280">Matched against</div>
           <div style="font-size:14px;font-weight:700;margin-top:4px">{{ clusterCount }} peer firms · {{ focal.sector }}</div>
@@ -158,8 +160,29 @@
   <!-- ============================================================ -->
   <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
   <main style="max-width:1000px;margin:0 auto;padding:30px 28px 70px;animation:mer-fade .35s ease both">
-    <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent,#2563eb)">Step 2 · Query Specification</div>
-    <h1 style="margin:6px 0 6px;font-size:24px;font-weight:800;letter-spacing:-0.02em;text-wrap:balance">What do you want to know about the proposal?</h1>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:6px">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent,#2563eb)">Step 2 · Query Specification</div>
+        <h1 style="margin:6px 0 0;font-size:24px;font-weight:800;letter-spacing:-0.02em;text-wrap:balance">What do you want to know about the proposal?</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px">
+        <span style="font-size:12px;color:var(--color-muted,#6b7280)">Quick-load a profile</span>
+        <div style="position:relative">
+          <button onClick="{{ togglePicker }}" style="display:flex;align-items:center;gap:9px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:9px;padding:8px 12px;transition-property:transform,border-color;transition-duration:.15s" style-hover="border-color:#b9c0cc" style-active="transform:scale(0.97)">{{ focal.name }} <span style="font-size:9px;color:#6b7280">▼</span></button>
+          <sc-if value="{{ pickerOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closePicker }}" style="position:fixed;inset:0;z-index:45"></div>
+            <div style="position:absolute;top:42px;right:0;z-index:46;width:300px;max-height:340px;overflow-y:auto;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:11px;box-shadow:0 18px 40px rgba(16,24,40,.16);padding:6px;animation:mer-fade .14s ease both">
+              <sc-for list="{{ presets }}" as="pr" hint-placeholder-count="10">
+                <button onClick="{{ pr.load }}" style="display:flex;align-items:center;gap:10px;width:100%;font:inherit;text-align:left;cursor:pointer;background:transparent;border:none;border-radius:8px;padding:8px 9px;transition-property:background-color;transition-duration:.12s" style-hover="background:#f3f5f8">
+                  <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#eef2fb;font-size:9.5px;font-weight:700;color:var(--color-accent,#2563eb);flex:none">{{ pr.ticker }}</span>
+                  <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:600">{{ pr.name }}</span><span style="display:block;font-size:11px;color:#6b7280">{{ pr.exec }}</span></span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
     <p style="margin:0 0 22px;font-size:13.5px;color:var(--color-muted,#6b7280);max-width:600px;text-wrap:pretty">Select the governance questions to evaluate for <strong style="color:#374151">{{ focal.exec }}</strong> at {{ focal.name }}. Each selection loads a dedicated supporting visualization in the report.</p>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -209,6 +232,48 @@
   </section>
 
   <main style="max-width:1440px;margin:0 auto;padding:20px 28px 64px;display:flex;flex-direction:column;gap:18px">
+
+    <!-- ========================================== -->
+    <!-- 5-KPI CARD GRID (React-Inspired Synergy)    -->
+    <!-- ========================================== -->
+    <div style="display:grid;grid-template-columns:repeat(5, 1fr);gap:14px;margin-bottom:10px">
+      
+      <!-- Card 1: Strategic Risk Rating -->
+      <div style="background:{{ verdictBg }};border:1px solid {{ verdictBorder }};border-radius:12px;padding:16px;box-shadow:{{ verdictGlow }} 0 0 10px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;display:block;margin-bottom:6px">Strategic Risk</span>
+        <div style="font-size:22px;font-weight:800;color:{{ verdictColor }}">{{ verdictWord }}</div>
+        <span style="font-size:11px;color:#6b7280;display:block;margin-top:4px">{{ tally.warn }} caution · {{ tally.fail }} concern flags</span>
+      </div>
+
+      <!-- Card 2: Compensation Excess -->
+      <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:12px;padding:16px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;display:block;margin-bottom:6px">Compensation Excess</span>
+        <div style="font-size:20px;font-weight:800;color:var(--color-text,#1f2430)">{{ proposed.deltaVsBaseline }}</div>
+        <span style="font-size:11px;color:#6b7280;display:block;margin-top:4px">over recommended package</span>
+      </div>
+
+      <!-- Card 3: Multiple of Median (MoM) -->
+      <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:12px;padding:16px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;display:block;margin-bottom:6px">Multiple of Median</span>
+        <div style="font-size:22px;font-weight:800;color:var(--color-text,#1f2430)">{{ momLabel }}</div>
+        <span style="font-size:11px;color:#6b7280;display:block;margin-top:4px">vs peer-cluster median</span>
+      </div>
+
+      <!-- Card 4: SML Pay Premium -->
+      <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:12px;padding:16px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;display:block;margin-bottom:6px">Pay Premium</span>
+        <div style="font-size:20px;font-weight:800;color:var(--color-text,#1f2430)">{{ premiumLabel }}</div>
+        <span style="font-size:11px;color:#6b7280;display:block;margin-top:4px">above SML size-fitted frontier</span>
+      </div>
+
+      <!-- Card 5: Econometric Reach -->
+      <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:12px;padding:16px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;display:block;margin-bottom:6px">Econometric Reach</span>
+        <div style="font-size:22px;font-weight:800;color:var(--color-text,#1f2430)">{{ reach.ratio }}</div>
+        <span style="font-size:11px;color:#6b7280;display:block;margin-top:4px">size-equivalent scale ratio</span>
+      </div>
+
+    </div>
 
     <!-- profile toolbar -->
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:12px;padding:11px 14px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
@@ -274,31 +339,62 @@
             <sc-if value="{{ chartReady }}" hint-placeholder-val="{{ false }}">
               <div style="position:absolute;inset:0;animation:mer-fade .35s ease both">
                 <svg viewBox="0 0 560 360" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
-                  <line x1="58" y1="30" x2="58" y2="300" stroke="#e3e6eb" stroke-width="1"></line>
-                  <line x1="58" y1="300" x2="470" y2="300" stroke="#e3e6eb" stroke-width="1"></line>
-                  <sc-for list="{{ gridY }}" as="g" hint-placeholder-count="4"><line x1="58" y1="{{ g.y }}" x2="470" y2="{{ g.y }}" stroke="#f0f1f4" stroke-width="1"></line></sc-for>
-                  <polygon points="{{ bandPoints }}" fill="rgba(37,99,235,.07)"></polygon>
-                  <line x1="{{ frontier.x1 }}" y1="{{ frontier.y1 }}" x2="{{ frontier.x2 }}" y2="{{ frontier.y2 }}" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 4"></line>
-                  <sc-for list="{{ leaders }}" as="l" hint-placeholder-count="5"><line x1="{{ l.x1 }}" y1="{{ l.y1 }}" x2="{{ l.x2 }}" y2="{{ l.y2 }}" stroke="{{ l.color }}" stroke-width="1" stroke-opacity="0.45"></line></sc-for>
-                  <sc-for list="{{ points }}" as="p" hint-placeholder-count="10"><circle cx="{{ p.cx }}" cy="{{ p.cy }}" r="{{ p.ring }}" fill="{{ p.color }}" fill-opacity="0.14"></circle><circle cx="{{ p.cx }}" cy="{{ p.cy }}" r="{{ p.r }}" fill="{{ p.color }}" stroke="#fff" stroke-width="{{ p.sw }}"></circle></sc-for>
+                  <line x1="58" y1="30" x2="58" y2="300" stroke="#e2e8f0" stroke-width="1"></line>
+                  <line x1="58" y1="300" x2="470" y2="300" stroke="#e2e8f0" stroke-width="1"></line>
+                  <sc-for list="{{ gridY }}" as="g" hint-placeholder-count="4"><line x1="58" y1="{{ g.y }}" x2="470" y2="{{ g.y }}" stroke="#f1f5f9" stroke-width="1"></line></sc-for>
+                  <polygon points="{{ bandPoints }}" fill="rgba(37,99,235,.05)"></polygon>
+                  <line x1="{{ frontier.x1 }}" y1="{{ frontier.y1 }}" x2="{{ frontier.x2 }}" y2="{{ frontier.y2 }}" stroke="#2563eb" stroke-width="2" stroke-dasharray="5 3"></line>
+                  <sc-for list="{{ points }}" as="p" hint-placeholder-count="10">
+                    <circle cx="{{ p.cx }}" cy="{{ p.cy }}" r="{{ p.ring }}" fill="{{ p.color }}" fill-opacity="0.12" ref="{{ p.bindRef }}"></circle>
+                    <circle cx="{{ p.cx }}" cy="{{ p.cy }}" r="{{ p.r }}" fill="{{ p.color }}" stroke="#fff" stroke-width="{{ p.sw }}" ref="{{ p.bindRef }}"></circle>
+                  </sc-for>
+                  <sc-for list="{{ directLabels }}" as="dl" hint-placeholder-count="5">
+                    <text x="{{ dl.x }}" y="{{ dl.y }}" fill="{{ dl.color }}" text-anchor="{{ dl.anchor }}" font-family="system-ui, -apple-system, sans-serif" font-size="9.5px" font-weight="600" opacity="0.85">{{ dl.name }}</text>
+                  </sc-for>
                 </svg>
                 <sc-for list="{{ xTicks }}" as="t" hint-placeholder-count="4"><span style="position:absolute;left:{{ t.left }};top:84%;transform:translateX(-50%);font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:10px;color:#9aa1ad;font-variant-numeric:tabular-nums">{{ t.label }}</span></sc-for>
                 <sc-for list="{{ yTicks }}" as="t" hint-placeholder-count="4"><span style="position:absolute;right:89%;top:{{ t.top }};transform:translateY(-50%);font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:10px;color:#9aa1ad;font-variant-numeric:tabular-nums">{{ t.label }}</span></sc-for>
-                <sc-for list="{{ chips }}" as="ch" hint-placeholder-count="5"><div style="position:absolute;left:{{ ch.left }};top:{{ ch.top }};transform:translateY(-50%);display:flex;flex-direction:column;line-height:1.15;background:#fff;border:1px solid {{ ch.border }};border-radius:6px;padding:3px 7px;box-shadow:0 2px 6px rgba(16,24,40,.08);white-space:nowrap;pointer-events:none"><span style="font-size:10px;font-weight:700">{{ ch.name }}</span><span style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:9px;font-weight:600;color:{{ ch.color }};font-variant-numeric:tabular-nums">{{ ch.value }}</span></div></sc-for>
+                
+                <!-- Floating High-Fidelity Tooltip -->
+                <sc-if value="{{ hoveredPt }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute;left:{{ hoveredPt.left }};top:{{ hoveredPt.top }};transform:translate(-50%,-112%);background:rgba(15,23,42,0.96);backdrop-filter:blur(6px);color:#fff;border-radius:10px;padding:9px 12px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.3),0 8px 10px -6px rgba(0,0,0,0.3);pointer-events:none;z-index:50;display:flex;flex-direction:column;gap:5px;width:200px;animation:mer-fade .15s ease both;border:1px solid rgba(255,255,255,0.15)">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+                      <span style="font-size:11.5px;font-weight:700;color:#f8fafc">{{ hoveredPt.name }}</span>
+                      <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:{{ hoveredPt.statusColor }}33;color:{{ hoveredPt.statusColor }};border:1px solid {{ hoveredPt.statusColor }}55">{{ hoveredPt.status }}</span>
+                    </div>
+                    <div style="height:1px;background:rgba(255,255,255,0.1);margin:2px 0"></div>
+                    <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8">
+                      <span>Operating Revenue:</span>
+                      <span style="font-family:ui-monospace,monospace;font-weight:600;color:#f1f5f9">€{{ hoveredPt.opre }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8">
+                      <span>Total Compensation:</span>
+                      <span style="font-family:ui-monospace,monospace;font-weight:600;color:#f1f5f9">€{{ hoveredPt.pay }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8">
+                      <span>Vs. SML frontier:</span>
+                      <span style="font-family:ui-monospace,monospace;font-weight:600;color:#f1f5f9">{{ hoveredPt.dist }}</span>
+                    </div>
+                    <span style="position:absolute;left:50%;bottom:-4px;transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:rgba(15,23,42,0.96);border-right:1px solid rgba(255,255,255,0.15);border-bottom:1px solid rgba(255,255,255,0.15)"></span>
+                  </div>
+                </sc-if>
+                
                 <span style="position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);font-size:10px;font-weight:600;color:#6b7280">Operating Revenue — log (€B)</span>
               </div>
             </sc-if>
           </div>
           <div>
-            <div style="font-size:11.5px;color:#6b7280;text-wrap:pretty">{{ smlInsight }}</div>
-            <div style="margin-top:12px;display:flex;flex-direction:column;gap:7px;font-size:11.5px;color:#4b5563">
-              <span style="display:flex;align-items:center;gap:7px"><span style="width:18px;height:0;border-top:2px dashed #2563eb"></span>Fitted frontier</span>
-              <span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#d32f2f"></span>Above frontier</span>
-              <span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#1e8e3e"></span>At / below</span>
-              <span style="display:flex;align-items:center;gap:7px"><span style="width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #2563eb"></span>{{ focal.ticker }} (subject)</span>
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+              <div style="font-size:11px;line-height:1.4;color:#475569;text-wrap:pretty">{{ smlInsight }}</div>
+              <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;font-size:11px;color:#4b5563">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin-bottom:2px">Legend</div>
+                <span style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:0;border-top:2px dashed #2563eb"></span>Fitted SML frontier</span>
+                <span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#ef4444"></span>Above frontier (Premium)</span>
+                <span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#10b981"></span>At / below (Aligned)</span>
+                <span style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #2563eb"></span>{{ focal.ticker }} (Subject)</span>
+              </div>
             </div>
           </div>
-        </div>
       </div>
       </sc-if>
 
@@ -339,14 +435,48 @@
       <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:17px 18px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
         <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa1ad">Q4 · Size / reach premium</div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px"><div style="font-size:14px;font-weight:700;text-wrap:balance">Does firm scale justify the level?</div><span style="font-family:ui-monospace,monospace;font-size:15px;font-weight:800;color:#2563eb;font-variant-numeric:tabular-nums;flex:none">{{ reach.ratio }}</span></div>
-        <div style="margin-top:30px;position:relative;height:14px;border-radius:8px;background:linear-gradient(90deg,#eef0f3,#dbe3f5)">
-          <div style="position:absolute;top:50%;left:{{ reach.medPct }};transform:translate(-50%,-50%);width:2px;height:24px;background:#9aa6b8"></div>
-          <div style="position:absolute;top:-22px;left:{{ reach.medPct }};transform:translateX(-50%);font-size:9.5px;color:#9aa1ad;white-space:nowrap">median</div>
-          <div style="position:absolute;top:50%;left:{{ reach.focalPct }};transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:#2563eb;border:2px solid #fff;box-shadow:0 2px 6px rgba(37,99,235,.4)"></div>
-          <div style="position:absolute;top:22px;left:{{ reach.focalPct }};transform:translateX(-50%);font-size:9.5px;font-weight:700;color:#2563eb;white-space:nowrap">{{ focal.ticker }}</div>
+        
+        <!-- Vertical Column Chart (High-Fidelity Render) -->
+        <div style="position:relative;margin-top:25px;height:160px;border-bottom:1px solid #e2e8f0">
+          <!-- grid lines -->
+          <div style="position:absolute;left:0;right:0;top:0;height:1px;background:#f1f5f9"></div>
+          <div style="position:absolute;left:0;right:0;top:25%;height:1px;background:#f1f5f9"></div>
+          <div style="position:absolute;left:0;right:0;top:50%;height:1px;background:#f1f5f9"></div>
+          <div style="position:absolute;left:0;right:0;top:75%;height:1px;background:#f1f5f9"></div>
+          
+          <!-- Y-Axis Labels -->
+          <div style="position:absolute;left:0;top:0;font-family:ui-monospace,monospace;font-size:9px;color:#94a3b8;transform:translateY(-50%)">€{{ reach.max }}B</div>
+          <div style="position:absolute;left:0;top:50%;font-family:ui-monospace,monospace;font-size:9px;color:#94a3b8;transform:translateY(-50%)">€{{ reach.med }}B</div>
+          <div style="position:absolute;left:0;top:100%;font-family:ui-monospace,monospace;font-size:9px;color:#94a3b8;transform:translateY(-50%)">€0B</div>
+          
+          <!-- Bars Container -->
+          <div style="position:absolute;left:45px;right:10px;top:0;bottom:0;display:flex;align-items:flex-end;justify-content:space-around">
+            <!-- Min Bar -->
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;flex:1;height:100%">
+              <div style="height:{{ reach.minHeight }};width:24px;background:#cbd5e1;border-radius:4px 4px 0 0"></div>
+              <span style="font-size:9.5px;color:#64748b;white-space:nowrap">Min</span>
+            </div>
+            <!-- Cluster Median Bar -->
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;flex:1;height:100%">
+              <div style="height:{{ reach.medHeight }};width:24px;background:#94a3b8;border-radius:4px 4px 0 0"></div>
+              <span style="font-size:9.5px;color:#64748b;white-space:nowrap">Cluster median</span>
+            </div>
+            <!-- Subject Bar -->
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;flex:1;height:100%">
+              <div style="height:{{ reach.focalHeight }};width:24px;background:#2563eb;border-radius:4px 4px 0 0"></div>
+              <span style="font-size:9.5px;color:#2563eb;font-weight:700;white-space:nowrap">Subject</span>
+            </div>
+            <!-- Max Bar -->
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;flex:1;height:100%">
+              <div style="height:{{ reach.maxHeight }};width:24px;background:#cbd5e1;border-radius:4px 4px 0 0"></div>
+              <span style="font-size:9.5px;color:#64748b;white-space:nowrap">Max</span>
+            </div>
+          </div>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-top:30px;font-family:ui-monospace,monospace;font-size:10px;color:#9aa1ad;font-variant-numeric:tabular-nums"><span>€{{ reach.min }}B</span><span>operating revenue (cluster range)</span><span>€{{ reach.max }}B</span></div>
-        <div style="font-size:11.5px;color:#6b7280;margin-top:12px;text-wrap:pretty">{{ reach.insight }}</div>
+
+        <div style="margin-top:16px;background:#f8fafc;border-radius:8px;padding:12px;font-size:12px;color:#334155;line-height:1.5;text-align:center">
+          At <strong>€{{ focal.opre }}B</strong> revenue the firm is large, but pay outpaces the scale-implied level by <strong>{{ reach.ratio }}</strong>.
+        </div>
       </div>
       </sc-if>
 
@@ -382,53 +512,34 @@
     <div style="background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:14px;padding:17px 18px 8px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div style="font-size:14px;font-weight:700">Shadow Peer Universe</div><div style="font-size:11px;color:#6b7280">{{ clusterCount }} matched firms · high-level descriptive view</div></div>
       <div style="font-size:11.5px;color:#6b7280;margin-bottom:10px;text-wrap:pretty">Econometric cluster used to fit the frontier and median.</div>
-      <div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.4fr) 64px 86px;gap:0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b7280;padding:0 8px 8px;border-bottom:1px solid #d9dce1"><span>Company</span><span>Revenue (scale)</span><span style="text-align:right">ROA</span><span style="text-align:right">Total Payout</span></div>
-      <div style="max-height:236px;overflow-y:auto;margin:0 -2px">
-        <sc-for list="{{ shadowRows }}" as="row" hint-placeholder-count="9">
-          <div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.4fr) 64px 86px;gap:0;align-items:center;padding:9px 8px;border-bottom:1px solid #f0f1f4">
-            <div style="display:flex;align-items:center;gap:9px;min-width:0"><span style="width:4px;height:26px;border-radius:3px;background:{{ row.accent }};flex:none"></span><div style="line-height:1.2;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ row.name }}</span><span style="display:block;font-size:10.5px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ row.exec }}</span></div></div>
-            <div style="display:flex;align-items:center;gap:8px;padding-right:10px"><div style="flex:1;height:6px;border-radius:4px;background:#eef0f3;overflow:hidden"><div style="height:100%;width:{{ row.revW }};border-radius:4px;background:#c2cbdb"></div></div><span style="font-family:ui-monospace,monospace;font-size:11px;color:#374151;font-variant-numeric:tabular-nums;flex:none">{{ row.rev }}</span></div>
-            <span style="font-family:ui-monospace,monospace;font-size:11.5px;font-weight:600;text-align:right;color:{{ row.roaColor }};font-variant-numeric:tabular-nums">{{ row.roa }}</span>
-            <span style="font-family:ui-monospace,monospace;font-size:11.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums">{{ row.pay }}</span>
+      <div style="width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div style="min-width:520px">
+          <div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.4fr) 64px 86px;gap:0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b7280;padding:0 8px 8px;border-bottom:1px solid #d9dce1"><span>Company</span><span>Revenue (scale)</span><span style="text-align:right">ROA</span><span style="text-align:right">Total Payout</span></div>
+          <div style="max-height:236px;overflow-y:auto;margin:0 -2px">
+            <sc-for list="{{ shadowRows }}" as="row" hint-placeholder-count="9">
+              <div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.4fr) 64px 86px;gap:0;align-items:center;padding:9px 8px;border-bottom:1px solid #f0f1f4">
+                <div style="display:flex;align-items:center;gap:9px;min-width:0"><span style="width:4px;height:26px;border-radius:3px;background:{{ row.accent }};flex:none"></span><div style="line-height:1.2;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ row.name }}</span><span style="display:block;font-size:10.5px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ row.exec }}</span></div></div>
+                <div style="display:flex;align-items:center;gap:8px;padding-right:10px"><div style="flex:1;height:6px;border-radius:4px;background:#eef0f3;overflow:hidden"><div style="height:100%;width:{{ row.revW }};border-radius:4px;background:#c2cbdb"></div></div><span style="font-family:ui-monospace,monospace;font-size:11px;color:#374151;font-variant-numeric:tabular-nums;flex:none">{{ row.rev }}</span></div>
+                <span style="font-family:ui-monospace,monospace;font-size:11.5px;font-weight:600;text-align:right;color:{{ row.roaColor }};font-variant-numeric:tabular-nums">{{ row.roa }}</span>
+                <span style="font-family:ui-monospace,monospace;font-size:11.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums">{{ row.pay }}</span>
+              </div>
+            </sc-for>
           </div>
-        </sc-for>
+        </div>
       </div>
     </div>
   </main>
   </div>
   </sc-if>
 
-  <!-- ===== ADVISOR SCRIM + DRAWER ===== -->
-  <div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;z-index:55;background:rgba(20,28,42,.18);opacity:{{ scrimOp }};pointer-events:{{ scrimPE }};transition-property:opacity;transition-duration:.26s"></div>
-  <aside style="position:fixed;top:0;right:0;bottom:0;z-index:60;width:420px;max-width:100vw;background:#fff;border-left:1px solid var(--color-border,#d9dce1);box-shadow:-14px 0 48px rgba(16,24,40,.14);display:flex;flex-direction:column;transform:translateX({{ drawerX }});transition-property:transform;transition-duration:.28s;transition-timing-function:cubic-bezier(.4,0,.2,1)">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #eceef1">
-      <div style="display:flex;align-items:center;gap:11px"><div style="width:32px;height:32px;border-radius:9px;background:var(--color-text,#1f2430);display:flex;align-items:center;justify-content:center;flex:none"><div style="width:11px;height:11px;border-radius:2px;background:var(--color-accent,#2563eb);transform:rotate(45deg)"></div></div><div style="line-height:1.2"><div style="font-size:13px;font-weight:700;letter-spacing:.04em">AEQUITAS ADVISOR</div><div style="font-size:11px;color:#6b7280">Reviewing {{ focal.name }}</div></div></div>
-      <button onClick="{{ closeDrawer }}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font:inherit;font-size:15px;cursor:pointer;color:#6b7280;background:transparent;border:1px solid #d9dce1;border-radius:8px;transition-property:transform,background-color;transition-duration:.15s" style-hover="background:#f3f5f8;color:#1f2430" style-active="transform:scale(0.96)">✕</button>
-    </div>
-    <div ref="{{ historyRef }}" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:13px">
-      <sc-for list="{{ messages }}" as="m" hint-placeholder-count="2">
-        <div style="display:flex;flex-direction:column;align-items:{{ m.align }};gap:5px">
-          <sc-if value="{{ m.isBot }}" hint-placeholder-val="{{ false }}"><span style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa1ad;padding-left:2px">Advisor</span></sc-if>
-          <div style="max-width:88%;padding:10px 13px;font-size:13px;line-height:1.5;border:1px solid {{ m.border }};border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};white-space:pre-wrap;word-break:break-word;text-wrap:pretty">{{ m.content }}</div>
-        </div>
-      </sc-for>
-      <sc-if value="{{ sending }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:8px;align-self:flex-start;padding:10px 13px;background:#eceef1;border-radius:12px 12px 12px 4px"><span style="font-size:12px;color:#6b7280">Analysing</span><span style="display:flex;gap:3px"><span style="width:5px;height:5px;border-radius:50%;background:#2563eb"></span><span style="width:5px;height:5px;border-radius:50%;background:#2563eb;opacity:.55"></span><span style="width:5px;height:5px;border-radius:50%;background:#2563eb;opacity:.3"></span></span></div></sc-if>
-    </div>
-    <div style="padding:12px 16px 16px;border-top:1px solid #eceef1">
-      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px"><sc-for list="{{ quicks }}" as="q" hint-placeholder-count="4"><button onClick="{{ q.run }}" style="font:inherit;font-size:12px;cursor:pointer;color:#374151;background:#f3f5f8;border:1px solid #e6e8ec;border-radius:18px;padding:6px 12px;transition-property:transform,background-color,border-color;transition-duration:.14s" style-hover="background:#fff;border-color:#2563eb;color:#1f2430" style-active="transform:scale(0.96)">{{ q.label }}</button></sc-for></div>
-      <div style="display:flex;align-items:flex-end;gap:9px;background:#fff;border:1px solid #d9dce1;border-radius:12px;padding:8px 8px 8px 13px" style-focus-within="border-color:#2563eb">
-        <textarea value="{{ input }}" onInput="{{ onInput }}" onKeyDown="{{ onKey }}" rows="1" placeholder="Ask about the verdict, peers, risks…" style="flex:1;font:inherit;font-size:13px;line-height:1.45;resize:none;border:none;outline:none;background:transparent;color:#1f2430;max-height:120px;padding:5px 0"></textarea>
-        <button onClick="{{ send }}" style="flex:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font:inherit;font-size:15px;cursor:pointer;color:#fff;background:var(--color-accent,#2563eb);border:none;border-radius:9px;transition-property:transform,background-color;transition-duration:.15s" style-hover="background:#1e54c9" style-active="transform:scale(0.92)">↑</button>
-      </div>
-    </div>
-  </aside>
+  <!-- ===== ADVISOR SCRIM + DRAWER REMOVED ===== -->
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024},&quot;chatOpenDefault&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;peerSort&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Revenue&quot;,&quot;ROA&quot;,&quot;Total Payout&quot;],&quot;default&quot;:&quot;Revenue&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
 class Component extends DCLogic {
   state = {
     step: 1, pickerOpen: false, drawerOpen: null, input: '', sending: false, msgs: {}, chartLoading: true, profileNote: '',
-    focal: { sourceId: 'VW', ticker: 'VW', name: 'Volkswagen AG', isin: 'DE0007664005', exec: 'Oliver Blume', sector: 'Automotive OEM', year: 2024, opre: 322.3, roa: 2.8, base: 2.00, sti: 3.34, lti: 4.80, ratchet: true, secrecy: false },
+    focal: { sourceId: 'VW', ticker: 'VW', name: 'Volkswagen AG', isin: 'DE0007664005', exec: 'Oliver Blume', sector: 'Automotive OEM', year: 2024, opre: 322.3, roa: 2.8, base: 2.00, sti: 3.34, lti: 4.80, ratchet: true, secrecy: false, maxEnumeration: 10.00, expectedAmount: 7.50 },
     selectedQ: { q1: true, q2: true, q3: true, q4: true, q5: true, q6: true },
   };
   historyRef = React.createRef();
@@ -537,6 +648,10 @@ class Component extends DCLogic {
       this.D = D;
       this.order = order;
       
+      const peerPays = peers.map(p => p.base + p.sti + p.lti);
+      const maxPeerPay = peerPays.length > 0 ? Math.max(...peerPays) : (trace.actual_pay / 1e6);
+      const median = (trace.salary_benchmark + trace.sti_benchmark + trace.lti_benchmark) / 1e6;
+
       this.setState({
         chartLoading: false,
         focal: {
@@ -553,7 +668,9 @@ class Component extends DCLogic {
           sti: trace.actual_pay * 0.35 / 1e6,
           lti: trace.actual_pay * 0.40 / 1e6,
           ratchet: trace.ratchet_triggered,
-          secrecy: trace.secrecy_premium_flag
+          secrecy: trace.secrecy_premium_flag,
+          maxEnumeration: +maxPeerPay.toFixed(2),
+          expectedAmount: +median.toFixed(2)
         }
       });
     })
@@ -579,7 +696,9 @@ class Component extends DCLogic {
           sti: p.sti,
           lti: p.lti,
           ratchet: p.ratchet,
-          secrecy: p.secrecy
+          secrecy: p.secrecy,
+          maxEnumeration: 36.50,
+          expectedAmount: 6.10
         }
       });
     });
@@ -651,20 +770,61 @@ class Component extends DCLogic {
     const xmin = Math.min(...allO) - 0.06, xmax = Math.max(...allO) + 0.10, ymin = Math.min(...allP) - 0.09, ymax = Math.max(...allP) + 0.13;
     const sx = v => X0 + (X1 - X0) * (v - xmin) / (xmax - xmin), sy = v => Y0 - (Y0 - Y1) * (v - ymin) / (ymax - ymin);
     const pc = (px, sp) => (px / sp * 100) + '%';
-    const mkPoint = (lx, ly, sel) => { const cx = sx(lx), cy = sy(ly), resid = ly - predLog(Math.pow(10, lx)); const color = sel ? C.accent : resid > 0.05 ? C.red : resid > 0 ? C.amber : C.green; return { cx, cy, r: sel ? 6.5 : 5, ring: sel ? 13 : 9, sw: sel ? 2.5 : 1.5, color, resid }; };
-    const points = cl.map(k => mkPoint(this.log10(D[k].opre), this.log10(this._peerPay(k)), false));
-    const focalPt = mkPoint(this.log10(this.num(f.opre) || 1), this.log10(pay || 0.01), true);
+    
+    const mkPoint = (lx, ly, sel, isin, cpName, opreVal, payVal) => {
+      const cx = sx(lx), cy = sy(ly), resid = ly - predLog(Math.pow(10, lx));
+      const color = sel ? C.accent : resid > 0.05 ? C.red : resid > 0 ? C.amber : C.green;
+      const statusWord = sel ? (premiumFrac > 0.05 ? 'Excessive' : premiumFrac > -0.05 ? 'Elevated' : 'Aligned') : (resid > 0.05 ? 'Excessive' : resid > 0 ? 'Elevated' : 'Aligned');
+      const distFrac = sel ? premiumFrac : (Math.pow(10, resid) - 1);
+      const sign = distFrac >= 0 ? '+' : '';
+      const distStr = sign + (distFrac * 100).toFixed(0) + '%';
+      
+      return {
+        cx, cy, r: sel ? 6.5 : 5, ring: sel ? 13 : 9, sw: sel ? 2.5 : 1.5, color, resid, isin,
+        bindRef: (el) => {
+          if (el.__hoverBound) return;
+          el.__hoverBound = true;
+          el.style.cursor = 'pointer';
+          el.addEventListener('mouseenter', () => {
+            this.setState({
+              hoveredPt: {
+                left: pc(cx, 560),
+                top: pc(cy, 360),
+                name: cpName,
+                opre: opreVal.toFixed(1) + 'B',
+                pay: payVal.toFixed(1) + 'M',
+                status: statusWord,
+                statusColor: color,
+                dist: distStr
+              }
+            });
+          });
+          el.addEventListener('mouseleave', () => {
+            this.setState({ hoveredPt: null });
+          });
+        }
+      };
+    };
+
+    const points = cl.map(k => mkPoint(this.log10(D[k].opre), this.log10(this._peerPay(k)), false, k, D[k].name, D[k].opre, this._peerPay(k)));
+    const focalPt = mkPoint(this.log10(this.num(f.opre) || 1), this.log10(pay || 0.01), true, f.sourceId, f.name, this.num(f.opre), pay);
     points.push(focalPt);
 
-    // annotation chips (curated + de-collided)
-    const named = cl.map(k => ({ k, ...mkPoint(this.log10(D[k].opre), this.log10(this._peerPay(k)), false), short: D[k].short, pay: this._peerPay(k) }));
+    // annotation direct labels (curated from top 4 peers + subject)
+    const named = cl.map(k => ({ k, ...mkPoint(this.log10(D[k].opre), this.log10(this._peerPay(k)), false, k, D[k].name, D[k].opre, this._peerPay(k)), short: D[k].short, pay: this._peerPay(k) }));
     named.sort((a, b) => b.pay - a.pay);
     let chipSrc = named.slice(0, 4).concat([{ k: f.sourceId, cx: focalPt.cx, cy: focalPt.cy, color: C.accent, short: f.ticker, pay }]);
-    chipSrc.sort((a, b) => a.cy - b.cy);
-    let lastY = -100; const chipX = 482;
-    chipSrc.forEach(cp => { let ly = cp.cy; if (ly - lastY < 42) ly = lastY + 42; lastY = ly; cp.ly = Math.max(Y1 + 4, Math.min(Y0 + 32, ly)); });
-    const chips = chipSrc.map(cp => ({ left: pc(chipX, 560), top: pc(cp.ly, 360), name: cp.short, value: '€' + cp.pay.toFixed(1) + 'M', color: cp.color, border: cp.k === f.sourceId ? C.accent : '#e6e8ec' }));
-    const leaders = chipSrc.map(cp => ({ x1: cp.cx, y1: cp.cy, x2: chipX - 4, y2: cp.ly, color: cp.color }));
+    
+    const directLabels = chipSrc.map(cp => {
+      const isRight = cp.cx > 410;
+      const x = isRight ? cp.cx - 9 : cp.cx + 9;
+      const y = cp.cy + 3;
+      const anchor = isRight ? 'end' : 'start';
+      const name = cp.short === 'Volkswagen' ? 'VW (Subject)' : cp.short;
+      return { x, y, name, color: cp.k === f.sourceId ? C.accent : '#475569', anchor };
+    });
+
+    const chips = [], leaders = [];
     const fy1 = sy(slope * xmin + intercept), fy2 = sy(slope * xmax + intercept), off = 0.085;
     const frontier = { x1: sx(xmin), y1: fy1, x2: sx(xmax), y2: fy2 };
     const bandPoints = [sx(xmin) + ',' + sy(slope * xmin + intercept + off), sx(xmax) + ',' + sy(slope * xmax + intercept + off), sx(xmax) + ',' + sy(slope * xmax + intercept - off), sx(xmin) + ',' + sy(slope * xmin + intercept - off)].join(' ');
@@ -695,7 +855,18 @@ class Component extends DCLogic {
     const ratchet = (() => { const up = 100, down = f.ratchet ? 35 : 88; return { tag: f.ratchet ? 'Asymmetric' : 'Symmetric', color: f.ratchet ? C.red : C.green, bg: f.ratchet ? C.redBg : C.greenBg, up: up + '%', down: down + '%', upW: '100%', downW: down + '%', downColor: f.ratchet ? C.red : C.green, insight: f.ratchet ? 'Bonus accrues on out-performance, but pay shows little symmetric reduction when results fall short — a pay-for-luck ratchet.' : 'Incentive payouts move symmetrically with performance in both directions.' }; })();
     const reachRatio = this.num(f.opre) / medOpre;
     const lo = Math.min(minOpre, this.num(f.opre)), hi = Math.max(maxOpre, this.num(f.opre));
-    const reach = { ratio: reachRatio.toFixed(2) + '×', medPct: ((medOpre - lo) / (hi - lo) * 100) + '%', focalPct: ((this.num(f.opre) - lo) / (hi - lo) * 100) + '%', min: lo.toFixed(0), max: hi.toFixed(0), insight: insightDefs.q4.detail };
+    const reach = {
+      ratio: reachRatio.toFixed(2) + '×',
+      min: lo.toFixed(1),
+      max: hi.toFixed(1),
+      med: medOpre.toFixed(1),
+      subject: (this.num(f.opre)).toFixed(1),
+      minHeight: Math.max(15, Math.round(lo / hi * 100)) + '%',
+      medHeight: Math.max(25, Math.round(medOpre / hi * 100)) + '%',
+      focalHeight: Math.max(15, Math.round((this.num(f.opre)) / hi * 100)) + '%',
+      maxHeight: '100%',
+      insight: insightDefs.q4.detail
+    };
     const disclosure = f.secrecy
       ? { status: 'Disclosure opt-out invoked', icon: '✕', color: C.red, bg: C.redBg, border: '#f2c2c2', score: '60%', scoreW: '60%', insight: 'Individual figures withheld under §286(5) HGB.' }
       : { status: 'Full individual disclosure', icon: '✓', color: C.green, bg: C.greenBg, border: '#bfe3cb', score: '100%', scoreW: '100%', insight: 'All package components individually disclosed.' };
@@ -739,7 +910,7 @@ class Component extends DCLogic {
       questions, questionCount: this.questionDefs.length, selectedCount,
       submitBg: selectedCount ? C.accent : '#aab4c4', submitOpacity: selectedCount ? '1' : '.6', submitPE: selectedCount ? 'auto' : 'none',
       qSel: this.state.selectedQ, selectedInsights, tally,
-      points, chips, leaders, frontier, bandPoints, gridY, xTicks, yTicks, smlInsight,
+      points, chips, leaders, directLabels, hoveredPt: this.state.hoveredPt, frontier, bandPoints, gridY, xTicks, yTicks, smlInsight,
       chartLoading: this.state.chartLoading, chartReady: !this.state.chartLoading,
       knobPct: Math.min(98, Math.max(2, mom * 45)) + '%', sliderTicks: [0.5, 1, 1.5, 2].map(v => ({ left: Math.min(98, Math.max(2, v * 45)) + '%', label: v.toFixed(1) + '×', tip: '€' + (v * median).toFixed(1) + 'M' })),
       ratchet, reach, disclosure, mix,
@@ -751,6 +922,7 @@ class Component extends DCLogic {
       togglePicker: () => this.setState(s => ({ pickerOpen: !s.pickerOpen })), closePicker: () => this.setState({ pickerOpen: false }),
       goStep1: () => this.goStep(1), goStep2: () => this.goStep(2), submitCriteria: () => { if (selectedCount) this.goStep(3); },
       onName: e => this.setFocal('name', e.target.value), onIsin: e => this.setFocal('isin', e.target.value), onExec: e => this.setFocal('exec', e.target.value), onSector: e => this.setFocal('sector', e.target.value), onYear: e => this.setFocal('year', e.target.value), onOpre: e => this.setFocal('opre', e.target.value), onRoa: e => this.setFocal('roa', e.target.value), onBase: e => this.setFocal('base', e.target.value), onSti: e => this.setFocal('sti', e.target.value), onLti: e => this.setFocal('lti', e.target.value),
+      onMaxEnumeration: e => this.setFocal('maxEnumeration', e.target.value), onExpectedAmount: e => this.setFocal('expectedAmount', e.target.value),
       reloadChart: () => this._reload(),
       pfBest: () => this.setState(s => ({ profileNote: 'Loaded best-practice profile', focal: { ...s.focal, base: +(median * 0.32).toFixed(2), sti: +(median * 0.28).toFixed(2), lti: +(median * 0.40).toFixed(2), ratchet: false } })),
       pfStored: () => this.loadPreset(this.state.focal.sourceId || 'VW'),

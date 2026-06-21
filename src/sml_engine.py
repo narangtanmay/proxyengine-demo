@@ -589,14 +589,37 @@ class ProxyEngineSML:
 
     def evaluate_proposal_statelessly(self, proposal_data: dict) -> dict:
         """Performs O(1) stateless evaluation of a compensation proposal against SML regression baseline."""
-        company_name = proposal_data.get("company_name", "Volkswagen AG")
-        matched_isin = "DE0007664005"
-        if "bayer" in company_name.lower():
-            matched_isin = "DE000BAY0017"
-        elif "continental" in company_name.lower():
-            matched_isin = "DE0005439004"
+        # 1. Resolve ISIN dynamically matching 130 corporations
+        matched_isin = proposal_data.get("isin") or proposal_data.get("company_id")
+        
+        # Match by name if ISIN is not in company_names
+        if not matched_isin or matched_isin not in self.company_names:
+            company_name = proposal_data.get("company_name", "Volkswagen AG")
+            name_lower = company_name.lower()
+            
+            # Exact name match
+            for isin, name in self.company_names.items():
+                if str(name).lower() == name_lower:
+                    matched_isin = isin
+                    break
+            
+            # Substring/fuzzy match
+            if not matched_isin:
+                for isin, name in self.company_names.items():
+                    if str(name).lower() in name_lower or name_lower in str(name).lower():
+                        matched_isin = isin
+                        break
+        
+        # Fallback to Volkswagen
+        if not matched_isin or matched_isin not in self.company_names:
+            matched_isin = "DE0007664005"
+            
+        company_name = self.company_names.get(matched_isin, proposal_data.get("company_name", "Volkswagen AG"))
 
-        year = proposal_data.get("year", self.cache_data.get("latest_year", 2024))
+        # Year and Cache fallbacks
+        cache = self.cache_data if hasattr(self, "cache_data") and self.cache_data else {}
+        year_fallback = cache.get("latest_year", 2024)
+        year = proposal_data.get("year", year_fallback)
 
         backdrop = ProxyEngineSML._cached_df
         if backdrop is None:
@@ -631,38 +654,41 @@ class ProxyEngineSML:
             gear
         ]
         X = np.array(X_unscaled)
-        mu = np.array(self.cache_data['scaler_mean'])
-        sigma = np.array(self.cache_data['scaler_scale'])
+        
+        scaler_mean = cache.get('scaler_mean', [0.0]*7)
+        scaler_scale = cache.get('scaler_scale', [1.0]*7)
+        mu = np.array(scaler_mean)
+        sigma = np.array(scaler_scale)
         X_scaled = (X - mu) / sigma
 
         # Map centroid matching over employees & operating revenue [2, 4]
         X_scaled_clustering = X_scaled[[2, 4]]
-        centroids = np.array(self.cache_data['kmeans_centroids'])[:, [2, 4]]
+        centroids_fallback = [[0.0] * 7] * 7
+        centroids = np.array(cache.get('kmeans_centroids', centroids_fallback))[:, [2, 4]]
         distances = np.linalg.norm(centroids - X_scaled_clustering, axis=1)
         cluster_id = int(np.argmin(distances))
 
         # Expected Pay Prediction
-        model_params = self.cache_data['model_params']
-        beta_size = self.cache_data['beta_size']
+        model_params = cache.get('model_params', {})
+        beta_size = cache.get('beta_size', self.beta_size if self.beta_size is not None else 0.3)
         beta_roa = model_params.get('roa', 1.5)
         beta_gear = model_params.get('gear', 0.0)
         intercept = model_params.get('Intercept', 7.2)
 
         cluster_param = f"C(shadow_peer_cluster)[T.{cluster_id}]"
         beta_cluster = model_params.get(cluster_param, 0.0)
-        # Year fixed effect defaults to 0 if not found
         beta_year = model_params.get(f'C(year)[T.{year}]', 0.0)
 
         expected_log_pay = intercept + beta_size * np.log(opre) + beta_roa * roa + beta_gear * gear + beta_cluster + beta_year
-        actual_log_pay = np.log(proposed_comp)
+        actual_log_pay = np.log(proposed_comp) if proposed_comp > 0 else 0.0
         residual = actual_log_pay - expected_log_pay
 
-        reach_ratio = np.exp(residual / beta_size)
+        reach_ratio = np.exp(residual / beta_size) if beta_size > 0 else 1.0
 
         # Medians lookup
-        medians = self.cache_data['cluster_medians_2024']
+        medians = cache.get('cluster_medians_2024', {})
         cluster_median_pay = medians.get(str(cluster_id), 1500000.0)
-        multiple_of_median = proposed_comp / cluster_median_pay
+        multiple_of_median = proposed_comp / cluster_median_pay if cluster_median_pay > 0 else 1.0
 
         # Ratchet check
         ratchet_flag = False
@@ -677,7 +703,7 @@ class ProxyEngineSML:
         sti_bench = float(cluster_median_pay * 0.35)
         lti_bench = float(cluster_median_pay * 0.35)
 
-        headline_premium = proposed_comp / (salary_bench + sti_bench + lti_bench)
+        headline_premium = proposed_comp / (salary_bench + sti_bench + lti_bench) if (salary_bench + sti_bench + lti_bench) > 0 else 1.0
         prem_salary = salary / (salary_bench + 1e-9)
         prem_sti = sti / (sti_bench + 1e-9)
         prem_lti = lti / (lti_bench + 1e-9)
@@ -694,7 +720,7 @@ class ProxyEngineSML:
             "company": str(company_name),
             "isin": str(matched_isin),
             "exec_id": str(proposal_data.get("exec_id", "Executive Board")),
-            "year": 2024,
+            "year": int(year),
             "cluster_id": cluster_id,
             "opre": float(opre),
             "actual_pay": float(proposed_comp),
@@ -703,7 +729,7 @@ class ProxyEngineSML:
             "pay_premium": float(np.exp(residual)),
             "reach_ratio": float(reach_ratio),
             "ratchet_triggered": ratchet_flag,
-            "secrecy_premium_flag": False,
+            "secrecy_premium_flag": bool(hist_row.get('opting_out', 0) == 1),
             "lti_vs_salary_ratio": float(lti / salary) if salary > 0 else None,
             "salary_benchmark": salary_bench,
             "sti_benchmark": sti_bench,
@@ -711,7 +737,7 @@ class ProxyEngineSML:
             "hidden_stretch": hidden_stretch,
             "hidden_stretch_variance": hidden_stretch_variance,
             "internal_concentration_ratio": float(multiple_of_median),
-            "concentration_ratchet_triggered": False,
+            "concentration_ratchet_triggered": bool(hist_row.get('concentration_ratchet_triggered', False)),
             "_traceability_map": self._build_traceability_map()
         }
 

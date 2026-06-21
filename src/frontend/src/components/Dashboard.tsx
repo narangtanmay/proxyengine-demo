@@ -7,12 +7,14 @@ interface DashboardProps {
   chartUrl: string;
   modelInfo: ModelInfo;
   layout?: "cards-only" | "visuals-only" | "all";
+  peers?: any[];
 }
 
-export default function Dashboard({ data, chartUrl, modelInfo, layout = "all" }: DashboardProps) {
+export default function Dashboard({ data, chartUrl, modelInfo, layout = "all", peers = [] }: DashboardProps) {
   const [isAcademicViewExpanded, setIsAcademicViewExpanded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const [hoveredPeer, setHoveredPeer] = useState<any | null>(null);
   
   if (!data) {
     return (
@@ -160,6 +162,24 @@ export default function Dashboard({ data, chartUrl, modelInfo, layout = "all" }:
     { size: 3.2e11, pay: 5.0e6, cluster: 4 },
   ];
 
+  const dynamicPeers = (peers && peers.length > 0)
+    ? peers.map(p => ({
+        size: p.opre * 1e9,
+        pay: p.total_comp * 1e6,
+        cluster: p.cluster !== undefined ? p.cluster : data.cluster_id,
+        name: p.name,
+        exec: p.exec,
+        total_comp: p.total_comp,
+        isShadowPeer: true
+      }))
+    : [];
+
+  const backgroundPeers = peerList.filter(p => p.cluster !== data.cluster_id);
+  const allPeers = [
+    ...backgroundPeers,
+    ...dynamicPeers
+  ];
+
   const margin = { top: 30, right: 30, bottom: 45, left: 55 };
   const width = 500;
   const height = 300;
@@ -170,14 +190,18 @@ export default function Dashboard({ data, chartUrl, modelInfo, layout = "all" }:
   const maxLogY = Math.log(1.5e7); 
 
   const mapX = (val: number) => {
-    const logVal = Math.log(val);
-    const pct = (logVal - minLogX) / (maxLogX - minLogX);
+    const safeVal = Math.max(1, val);
+    const logVal = Math.log(safeVal);
+    let pct = (logVal - minLogX) / (maxLogX - minLogX);
+    if (isNaN(pct) || !isFinite(pct)) pct = 0;
     return margin.left + Math.max(0, Math.min(1, pct)) * (width - margin.left - margin.right);
   };
   
   const mapY = (val: number) => {
-    const logVal = Math.log(val);
-    const pct = (logVal - minLogY) / (maxLogY - minLogY);
+    const safeVal = Math.max(1, val);
+    const logVal = Math.log(safeVal);
+    let pct = (logVal - minLogY) / (maxLogY - minLogY);
+    if (isNaN(pct) || !isFinite(pct)) pct = 0;
     return margin.top + (1 - Math.max(0, Math.min(1, pct))) * (height - margin.top - margin.bottom);
   };
 
@@ -297,66 +321,8 @@ export default function Dashboard({ data, chartUrl, modelInfo, layout = "all" }:
         {/* Left Column: SML Scatterplot Chart */}
         <PlaceholderCard title="SML Quantile Regression Frontier & Peers">
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "0.5rem", width: "100%", minHeight: "310px", position: "relative" }}>
-            {(!imageError && chartUrl) ? (
-              <>
-                {imageLoading && (
-                  <div style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    backgroundColor: "#f8fafc",
-                    borderRadius: "4px",
-                    animation: "pulse 1.5s infinite ease-in-out"
-                  }}>
-                    <style>{`
-                      @keyframes pulse {
-                        0% { opacity: 0.6; }
-                        50% { opacity: 1.0; }
-                        100% { opacity: 0.6; }
-                      }
-                    `}</style>
-                    <div style={{ width: "80%", height: "12px", backgroundColor: "#cbd5e1", borderRadius: "4px", marginBottom: "8px" }} />
-                    <div style={{ width: "60%", height: "12px", backgroundColor: "#cbd5e1", borderRadius: "4px", marginBottom: "16px" }} />
-                    <div style={{ width: "100%", height: "150px", backgroundColor: "#e2e8f0", borderRadius: "4px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      <span style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>Constructing Regression Grid...</span>
-                    </div>
-                  </div>
-                )}
-                <img 
-                  src={chartUrl} 
-                  alt="SML Regression Scatterplot" 
-                  style={{ maxWidth: "100%", height: "auto", borderRadius: "4px", display: imageLoading ? "none" : "block" }}
-                  onLoad={() => setImageLoading(false)}
-                  onError={() => {
-                    setImageError(true);
-                    setImageLoading(false);
-                  }}
-                />
-              </>
-            ) : (
-              <div style={{ width: "100%" }}>
-                <div style={{ 
-                  backgroundColor: "#fffbeb", 
-                  borderLeft: "4px solid #d97706", 
-                  padding: "0.5rem 1rem", 
-                  borderRadius: "4px", 
-                  marginBottom: "1rem", 
-                  fontSize: "0.8rem", 
-                  color: "#92400e",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px"
-                }}>
-                  <span>⚠️</span>
-                  <span><strong>Dynamic Graph Rendering Offline:</strong> Live server has not finished compiling. Utilizing high-fidelity vector fallback below.</span>
-                </div>
-                <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%", height: "auto", fontFamily: "sans-serif" }}>
+            <div style={{ width: "100%" }}>
+              <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%", height: "auto", fontFamily: "sans-serif" }}>
                 {/* Background Grid Lines */}
                 <line x1={margin.left} y1={mapY(1e6)} x2={width - margin.right} y2={mapY(1e6)} stroke="#e2e8f0" strokeDasharray="2 2" />
                 <line x1={margin.left} y1={mapY(3e6)} x2={width - margin.right} y2={mapY(3e6)} stroke="#e2e8f0" strokeDasharray="2 2" />
@@ -402,8 +368,10 @@ export default function Dashboard({ data, chartUrl, modelInfo, layout = "all" }:
                 </g>
 
                 {/* Peer Dots */}
-                {peerList.map((p, idx) => {
-                  const isShadowPeer = p.cluster === data.cluster_id;
+                {allPeers.map((p, idx) => {
+                  const isShadowPeer = p.isShadowPeer || p.cluster === data.cluster_id;
+                  const opreB = p.size / 1e9;
+                  const payM = p.pay / 1e6;
                   return (
                     <circle 
                       key={idx}
@@ -414,6 +382,19 @@ export default function Dashboard({ data, chartUrl, modelInfo, layout = "all" }:
                       stroke={isShadowPeer ? "#0f172a" : "none"}
                       strokeWidth="1"
                       opacity={isShadowPeer ? 0.9 : 0.4}
+                      style={{ cursor: "pointer", transition: "all 0.15s ease" }}
+                      onMouseEnter={() => {
+                        setHoveredPeer({
+                          name: p.name || `Peer Firm #${idx + 1}`,
+                          opre: opreB,
+                          pay: payM,
+                          isShadowPeer,
+                          type: isShadowPeer ? "Shadow Peer" : "Other Peer",
+                          left: `${(mapX(p.size) / width) * 100}%`,
+                          top: `${(mapY(p.pay) / height) * 100}%`
+                        });
+                      }}
+                      onMouseLeave={() => setHoveredPeer(null)}
                     />
                   );
                 })}
@@ -446,7 +427,19 @@ export default function Dashboard({ data, chartUrl, modelInfo, layout = "all" }:
                   fill="#ff7600"
                   stroke="#ffffff"
                   strokeWidth="2"
-                  style={{ filter: "drop-shadow(0px 2px 4px rgba(255, 118, 0, 0.4))" }}
+                  style={{ filter: "drop-shadow(0px 2px 4px rgba(255, 118, 0, 0.4))", cursor: "pointer" }}
+                  onMouseEnter={() => {
+                    setHoveredPeer({
+                      name: data.company,
+                      opre: data.opre / 1e9,
+                      pay: data.actual_pay / 1e6,
+                      isShadowPeer: false,
+                      type: "Subject Company",
+                      left: `${(mapX(data.opre) / width) * 100}%`,
+                      top: `${(mapY(data.actual_pay) / height) * 100}%`
+                    });
+                  }}
+                  onMouseLeave={() => setHoveredPeer(null)}
                 />
                  <text 
                   x={mapX(data.opre) > width * 0.7 ? mapX(data.opre) - 12 : mapX(data.opre) + 12} 
@@ -491,8 +484,46 @@ export default function Dashboard({ data, chartUrl, modelInfo, layout = "all" }:
                   <text x="15" y="21" fill="#475569" fontSize="0.65rem">Shadow Peers (Cluster {data.cluster_id})</text>
                 </g>
               </svg>
+              
+              {hoveredPeer && (
+                <div style={{
+                  position: "absolute",
+                  left: hoveredPeer.left,
+                  top: hoveredPeer.top,
+                  transform: "translate(-50%, calc(-100% - 8px))",
+                  backgroundColor: "rgba(15, 23, 42, 0.96)",
+                  backdropFilter: "blur(4px)",
+                  color: "#ffffff",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  fontSize: "0.75rem",
+                  zIndex: 1000,
+                  pointerEvents: "none",
+                  minWidth: "180px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "3px"
+                }}>
+                  <div style={{ fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.2)", paddingBottom: "3px", marginBottom: "3px", fontSize: "0.8rem", color: hoveredPeer.isShadowPeer ? "#38bdf8" : "#f1f5f9" }}>
+                    {hoveredPeer.name}
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ color: "#94a3b8" }}>Type:</span>
+                    <span style={{ fontWeight: "bold" }}>{hoveredPeer.type}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ color: "#94a3b8" }}>Revenue (Size):</span>
+                    <span style={{ fontFamily: "monospace" }}>€{hoveredPeer.opre.toFixed(1)}B</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ color: "#94a3b8" }}>Compensation:</span>
+                    <span style={{ fontFamily: "monospace" }}>€{hoveredPeer.pay.toFixed(1)}M</span>
+                  </div>
+                </div>
+              )}
               </div>
-            )}
           </div>
         </PlaceholderCard>
 

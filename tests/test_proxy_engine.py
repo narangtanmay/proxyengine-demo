@@ -92,6 +92,32 @@ def test_dual_lens_report_generation(shared_dual_lens):
     assert "Bayer AG" in compliance_report
     assert "DCGK" in compliance_report
 
+
+def test_dynamic_company_resolution(shared_sml_engine):
+    """Verify that evaluate_proposal_statelessly dynamically resolves non-Volkswagen ISINs."""
+    # Test 1: Explicit ISIN resolution (e.g. Bayer ISIN)
+    proposal_isin = {
+        "company_name": "Unknown Name",
+        "isin": "DE000BAY0017",
+        "proposed_salary": 1000000.0,
+        "proposed_sti": 1000000.0,
+        "proposed_lti": 1000000.0
+    }
+    res = shared_sml_engine.evaluate_proposal_statelessly(proposal_isin)
+    assert res["isin"] == "DE000BAY0017"
+    assert "bayer" in res["company"].lower()
+
+    # Test 2: Substring matching name-resolution (e.g. "BMW" or "Adidas")
+    proposal_name = {
+        "company_name": "BMW AG",
+        "proposed_salary": 1000000.0,
+        "proposed_sti": 1000000.0,
+        "proposed_lti": 1000000.0
+    }
+    res2 = shared_sml_engine.evaluate_proposal_statelessly(proposal_name)
+    assert res2["isin"] == "DE0005190003"
+    assert "bmw" in res2["company"].lower()
+
 def test_kmeans_shadow_peer_quality(shared_sml_engine):
     """
     Hardened Programmatic Quality Test: Shadow Peer Cohesion & Separation

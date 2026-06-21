@@ -3,7 +3,7 @@ SYNC IMPACT REPORT
 Version: 0.1.0 -> 1.0.0
 Modified Principles:
 - Set up core financial principles.
-Added: NDA Compliance, Deterministic SML, Wargaming Separation
+Added: NDA Compliance, Deterministic SML, Dual-Lens Separation
 Removed: N/A
 Templates Requiring Updates: None.
 -->

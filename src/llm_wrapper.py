@@ -15,6 +15,25 @@ class ProxyEngineDualLens:
         """
         pass
 
+    # Fields safe to send to a third-party LLM API: abstract, derived ratios/flags only.
+    # Raw proprietary figures (opre, actual_pay, isin, _traceability_map) and raw proposed
+    # dollar amounts (proposed_salary, proposed_sti, proposed_lti) must never leave this process.
+    TRACE_ALLOWLIST = {
+        "company", "exec_id", "year", "cluster_id", "multiple_of_median",
+        "pay_premium", "reach_ratio", "ratchet_triggered", "secrecy_premium_flag",
+        "lti_vs_salary_ratio", "roa", "gear", "sector", "salary_benchmark",
+        "sti_benchmark", "lti_benchmark", "hidden_stretch", "hidden_stretch_variance",
+        "internal_concentration_ratio", "concentration_ratchet_triggered",
+    }
+    PROPOSAL_ALLOWLIST = {"company_name", "exec_id", "esg_linked", "agenda_item"}
+
+    @staticmethod
+    def _filter_for_llm(trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> tuple:
+        """Strip raw proprietary fields before any data is serialized into an LLM prompt."""
+        filtered_trace = {k: v for k, v in trace.items() if k in ProxyEngineDualLens.TRACE_ALLOWLIST}
+        filtered_proposal = {k: v for k, v in proposal_data.items() if k in ProxyEngineDualLens.PROPOSAL_ALLOWLIST}
+        return filtered_trace, filtered_proposal
+
     def _generate_narrative_with_api(self, mode: str, trace: Dict[str, Any], proposal_data: Dict[str, Any], user_query: str = None) -> str:
         """
         Uses OpenAI or Anthropic API to generate tailored narrative reports if credentials exist.
@@ -53,11 +72,12 @@ class ProxyEngineDualLens:
                     "strictly in the SML Evidence Trace and DCGK guidelines."
                 )
         
+        filtered_trace, filtered_proposal = self._filter_for_llm(trace, proposal_data)
         user_content = (
             f"Econometric Evidence Trace (SML Output):\n"
-            f"{json.dumps(trace, indent=2)}\n\n"
+            f"{json.dumps(filtered_trace, indent=2)}\n\n"
             f"Remuneration Proposal Details (PDF Parser Output):\n"
-            f"{json.dumps(proposal_data, indent=2)}"
+            f"{json.dumps(filtered_proposal, indent=2)}"
         )
         
         # Try OpenAI
@@ -159,12 +179,13 @@ class ProxyEngineDualLens:
     def _build_insight_user_content(self, criterion: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
         """Assemble the grounded prompt payload sent to the model for a single criterion."""
         focus = self.CRITERION_GUIDE.get(criterion, criterion)
+        filtered_trace, filtered_proposal = self._filter_for_llm(trace, proposal_data)
         return (
             f"Company: {trace.get('company', proposal_data.get('company_name', 'the company'))}\n"
             f"Executive scope: {trace.get('exec_id', 'Executive Board')}\n\n"
             f"Focus your analysis ONLY on: {focus}\n\n"
-            f"Deterministic SML evidence trace:\n{json.dumps(trace, indent=2)}\n\n"
-            f"Remuneration proposal details:\n{json.dumps(proposal_data, indent=2)}"
+            f"Deterministic SML evidence trace:\n{json.dumps(filtered_trace, indent=2)}\n\n"
+            f"Remuneration proposal details:\n{json.dumps(filtered_proposal, indent=2)}"
         )
 
     def _generate_with_gemini(self, criterion: str, lens: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:

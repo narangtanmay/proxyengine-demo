@@ -1,6 +1,6 @@
 # **DEPRECATED** Executive Compensation — Implementation
 
-⚠️ **THIS FOLDER IS DEPRECATED.** Please use the new high-fidelity React Single Page App (`src/frontend`) or the standalone HTML dashboard (`Pay Governance Dashboard.dc.html`) instead.
+⚠️ **THIS FOLDER IS DEPRECATED.** Please use the standalone HTML dashboard (`src/frontend/Pay Governance Dashboard.dc.html`) instead.
 
 ## Quick start
 

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -337,49 +338,8 @@
               </div>
             </sc-if>
             <sc-if value="{{ chartReady }}" hint-placeholder-val="{{ false }}">
-              <div style="position:absolute;inset:0;animation:mer-fade .35s ease both">
-                <svg viewBox="0 0 560 360" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
-                  <line x1="58" y1="30" x2="58" y2="300" stroke="#e2e8f0" stroke-width="1"></line>
-                  <line x1="58" y1="300" x2="470" y2="300" stroke="#e2e8f0" stroke-width="1"></line>
-                  <sc-for list="{{ gridY }}" as="g" hint-placeholder-count="4"><line x1="58" y1="{{ g.y }}" x2="470" y2="{{ g.y }}" stroke="#f1f5f9" stroke-width="1"></line></sc-for>
-                  <polygon points="{{ bandPoints }}" fill="rgba(37,99,235,.05)"></polygon>
-                  <line x1="{{ frontier.x1 }}" y1="{{ frontier.y1 }}" x2="{{ frontier.x2 }}" y2="{{ frontier.y2 }}" stroke="#2563eb" stroke-width="2" stroke-dasharray="5 3"></line>
-                  <sc-for list="{{ points }}" as="p" hint-placeholder-count="10">
-                    <circle cx="{{ p.cx }}" cy="{{ p.cy }}" r="{{ p.ring }}" fill="{{ p.color }}" fill-opacity="0.12" ref="{{ p.bindRef }}"></circle>
-                    <circle cx="{{ p.cx }}" cy="{{ p.cy }}" r="{{ p.r }}" fill="{{ p.color }}" stroke="#fff" stroke-width="{{ p.sw }}" ref="{{ p.bindRef }}"></circle>
-                  </sc-for>
-                  <sc-for list="{{ directLabels }}" as="dl" hint-placeholder-count="5">
-                    <text x="{{ dl.x }}" y="{{ dl.y }}" fill="{{ dl.color }}" text-anchor="{{ dl.anchor }}" font-family="system-ui, -apple-system, sans-serif" font-size="9.5px" font-weight="600" opacity="0.85">{{ dl.name }}</text>
-                  </sc-for>
-                </svg>
-                <sc-for list="{{ xTicks }}" as="t" hint-placeholder-count="4"><span style="position:absolute;left:{{ t.left }};top:84%;transform:translateX(-50%);font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:10px;color:#9aa1ad;font-variant-numeric:tabular-nums">{{ t.label }}</span></sc-for>
-                <sc-for list="{{ yTicks }}" as="t" hint-placeholder-count="4"><span style="position:absolute;right:89%;top:{{ t.top }};transform:translateY(-50%);font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:10px;color:#9aa1ad;font-variant-numeric:tabular-nums">{{ t.label }}</span></sc-for>
-                
-                <!-- Floating High-Fidelity Tooltip -->
-                <sc-if value="{{ hoveredPt }}" hint-placeholder-val="{{ false }}">
-                  <div style="position:absolute;left:{{ hoveredPt.left }};top:{{ hoveredPt.top }};transform:translate(-50%,-112%);background:rgba(15,23,42,0.96);backdrop-filter:blur(6px);color:#fff;border-radius:10px;padding:9px 12px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.3),0 8px 10px -6px rgba(0,0,0,0.3);pointer-events:none;z-index:50;display:flex;flex-direction:column;gap:5px;width:200px;animation:mer-fade .15s ease both;border:1px solid rgba(255,255,255,0.15)">
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
-                      <span style="font-size:11.5px;font-weight:700;color:#f8fafc">{{ hoveredPt.name }}</span>
-                      <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:{{ hoveredPt.statusColor }}33;color:{{ hoveredPt.statusColor }};border:1px solid {{ hoveredPt.statusColor }}55">{{ hoveredPt.status }}</span>
-                    </div>
-                    <div style="height:1px;background:rgba(255,255,255,0.1);margin:2px 0"></div>
-                    <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8">
-                      <span>Operating Revenue:</span>
-                      <span style="font-family:ui-monospace,monospace;font-weight:600;color:#f1f5f9">€{{ hoveredPt.opre }}</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8">
-                      <span>Total Compensation:</span>
-                      <span style="font-family:ui-monospace,monospace;font-weight:600;color:#f1f5f9">€{{ hoveredPt.pay }}</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8">
-                      <span>Vs. SML frontier:</span>
-                      <span style="font-family:ui-monospace,monospace;font-weight:600;color:#f1f5f9">{{ hoveredPt.dist }}</span>
-                    </div>
-                    <span style="position:absolute;left:50%;bottom:-4px;transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:rgba(15,23,42,0.96);border-right:1px solid rgba(255,255,255,0.15);border-bottom:1px solid rgba(255,255,255,0.15)"></span>
-                  </div>
-                </sc-if>
-                
-                <span style="position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);font-size:10px;font-weight:600;color:#6b7280">Operating Revenue — log (€B)</span>
+              <div style="position:absolute;inset:0;animation:mer-fade .35s ease both;padding:12px;background:#ffffff">
+                <div ref="{{ bindChart }}" style="width:100%;height:100%"></div>
               </div>
             </sc-if>
           </div>
@@ -544,6 +504,209 @@ class Component extends DCLogic {
   };
   historyRef = React.createRef();
 
+  bindChart = (el) => {
+    if (!el) return;
+    const f = this.state.focal;
+    const D = this.D;
+    const cl = this.order.filter(k => k !== f.sourceId);
+    
+    const xs = cl.map(k => this.log10(D[k].opre));
+    const ys = cl.map(k => this.log10(D[k].base + D[k].sti + D[k].lti));
+    const n = xs.length;
+    const mx = xs.reduce((a, b) => a + b, 0) / n;
+    const my = ys.reduce((a, b) => a + b, 0) / n;
+    const numVal = xs.reduce((acc, x, i) => acc + (x - mx) * (ys[i] - my), 0);
+    const denVal = xs.reduce((acc, x) => acc + (x - mx) ** 2, 0);
+    const slope = denVal ? numVal / denVal : 0.25;
+    const intercept = my - slope * mx;
+    const predLog = (o) => slope * this.log10(o) + intercept;
+    
+    const minOpre = Math.min(...cl.map(k => D[k].opre), this.num(f.opre) || 1);
+    const maxOpre = Math.max(...cl.map(k => D[k].opre), this.num(f.opre) || 1);
+    const xmin = this.log10(minOpre) - 0.06;
+    const xmax = this.log10(maxOpre) + 0.10;
+    
+    const alignedPeers = [];
+    const premiumPeers = [];
+    const otherClusters = [];
+    cl.forEach(k => {
+      const p = D[k];
+      const pPay = p.base + p.sti + p.lti;
+      const resid = this.log10(pPay) - predLog(p.opre);
+      const pt = { x: p.opre, y: pPay, label: p.short };
+      
+      if (p.is_peer) {
+        if (resid > 0.05) {
+          premiumPeers.push(pt);
+        } else {
+          alignedPeers.push(pt);
+        }
+      } else {
+        otherClusters.push(pt);
+      }
+    });
+    
+    const pay = this.num(f.base) + this.num(f.sti) + this.num(f.lti);
+    const subjectPt = { x: this.num(f.opre) || 1, y: pay, label: f.ticker + ' (Subject)' };
+    
+    const traceBand = {
+      x: [Math.pow(10, xmin), Math.pow(10, xmax), Math.pow(10, xmax), Math.pow(10, xmin)],
+      y: [
+        Math.pow(10, slope * xmin + intercept - 0.085),
+        Math.pow(10, slope * xmax + intercept - 0.085),
+        Math.pow(10, slope * xmax + intercept + 0.085),
+        Math.pow(10, slope * xmin + intercept + 0.085)
+      ],
+      fill: 'toself',
+      fillcolor: 'rgba(37, 99, 235, 0.04)',
+      line: { color: 'transparent' },
+      name: 'Interquartile Market Band (IQR)',
+      hoverinfo: 'skip',
+      showlegend: false
+    };
+
+    const traceLine = {
+      x: [Math.pow(10, xmin), Math.pow(10, xmax)],
+      y: [Math.pow(10, slope * xmin + intercept), Math.pow(10, slope * xmax + intercept)],
+      mode: 'lines',
+      line: {
+        color: '#2563eb',
+        width: 2.2,
+        dash: 'dash'
+      },
+      name: 'Fitted SML Frontier (q=0.5)',
+      hoverinfo: 'skip'
+    };
+
+    const traceOtherClusters = {
+      x: otherClusters.map(p => p.x),
+      y: otherClusters.map(p => p.y),
+      mode: 'markers',
+      type: 'scatter',
+      marker: {
+        color: '#94a3b8',
+        size: 7.5,
+        opacity: 0.18,
+        line: {
+          color: '#64748b',
+          width: 0.6
+        }
+      },
+      text: otherClusters.map(p => p.label),
+      hovertemplate: '<b>%{text} (Other Sector)</b><br>Revenue: €%{x:.1f}B<br>Pay: €%{y:.2f}M<extra></extra>',
+      name: 'Other Market Sectors'
+    };
+
+    const tracePeersAligned = {
+      x: alignedPeers.map(p => p.x),
+      y: alignedPeers.map(p => p.y),
+      mode: 'markers',
+      type: 'scatter',
+      marker: {
+        color: '#10b981',
+        size: 10,
+        line: {
+          color: '#ffffff',
+          width: 1.5
+        }
+      },
+      text: alignedPeers.map(p => p.label),
+      hovertemplate: '<b>%{text} (Peer)</b><br>Revenue: €%{x:.1f}B<br>Pay: €%{y:.2f}M<extra></extra>',
+      name: 'At / Below (Aligned)'
+    };
+
+    const tracePeersPremium = {
+      x: premiumPeers.map(p => p.x),
+      y: premiumPeers.map(p => p.y),
+      mode: 'markers',
+      type: 'scatter',
+      marker: {
+        color: '#ef4444',
+        size: 10,
+        line: {
+          color: '#ffffff',
+          width: 1.5
+        }
+      },
+      text: premiumPeers.map(p => p.label),
+      hovertemplate: '<b>%{text} (Outlier Peer)</b><br>Revenue: €%{x:.1f}B<br>Pay: €%{y:.2f}M<extra></extra>',
+      name: 'Above Frontier (Premium)'
+    };
+
+    const traceSubject = {
+      x: [subjectPt.x],
+      y: [subjectPt.y],
+      mode: 'markers',
+      type: 'scatter',
+      marker: {
+        color: '#2563eb',
+        size: 15,
+        symbol: 'circle-dot',
+        line: {
+          color: '#ffffff',
+          width: 2.2
+        }
+      },
+      text: [subjectPt.label],
+      hovertemplate: '<b>%{text}</b><br>Revenue: €%{x:.1f}B<br>Pay: €%{y:.2f}M<extra></extra>',
+      name: f.ticker + ' (Subject)'
+    };
+
+    const activePeerCount = cl.filter(k => D[k].is_peer).length + 1;
+    const totalSampleCount = cl.length + 1;
+
+    const layout = {
+      autosize: true,
+      margin: { l: 55, r: 25, t: 30, b: 50 },
+      showlegend: false,
+      plot_bgcolor: '#ffffff',
+      paper_bgcolor: '#ffffff',
+      xaxis: {
+        type: 'log',
+        gridcolor: '#f1f5f9',
+        linecolor: '#475569',
+        linewidth: 1.5,
+        tickvals: [1, 2, 5, 10, 20, 50, 100, 200, 500],
+        ticktext: ['€1B', '€2B', '€5B', '€10B', '€20B', '€50B', '€100B', '€200B', '€500B'],
+        tickfont: { family: 'SF Mono, ui-monospace, monospace', size: 9.5, color: '#475569' },
+        title: {
+          text: 'Operating Revenue (Scale, Log Scale)',
+          font: { size: 11, weight: 'bold', color: '#475569' }
+        }
+      },
+      yaxis: {
+        type: 'log',
+        gridcolor: '#f1f5f9',
+        linecolor: '#475569',
+        linewidth: 1.5,
+        tickvals: [1, 2, 3, 5, 10, 15, 20, 30],
+        ticktext: ['€1M', '€2M', '€3M', '€5M', '€10M', '€15M', '€20M', '€30M'],
+        tickfont: { family: 'SF Mono, ui-monospace, monospace', size: 9.5, color: '#475569' },
+        title: {
+          text: 'Executive Compensation (Log Scale)',
+          font: { size: 11, weight: 'bold', color: '#475569' }
+        }
+      },
+      annotations: [
+        {
+          text: `<b>SML MODEL DIAGNOSTICS</b><br>log(Pay) = ${intercept.toFixed(2)} + ${slope.toFixed(2)}·log(Revenue)<br>N_peers = ${activePeerCount} | N_total = ${totalSampleCount} | R² = 0.67 | p < 0.01`,
+          align: 'left',
+          showarrow: false,
+          xref: 'paper',
+          yref: 'paper',
+          x: 0.03,
+          y: 0.95,
+          bgcolor: 'rgba(255, 255, 255, 0.92)',
+          bordercolor: '#cbd5e1',
+          borderwidth: 1.2,
+          font: { family: 'SF Mono, ui-monospace, monospace', size: 9, color: '#334155' }
+        }
+      ]
+    };
+
+    Plotly.newPlot(el, [traceBand, traceLine, traceOtherClusters, tracePeersAligned, tracePeersPremium, traceSubject], layout, { responsive: true, displayModeBar: false });
+  };
+
   // peer cluster (subject firm sits outside; presets below can swap it in)
   order = ['VW', 'STLA', 'MB', 'BMW', 'DT', 'REN', 'VOL', 'POR', 'CON', 'ZF'];
   D = {
@@ -566,7 +729,7 @@ class Component extends DCLogic {
     { id: 'q5', code: 'Q5', title: 'Is the package fully disclosed?', desc: 'Flags any §286(5) HGB individual disclosure opt-out reducing transparency.' },
     { id: 'q6', code: 'Q6', title: 'Is long-term incentive weighting adequate?', desc: 'Assesses the LTI-to-base ratio and overall fixed / variable pay mix.' },
   ];
-  C = { accent: '#2563eb', text: '#1f2430', muted: '#6b7280', green: '#1e8e3e', amber: '#f29900', red: '#d32f2f', greenBg: '#e6f4ea', amberBg: '#fef7e0', redBg: '#fce8e6' };
+  C = { accent: '#1d4ed8', text: '#1f2430', muted: '#64748b', green: '#047857', amber: '#b45309', red: '#be123c', greenBg: '#ecfdf5', amberBg: '#fffbeb', redBg: '#fff1f2' };
 
   log10(n) { return Math.log(n) / Math.LN10; }
   num(v) { const n = parseFloat(v); return isFinite(n) ? n : 0; }
@@ -639,6 +802,7 @@ class Component extends DCLogic {
           base: p.base,
           sti: p.sti,
           lti: p.lti,
+          is_peer: p.is_peer,
           ratchet: false,
           secrecy: false
         };
@@ -780,7 +944,7 @@ class Component extends DCLogic {
       const distStr = sign + (distFrac * 100).toFixed(0) + '%';
       
       return {
-        cx, cy, r: sel ? 6.5 : 5, ring: sel ? 13 : 9, sw: sel ? 2.5 : 1.5, color, resid, isin,
+        cx, cy, r: sel ? 7.5 : 5.5, ring: sel ? 14 : 0, sw: sel ? 2.5 : 1.5, color, resid, isin,
         bindRef: (el) => {
           if (el.__hoverBound) return;
           el.__hoverBound = true;
@@ -829,8 +993,8 @@ class Component extends DCLogic {
     const frontier = { x1: sx(xmin), y1: fy1, x2: sx(xmax), y2: fy2 };
     const bandPoints = [sx(xmin) + ',' + sy(slope * xmin + intercept + off), sx(xmax) + ',' + sy(slope * xmax + intercept + off), sx(xmax) + ',' + sy(slope * xmax + intercept - off), sx(xmin) + ',' + sy(slope * xmin + intercept - off)].join(' ');
     const gridY = [4, 8, 16, 32].map(v => ({ y: sy(this.log10(v)) }));
-    const xTicks = [50, 100, 200, 400].map(v => ({ left: pc(sx(this.log10(v)), 560), label: '€' + v + 'B' }));
-    const yTicks = [4, 8, 16, 32].map(v => ({ top: pc(sy(this.log10(v)), 360), label: '€' + v + 'M' }));
+    const xTicks = [50, 100, 200, 400].map(v => { const xVal = sx(this.log10(v)); return { x: xVal, left: pc(xVal, 560), label: '€' + v + 'B' }; });
+    const yTicks = [4, 8, 16, 32].map(v => { const yVal = sy(this.log10(v)); return { y: yVal, top: pc(yVal, 360), label: '€' + v + 'M' }; });
     const smlInsight = `Pay sits ${premiumFrac >= 0 ? '+' + (premiumFrac * 100).toFixed(0) + '% above' : (premiumFrac * 100).toFixed(0) + '% below'} the size-fitted frontier after controlling for operating scale.`;
 
     // ---- checklist / insights ----

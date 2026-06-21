@@ -1,6 +1,8 @@
-# Aequitas / ProxyEngine
+# Aequitas / ProxyEngine (public demo)
 
 AI-powered executive compensation benchmarking and governance red-flag detection — built for the **TUM Science Hackathon** (Chair of Financial Accounting).
+
+**Public demo repository:** [github.com/narangtanmay/proxyengine-demo](https://github.com/narangtanmay/proxyengine-demo) — synthetic data only; no confidential hackathon panel is included or has ever been committed here.
 
 ## Important: confidentiality
 

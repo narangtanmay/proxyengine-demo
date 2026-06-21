@@ -1,4 +1,4 @@
-# Aequitas: Executive Pay Governance (Claude/Agent Guide)
+# PayAudit: Executive Pay Governance (Claude/Agent Guide)
 
 ## 🤖 System Architecture & Conventions
 

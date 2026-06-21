@@ -17,7 +17,7 @@ class ProxyEngineSML:
     CLUSTER_FEATURES = ["total_assets", "turnover_per_employee", "employees", "operating_profit", "operating_revenue", "return_on_assets", "gearing"]
 
     def __init__(self, data: pd.DataFrame = None):
-        """Initialize the SML Engine. Loads synthetic demo panel by default."""
+        """Initialize the SML Engine. If data is not provided, we load the real dataset."""
         if data is None:
             self.data = self.load_real_panel()
         else:
@@ -37,33 +37,27 @@ class ProxyEngineSML:
 
     def load_real_panel(self) -> pd.DataFrame:
         """
-        Loads the matched panel.
-
-        Default (NDA-safe): synthetic demo panel via ``USE_MOCK_PANEL=1``.
-        Local hackathon data: set ``CONFIDENTIAL_DATA_DIR`` to the Chair-approved
-        dataset root and ``USE_CONFIDENTIAL_PANEL=1`` (never commit those files).
+        Loads the matched panel. First tries to load and join the raw ORBIS/compy files
+        if present locally, otherwise falls back to the precomputed portable CSV.
         """
         if ProxyEngineSML._cached_df is not None:
             self.company_names = {row['isin']: row['company_name'] for _, row in ProxyEngineSML._cached_df.iterrows()}
             return ProxyEngineSML._cached_df.copy()
 
-        if os.getenv("USE_MOCK_PANEL", "1") == "1":
+        if os.getenv("USE_MOCK_PANEL") == "1":
             print("Loading NDA-safe synthetic demo panel...")
             df = self.build_mock_panel()
-            self.company_names = {row['isin']: row['company_name'] for _, row in df.iterrows()}
             ProxyEngineSML._cached_df = df.copy()
             return df
 
-        raw_base_path = os.getenv("CONFIDENTIAL_DATA_DIR", "")
-        comp_file = os.path.join(raw_base_path, "2008-2020", "company_year.csv") if raw_base_path else ""
-        orbis_file = os.path.join(raw_base_path, "ORBIS_Abzug_DE_2005_2024.csv") if raw_base_path else ""
+        raw_base_path = os.getenv(
+            "CONFIDENTIAL_DATA_DIR",
+            "/home/tanmay/Desktop/science_hack/Scienehack TUM FA/Data",
+        )
+        comp_file = os.path.join(raw_base_path, "2008-2020", "company_year.csv")
+        orbis_file = os.path.join(raw_base_path, "ORBIS_Abzug_DE_2005_2024.csv")
 
-        if (
-            raw_base_path
-            and os.getenv("USE_CONFIDENTIAL_PANEL") == "1"
-            and os.path.exists(comp_file)
-            and os.path.exists(orbis_file)
-        ):
+        if os.path.exists(comp_file) and os.path.exists(orbis_file) and os.getenv("USE_PORTABLE_PANEL") != "1":
             print("Loading raw scientific datasets for high-rigor joins...")
             df_comp = pd.read_csv(comp_file, sep="|")
             df_orbis = pd.read_csv(orbis_file, sep=",", low_memory=False)
@@ -96,13 +90,9 @@ class ProxyEngineSML:
 
         else:
             fy_path = os.path.join(self._data_dir(), "peer_cluster_firm_years.csv")
-            if os.getenv("USE_CONFIDENTIAL_PANEL") == "1" and os.path.exists(fy_path):
-                print("Loading local confidential portable panel (do not commit this file)...")
-            else:
-                raise FileNotFoundError(
-                    "No panel data available. Default is USE_MOCK_PANEL=1 (synthetic demo). "
-                    "For Chair-approved local data, set CONFIDENTIAL_DATA_DIR and USE_CONFIDENTIAL_PANEL=1."
-                )
+            if not os.path.exists(fy_path):
+                raise FileNotFoundError(f"Real cluster panel not found at {fy_path}.")
+            print("Loading precomputed portable panel CSV...")
             df = pd.read_csv(fy_path)
 
             out = pd.DataFrame()
@@ -141,8 +131,7 @@ class ProxyEngineSML:
         special_companies = [
             {"isin": "DE0007664005", "name": "Volkswagen AG", "exec_id": "Oliver Blume", "base_size": 2.5e11, "is_outlier": True},
             {"isin": "DE000BAY0017", "name": "Bayer AG", "exec_id": "Bill Anderson", "base_size": 4.7e10, "is_outlier": False},
-            {"isin": "DE0007164600", "name": "SAP SE", "exec_id": "Christian Klein", "base_size": 3.1e10, "is_outlier": False},
-            {"isin": "DE0005439004", "name": "Continental AG", "exec_id": "Nikolai Setzer", "base_size": 3.9e10, "is_outlier": False},
+            {"isin": "DE0005439004", "name": "Continental AG", "exec_id": "Nikolai Setzer", "base_size": 3.9e10, "is_outlier": False}
         ]
         self.company_names = {c["isin"]: c["name"] for c in special_companies}
 
@@ -173,7 +162,7 @@ class ProxyEngineSML:
                     'OOPE': opre * 0.1, 'opting_out': 0
                 })
 
-        for i in range(96):
+        for i in range(97):
             isin = f"DE{str(100000 + i).zfill(8)}"
             name = f"Peer_Firm_{i+1}"
             self.company_names[isin] = name

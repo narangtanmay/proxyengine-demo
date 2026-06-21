@@ -109,16 +109,16 @@ def test_dynamic_company_resolution(shared_sml_engine):
     assert res["isin"] == "DE000BAY0017"
     assert "bayer" in res["company"].lower()
 
-    # Test 2: Substring matching name-resolution (Volkswagen in demo panel)
+    # Test 2: Substring matching name-resolution (e.g. "BMW" or "Adidas")
     proposal_name = {
-        "company_name": "Volkswagen AG",
+        "company_name": "BMW AG",
         "proposed_salary": 1000000.0,
         "proposed_sti": 1000000.0,
         "proposed_lti": 1000000.0
     }
     res2 = shared_sml_engine.evaluate_proposal_statelessly(proposal_name)
-    assert res2["isin"] == "DE0007664005"
-    assert "volkswagen" in res2["company"].lower()
+    assert res2["isin"] == "DE0005190003"
+    assert "bmw" in res2["company"].lower()
 
 def test_kmeans_shadow_peer_quality(shared_sml_engine):
     """
@@ -136,11 +136,10 @@ def test_kmeans_shadow_peer_quality(shared_sml_engine):
     # Assert Cohesion & Separation Gate
     assert score >= 0.48, f"K-Means shadow peer clustering quality degraded! Silhouette score: {score:.4f}"
     
-    # Assert the Balance Gate (mock panel has fewer anchor firms, slightly looser cap)
-    max_pct_limit = 0.43 if os.getenv("USE_MOCK_PANEL", "1") == "1" else 0.40
+    # Assert the Balance Gate (max cluster <= 40%)
     counts = df['shadow_peer_cluster'].value_counts()
     max_pct = counts.max() / len(df)
-    assert max_pct <= max_pct_limit, f"K-Means collapsed into unbalanced clusters! Largest cluster contains {max_pct:.2%}"
+    assert max_pct <= 0.40, f"K-Means collapsed into unbalanced clusters! Largest cluster contains {max_pct:.2%}"
 
 def test_parts_combined_pipeline_consistency():
     """

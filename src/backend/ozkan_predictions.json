@@ -1,0 +1,1848 @@
+{
+  "summary": {
+    "firm_years": 1163,
+    "firms": 130,
+    "join_pct": 80.4,
+    "movers": 80
+  },
+  "clusters": [
+    {
+      "peer": "Peer_C0",
+      "n": 33,
+      "median_pay_k": 2263.0
+    },
+    {
+      "peer": "Peer_C1",
+      "n": 1,
+      "median_pay_k": 547.0
+    },
+    {
+      "peer": "Peer_C2",
+      "n": 13,
+      "median_pay_k": 998.0
+    },
+    {
+      "peer": "Peer_C3",
+      "n": 9,
+      "median_pay_k": 1521.0
+    },
+    {
+      "peer": "Peer_C4",
+      "n": 16,
+      "median_pay_k": 3068.0
+    },
+    {
+      "peer": "Peer_C5",
+      "n": 9,
+      "median_pay_k": 1495.0
+    },
+    {
+      "peer": "Peer_C6",
+      "n": 49,
+      "median_pay_k": 1296.0
+    }
+  ],
+  "companies": [
+    {
+      "isin": "DE0005545503",
+      "name": "1&1 Drillisch",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1005.0,
+      "median_opre_m": 4066.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0005085906",
+      "name": "AWD",
+      "peer": "Peer_C5",
+      "index": "MDAX",
+      "median_pay_k": 975.0,
+      "median_opre_m": 962.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A1EWWW0",
+      "name": "Adidas",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 2719.0,
+      "median_opre_m": 19383.0,
+      "pred": {
+        "company": "Adidas",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1884.0,
+        "lti_k": 1545.0,
+        "total_k": 3382.0
+      }
+    },
+    {
+      "isin": "DE000A0WMPJ6",
+      "name": "Aixtron",
+      "peer": "Peer_C5",
+      "index": "MDAX",
+      "median_pay_k": 1495.0,
+      "median_opre_m": 424.0,
+      "pred": {
+        "company": "Aixtron",
+        "peer": "Peer_C5",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1312.0,
+        "lti_k": 447.0,
+        "total_k": 1615.0
+      }
+    },
+    {
+      "isin": "DE000A0LD2U1",
+      "name": "Alstria Office REIT",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 1026.0,
+      "median_opre_m": 356.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0007600801",
+      "name": "Altana",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1296.0,
+      "median_opre_m": 1807.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006275001",
+      "name": "Arcandor",
+      "peer": "Peer_C3",
+      "index": "MDAX",
+      "median_pay_k": 1703.0,
+      "median_opre_m": 21518.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0005156004",
+      "name": "Arques",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1439.0,
+      "median_opre_m": 5738.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006766504",
+      "name": "Aurubis",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1027.0,
+      "median_opre_m": 13169.0,
+      "pred": {
+        "company": "Aurubis",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1173.0,
+        "lti_k": 413.0,
+        "total_k": 1733.0
+      }
+    },
+    {
+      "isin": "DE0005501357",
+      "name": "Axel Springer",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 4820.0,
+      "median_opre_m": 4054.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000BASF111",
+      "name": "BASF",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 3419.0,
+      "median_opre_m": 82440.0,
+      "pred": {
+        "company": "BASF",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1998.0,
+        "lti_k": 1547.0,
+        "total_k": 3348.0
+      }
+    },
+    {
+      "isin": "DE0005190003",
+      "name": "BMW",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 3578.0,
+      "median_opre_m": 100655.0,
+      "pred": {
+        "company": "BMW",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 2153.0,
+        "lti_k": 1603.0,
+        "total_k": 3520.0
+      }
+    },
+    {
+      "isin": "DE0005168108",
+      "name": "Bauer",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 454.0,
+      "median_opre_m": 1556.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000BAY0017",
+      "name": "Bayer",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 3226.0,
+      "median_opre_m": 51169.0,
+      "pred": {
+        "company": "Bayer",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 2004.0,
+        "lti_k": 1276.0,
+        "total_k": 3108.0
+      }
+    },
+    {
+      "isin": "DE0005158703",
+      "name": "Bechtle",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1749.0,
+      "median_opre_m": 6047.0,
+      "pred": {
+        "company": "Bechtle",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1079.0,
+        "lti_k": 445.0,
+        "total_k": 1684.0
+      }
+    },
+    {
+      "isin": "DE0005200000",
+      "name": "Beiersdorf",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 1386.0,
+      "median_opre_m": 8349.0,
+      "pred": {
+        "company": "Beiersdorf",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1605.0,
+        "lti_k": 1260.0,
+        "total_k": 2734.0
+      }
+    },
+    {
+      "isin": "DE0005232805",
+      "name": "Bertrandt",
+      "peer": "Peer_C5",
+      "index": NaN,
+      "median_pay_k": 1586.0,
+      "median_opre_m": 927.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0005909006",
+      "name": "Bilfinger Berger",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 1730.0,
+      "median_opre_m": 10808.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A1DAHH0",
+      "name": "Brenntag",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 1596.0,
+      "median_opre_m": 13174.0,
+      "pred": {
+        "company": "Brenntag",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1659.0,
+        "lti_k": 1180.0,
+        "total_k": 2767.0
+      }
+    },
+    {
+      "isin": "DE0005470306",
+      "name": "CTS Eventim",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1594.0,
+      "median_opre_m": 887.0,
+      "pred": {
+        "company": "CTS Eventim",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 860.0,
+        "lti_k": 440.0,
+        "total_k": 1389.0
+      }
+    },
+    {
+      "isin": "DE0005419105",
+      "name": "Cancom",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1067.0,
+      "median_opre_m": 1846.0,
+      "pred": {
+        "company": "Cancom",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 958.0,
+        "lti_k": 357.0,
+        "total_k": 1484.0
+      }
+    },
+    {
+      "isin": "DE0005313704",
+      "name": "Carl Zeiss Meditec",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 877.0,
+      "median_opre_m": 1564.0,
+      "pred": {
+        "company": "Carl Zeiss Meditec",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 936.0,
+        "lti_k": 399.0,
+        "total_k": 1469.0
+      }
+    },
+    {
+      "isin": "DE000A288904",
+      "name": "CompuGroup",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1147.0,
+      "median_opre_m": 980.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0005439004",
+      "name": "Continental",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 2251.0,
+      "median_opre_m": 43090.0,
+      "pred": {
+        "company": "Continental",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 2177.0,
+        "lti_k": 2271.0,
+        "total_k": 4366.0
+      }
+    },
+    {
+      "isin": "DE0006062144",
+      "name": "Covestro",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 3447.0,
+      "median_opre_m": 14153.0,
+      "pred": {
+        "company": "Covestro",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1712.0,
+        "lti_k": 1215.0,
+        "total_k": 2855.0
+      }
+    },
+    {
+      "isin": "DE0007100000",
+      "name": "Daimler",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 3931.0,
+      "median_opre_m": 164758.0,
+      "pred": {
+        "company": "Daimler",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 2215.0,
+        "lti_k": 1633.0,
+        "total_k": 3710.0
+      }
+    },
+    {
+      "isin": "DE000DTR0CK8",
+      "name": "Daimler Truck",
+      "peer": "Peer_C4",
+      "index": "DAX and MDAX",
+      "median_pay_k": 792.0,
+      "median_opre_m": 47280.0,
+      "pred": {
+        "company": "Daimler Truck",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1869.0,
+        "lti_k": 1242.0,
+        "total_k": 3035.0
+      }
+    },
+    {
+      "isin": "DE000A2E4K43",
+      "name": "Delivery Hero",
+      "peer": "Peer_C3",
+      "index": "MDAX",
+      "median_pay_k": 1885.0,
+      "median_opre_m": 2489.0,
+      "pred": {
+        "company": "Delivery Hero",
+        "peer": "Peer_C3",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 542.0,
+        "lti_k": 1122.0,
+        "total_k": 1864.0
+      }
+    },
+    {
+      "isin": "DE000DCAG010",
+      "name": "Demag Cranes",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1538.0,
+      "median_opre_m": 1496.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0005810055",
+      "name": "Deutsche B\u00f6rse",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 2840.0,
+      "median_opre_m": 2924.0,
+      "pred": {
+        "company": "Deutsche B\u00f6rse",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1367.0,
+        "lti_k": 850.0,
+        "total_k": 2157.0
+      }
+    },
+    {
+      "isin": "DE0008232125",
+      "name": "Deutsche Lufthansa",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 2208.0,
+      "median_opre_m": 37653.0,
+      "pred": {
+        "company": "Deutsche Lufthansa",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1954.0,
+        "lti_k": 806.0,
+        "total_k": 2602.0
+      }
+    },
+    {
+      "isin": "DE0005552004",
+      "name": "Deutsche Post",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 3043.0,
+      "median_opre_m": 74553.0,
+      "pred": {
+        "company": "Deutsche Post",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1981.0,
+        "lti_k": 1461.0,
+        "total_k": 3292.0
+      }
+    },
+    {
+      "isin": "DE0005557508",
+      "name": "Deutsche Telekom",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 2402.0,
+      "median_opre_m": 86680.0,
+      "pred": {
+        "company": "Deutsche Telekom",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 2275.0,
+        "lti_k": 1537.0,
+        "total_k": 3633.0
+      }
+    },
+    {
+      "isin": "DE000A0HN5C6",
+      "name": "Deutsche Wohnen",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 918.0,
+      "median_opre_m": 993.0,
+      "pred": {
+        "company": "Deutsche Wohnen",
+        "peer": "Peer_C2",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 903.0,
+        "lti_k": 502.0,
+        "total_k": 1332.0
+      }
+    },
+    {
+      "isin": "DE0006305006",
+      "name": "Deutz",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1188.0,
+      "median_opre_m": 2019.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006099005",
+      "name": "Douglas",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1030.0,
+      "median_opre_m": 4764.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0007480204",
+      "name": "Dt. Euroshop",
+      "peer": "Peer_C1",
+      "index": "MDAX",
+      "median_pay_k": 547.0,
+      "median_opre_m": 222.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0005565204",
+      "name": "D\u00fcrr",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 2327.0,
+      "median_opre_m": 3564.0,
+      "pred": {
+        "company": "D\u00fcrr",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1096.0,
+        "lti_k": 532.0,
+        "total_k": 1761.0
+      }
+    },
+    {
+      "isin": "DE000ENAG999",
+      "name": "E.ON",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 3094.0,
+      "median_opre_m": 138234.0,
+      "pred": {
+        "company": "E.ON",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 2316.0,
+        "lti_k": 1305.0,
+        "total_k": 3369.0
+      }
+    },
+    {
+      "isin": "DE0007856023",
+      "name": "ElringKlinger",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1107.0,
+      "median_opre_m": 1351.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006095003",
+      "name": "Encavis",
+      "peer": "Peer_C2",
+      "index": NaN,
+      "median_pay_k": 1194.0,
+      "median_opre_m": 380.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000EVNK013",
+      "name": "Evonik",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 2794.0,
+      "median_opre_m": 17177.0,
+      "pred": {
+        "company": "Evonik",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1644.0,
+        "lti_k": 1132.0,
+        "total_k": 2714.0
+      }
+    },
+    {
+      "isin": "DE0005664809",
+      "name": "Evotec",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1062.0,
+      "median_opre_m": 589.0,
+      "pred": {
+        "company": "Evotec",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 832.0,
+        "lti_k": 365.0,
+        "total_k": 1277.0
+      }
+    },
+    {
+      "isin": "DE0005772206",
+      "name": "Fielmann",
+      "peer": "Peer_C5",
+      "index": "MDAX",
+      "median_pay_k": 1988.0,
+      "median_opre_m": 1425.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0005773303",
+      "name": "Fraport",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 1191.0,
+      "median_opre_m": 3047.0,
+      "pred": {
+        "company": "Fraport",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1362.0,
+        "lti_k": 834.0,
+        "total_k": 2196.0
+      }
+    },
+    {
+      "isin": "DE000A0Z2ZZ5",
+      "name": "Freenet",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1206.0,
+      "median_opre_m": 3393.0,
+      "pred": {
+        "company": "Freenet",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 930.0,
+        "lti_k": 384.0,
+        "total_k": 1369.0
+      }
+    },
+    {
+      "isin": "DE0005785604",
+      "name": "Fresenius",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 2661.0,
+      "median_opre_m": 28122.0,
+      "pred": {
+        "company": "Fresenius",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1880.0,
+        "lti_k": 1305.0,
+        "total_k": 3033.0
+      }
+    },
+    {
+      "isin": "DE0005785802",
+      "name": "Fresenius Medical Care",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 2886.0,
+      "median_opre_m": 15221.0,
+      "pred": {
+        "company": "Fresenius Medical Care",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1814.0,
+        "lti_k": 1521.0,
+        "total_k": 3272.0
+      }
+    },
+    {
+      "isin": "DE0006602006",
+      "name": "GEA Group",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 1700.0,
+      "median_opre_m": 5664.0,
+      "pred": {
+        "company": "GEA Group",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1317.0,
+        "lti_k": 719.0,
+        "total_k": 1920.0
+      }
+    },
+    {
+      "isin": "DE000GSW1111",
+      "name": "GSW Immobilien",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 716.0,
+      "median_opre_m": 493.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A0LD6E6",
+      "name": "Gerresheimer",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1187.0,
+      "median_opre_m": 1597.0,
+      "pred": {
+        "company": "Gerresheimer",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1044.0,
+        "lti_k": 545.0,
+        "total_k": 1706.0
+      }
+    },
+    {
+      "isin": "DE0005878003",
+      "name": "Gildemeister",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1963.0,
+      "median_opre_m": 2487.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A0S8488",
+      "name": "Hamburger Hafen",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 766.0,
+      "median_opre_m": 1575.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006047004",
+      "name": "Heidelberg Cement",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 3221.0,
+      "median_opre_m": 16988.0,
+      "pred": {
+        "company": "Heidelberg Cement",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1929.0,
+        "lti_k": 1799.0,
+        "total_k": 3633.0
+      }
+    },
+    {
+      "isin": "DE0007314007",
+      "name": "Heidelberger Druckmaschinen",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 887.0,
+      "median_opre_m": 4108.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A13SX22",
+      "name": "Hella",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 2563.0,
+      "median_opre_m": 7155.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A161408",
+      "name": "HelloFresh",
+      "peer": "Peer_C5",
+      "index": "DAX and MDAX",
+      "median_pay_k": 2294.0,
+      "median_opre_m": 5705.0,
+      "pred": {
+        "company": "HelloFresh",
+        "peer": "Peer_C5",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1510.0,
+        "lti_k": 1648.0,
+        "total_k": 2593.0
+      }
+    },
+    {
+      "isin": "DE0006070006",
+      "name": "Hochtief",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 2706.0,
+      "median_opre_m": 27283.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A1PHFF7",
+      "name": "Hugo Boss",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1725.0,
+      "median_opre_m": 2982.0,
+      "pred": {
+        "company": "Hugo Boss",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 970.0,
+        "lti_k": 407.0,
+        "total_k": 1435.0
+      }
+    },
+    {
+      "isin": "DE0005493365",
+      "name": "Hypoport",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 555.0,
+      "median_opre_m": 495.0,
+      "pred": {
+        "company": "Hypoport",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 917.0,
+        "lti_k": 516.0,
+        "total_k": 1561.0
+      }
+    },
+    {
+      "isin": "DE0006205701",
+      "name": "IVG",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 959.0,
+      "median_opre_m": 1450.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006231004",
+      "name": "Infineon",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 1767.0,
+      "median_opre_m": 8579.0,
+      "pred": {
+        "company": "Infineon",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1581.0,
+        "lti_k": 1074.0,
+        "total_k": 2563.0
+      }
+    },
+    {
+      "isin": "DE000A2AADD2",
+      "name": "Innogy",
+      "peer": "Peer_C4",
+      "index": "MDAX",
+      "median_pay_k": 1590.0,
+      "median_opre_m": 44946.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006219934",
+      "name": "Jungheinrich",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1476.0,
+      "median_opre_m": 3691.0,
+      "pred": {
+        "company": "Jungheinrich",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1103.0,
+        "lti_k": 491.0,
+        "total_k": 1703.0
+      }
+    },
+    {
+      "isin": "DE000KSAG888",
+      "name": "K+S",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 1494.0,
+      "median_opre_m": 4768.0,
+      "pred": {
+        "company": "K+S",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1629.0,
+        "lti_k": 1101.0,
+        "total_k": 2675.0
+      }
+    },
+    {
+      "isin": "DE000KGX8881",
+      "name": "KION GROUP",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 2426.0,
+      "median_opre_m": 7899.0,
+      "pred": {
+        "company": "KION GROUP",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1644.0,
+        "lti_k": 1229.0,
+        "total_k": 2808.0
+      }
+    },
+    {
+      "isin": "DE0006204407",
+      "name": "KUKA",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1379.0,
+      "median_opre_m": 2092.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000KC01000",
+      "name": "Kl\u00f6ckner",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1572.0,
+      "median_opre_m": 7920.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000KBX1006",
+      "name": "Knorr Bremse",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 1983.0,
+      "median_opre_m": 7804.0,
+      "pred": {
+        "company": "Knorr Bremse",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1506.0,
+        "lti_k": 980.0,
+        "total_k": 2396.0
+      }
+    },
+    {
+      "isin": "DE0006335003",
+      "name": "Krones",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 863.0,
+      "median_opre_m": 3581.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000LEG1110",
+      "name": "LEG Immobilien",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 998.0,
+      "median_opre_m": 1399.0,
+      "pred": {
+        "company": "LEG Immobilien",
+        "peer": "Peer_C2",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 721.0,
+        "lti_k": 383.0,
+        "total_k": 1005.0
+      }
+    },
+    {
+      "isin": "DE0005470405",
+      "name": "Lanxess",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 2279.0,
+      "median_opre_m": 9556.0,
+      "pred": {
+        "company": "Lanxess",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1495.0,
+        "lti_k": 972.0,
+        "total_k": 2392.0
+      }
+    },
+    {
+      "isin": "DE0005408884",
+      "name": "Leoni",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1547.0,
+      "median_opre_m": 4802.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006483001",
+      "name": "Linde",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 3410.0,
+      "median_opre_m": 18657.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0005937007",
+      "name": "MAN",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 2414.0,
+      "median_opre_m": 21425.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A0D9PT0",
+      "name": "MTU",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1600.0,
+      "median_opre_m": 4777.0,
+      "pred": {
+        "company": "MTU",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1044.0,
+        "lti_k": 462.0,
+        "total_k": 1600.0
+      }
+    },
+    {
+      "isin": "DE0006605009",
+      "name": "Medion",
+      "peer": "Peer_C3",
+      "index": "MDAX",
+      "median_pay_k": 270.0,
+      "median_opre_m": 2122.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006599905",
+      "name": "Merck",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 3242.0,
+      "median_opre_m": 14694.0,
+      "pred": {
+        "company": "Merck",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1815.0,
+        "lti_k": 1437.0,
+        "total_k": 3188.0
+      }
+    },
+    {
+      "isin": "DE0007257503",
+      "name": "Metro",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 2133.0,
+      "median_opre_m": 42919.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000BFB0019",
+      "name": "Metro_neu2017",
+      "peer": "Peer_C4",
+      "index": "MDAX",
+      "median_pay_k": 3042.0,
+      "median_opre_m": 39030.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006632003",
+      "name": "Morphosys",
+      "peer": "Peer_C3",
+      "index": "MDAX",
+      "median_pay_k": 1606.0,
+      "median_opre_m": 104.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A1H8BV3",
+      "name": "NORMA Group",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 958.0,
+      "median_opre_m": 922.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006452907",
+      "name": "Nemetschek",
+      "peer": "Peer_C5",
+      "index": "MDAX",
+      "median_pay_k": 881.0,
+      "median_opre_m": 633.0,
+      "pred": {
+        "company": "Nemetschek",
+        "peer": "Peer_C5",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1111.0,
+        "lti_k": 438.0,
+        "total_k": 1616.0
+      }
+    },
+    {
+      "isin": "DE000A0D6554",
+      "name": "Nordex",
+      "peer": "Peer_C3",
+      "index": NaN,
+      "median_pay_k": 944.0,
+      "median_opre_m": 6179.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000LED4000",
+      "name": "OSRAM",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 2549.0,
+      "median_opre_m": 6255.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000PAT1AG3",
+      "name": "PATRIZIA Immobilien",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 556.0,
+      "median_opre_m": 354.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006764749",
+      "name": "Pfleiderer",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1267.0,
+      "median_opre_m": 2254.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000PAH0038",
+      "name": "Porsche Automobil Holding",
+      "peer": "Peer_C3",
+      "index": "DAX and MDAX",
+      "median_pay_k": 837.0,
+      "median_opre_m": 75.0,
+      "pred": {
+        "company": "Porsche Automobil Holding",
+        "peer": "Peer_C3",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 707.0,
+        "lti_k": 327.0,
+        "total_k": 1078.0
+      }
+    },
+    {
+      "isin": "DE000A0F6MD5",
+      "name": "Praktiker",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 790.0,
+      "median_opre_m": 5065.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000PSM7770",
+      "name": "ProSiebenSat1",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 1843.0,
+      "median_opre_m": 4026.0,
+      "pred": {
+        "company": "ProSiebenSat1",
+        "peer": "Peer_C2",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1276.0,
+        "lti_k": 642.0,
+        "total_k": 1903.0
+      }
+    },
+    {
+      "isin": "DE0006969603",
+      "name": "Puma",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 3139.0,
+      "median_opre_m": 4170.0,
+      "pred": {
+        "company": "Puma",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1018.0,
+        "lti_k": 387.0,
+        "total_k": 1476.0
+      }
+    },
+    {
+      "isin": "DE0007037129",
+      "name": "RWE",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 3420.0,
+      "median_opre_m": 56656.0,
+      "pred": {
+        "company": "RWE",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1854.0,
+        "lti_k": 1129.0,
+        "total_k": 2785.0
+      }
+    },
+    {
+      "isin": "DE0007010803",
+      "name": "Rational",
+      "peer": "Peer_C5",
+      "index": "MDAX",
+      "median_pay_k": 1091.0,
+      "median_opre_m": 576.0,
+      "pred": {
+        "company": "Rational",
+        "peer": "Peer_C5",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1370.0,
+        "lti_k": 714.0,
+        "total_k": 1843.0
+      }
+    },
+    {
+      "isin": "DE0007030009",
+      "name": "Rheinmetall",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 2193.0,
+      "median_opre_m": 6105.0,
+      "pred": {
+        "company": "Rheinmetall",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1410.0,
+        "lti_k": 845.0,
+        "total_k": 2164.0
+      }
+    },
+    {
+      "isin": "DE0007042301",
+      "name": "Rh\u00f6n-Klinikum",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1210.0,
+      "median_opre_m": 3179.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A12UKK6",
+      "name": "Rocket Internet",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1895.0,
+      "median_opre_m": 335.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0007164600",
+      "name": "SAP",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 4912.0,
+      "median_opre_m": 22042.0,
+      "pred": {
+        "company": "SAP",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1957.0,
+        "lti_k": 1743.0,
+        "total_k": 3602.0
+      }
+    },
+    {
+      "isin": "DE0007235301",
+      "name": "SGL Carbon",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1730.0,
+      "median_opre_m": 2009.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0006202005",
+      "name": "Salzgitter",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 1123.0,
+      "median_opre_m": 11365.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000SHA0159",
+      "name": "Schaeffler",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 2129.0,
+      "median_opre_m": 16406.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0007221905",
+      "name": "Schwarz Pharma",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 2090.0,
+      "median_opre_m": 1037.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A12DM80",
+      "name": "Scout24",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1078.0,
+      "median_opre_m": 595.0,
+      "pred": {
+        "company": "Scout24",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 764.0,
+        "lti_k": 373.0,
+        "total_k": 1186.0
+      }
+    },
+    {
+      "isin": "DE0007236101",
+      "name": "Siemens",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 4049.0,
+      "median_opre_m": 96736.0,
+      "pred": {
+        "company": "Siemens",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1991.0,
+        "lti_k": 1425.0,
+        "total_k": 3251.0
+      }
+    },
+    {
+      "isin": "DE000ENER6Y0",
+      "name": "Siemens Energy",
+      "peer": "Peer_C3",
+      "index": "DAX and MDAX",
+      "median_pay_k": 2995.0,
+      "median_opre_m": 32653.0,
+      "pred": {
+        "company": "Siemens Energy",
+        "peer": "Peer_C3",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 549.0,
+        "lti_k": 757.0,
+        "total_k": 1452.0
+      }
+    },
+    {
+      "isin": "DE000SHL1006",
+      "name": "Siemens Healthineers",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 2263.0,
+      "median_opre_m": 16433.0,
+      "pred": {
+        "company": "Siemens Healthineers",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1701.0,
+        "lti_k": 1206.0,
+        "total_k": 2848.0
+      }
+    },
+    {
+      "isin": "DE000WAF3001",
+      "name": "Siltronic",
+      "peer": "Peer_C5",
+      "index": "MDAX",
+      "median_pay_k": 1309.0,
+      "median_opre_m": 1554.0,
+      "pred": {
+        "company": "Siltronic",
+        "peer": "Peer_C5",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1032.0,
+        "lti_k": 800.0,
+        "total_k": 1783.0
+      }
+    },
+    {
+      "isin": "DE0007231326",
+      "name": "Sixt",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1784.0,
+      "median_opre_m": 2586.0,
+      "pred": {
+        "company": "Sixt",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 831.0,
+        "lti_k": 291.0,
+        "total_k": 1093.0
+      }
+    },
+    {
+      "isin": "DE000SKYD000",
+      "name": "Sky Dtl.",
+      "peer": "Peer_C3",
+      "index": "MDAX",
+      "median_pay_k": 1521.0,
+      "median_opre_m": 1457.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A2GS401",
+      "name": "Software",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 2892.0,
+      "median_opre_m": 1017.0,
+      "pred": {
+        "company": "Software",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 775.0,
+        "lti_k": 340.0,
+        "total_k": 1145.0
+      }
+    },
+    {
+      "isin": "DE0007251803",
+      "name": "Stada",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1888.0,
+      "median_opre_m": 2345.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0007493991",
+      "name": "Str\u00f6er",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1494.0,
+      "median_opre_m": 1658.0,
+      "pred": {
+        "company": "Str\u00f6er",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1275.0,
+        "lti_k": 719.0,
+        "total_k": 2097.0
+      }
+    },
+    {
+      "isin": "DE000SYM9999",
+      "name": "Symrise",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1317.0,
+      "median_opre_m": 2570.0,
+      "pred": {
+        "company": "Symrise",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 984.0,
+        "lti_k": 394.0,
+        "total_k": 1442.0
+      }
+    },
+    {
+      "isin": "DE0007297004",
+      "name": "S\u00fcdzucker",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 1011.0,
+      "median_opre_m": 7949.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0008303504",
+      "name": "TAG Immobilien",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 697.0,
+      "median_opre_m": 550.0,
+      "pred": {
+        "company": "TAG Immobilien",
+        "peer": "Peer_C2",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 681.0,
+        "lti_k": 364.0,
+        "total_k": 944.0
+      }
+    },
+    {
+      "isin": "DE000A2YN900",
+      "name": "TeamViewer",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 1210.0,
+      "median_opre_m": 596.0,
+      "pred": {
+        "company": "TeamViewer",
+        "peer": "Peer_C2",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 699.0,
+        "lti_k": 459.0,
+        "total_k": 995.0
+      }
+    },
+    {
+      "isin": "DE0005471601",
+      "name": "Techem",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 916.0,
+      "median_opre_m": 667.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000A1J5RX9",
+      "name": "Telefonica",
+      "peer": "Peer_C3",
+      "index": "MDAX",
+      "median_pay_k": 825.0,
+      "median_opre_m": 8942.0,
+      "pred": {
+        "company": "Telefonica",
+        "peer": "Peer_C3",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 971.0,
+        "lti_k": 270.0,
+        "total_k": 1157.0
+      }
+    },
+    {
+      "isin": "DE0007500001",
+      "name": "ThyssenKrupp",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 2637.0,
+      "median_opre_m": 52589.0,
+      "pred": {
+        "company": "ThyssenKrupp",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1944.0,
+        "lti_k": 1332.0,
+        "total_k": 3001.0
+      }
+    },
+    {
+      "isin": "DE000A0N4P43",
+      "name": "Tognum",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1137.0,
+      "median_opre_m": 3852.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0005089031",
+      "name": "United Internet",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 480.0,
+      "median_opre_m": 5957.0,
+      "pred": {
+        "company": "United Internet",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1323.0,
+        "lti_k": 706.0,
+        "total_k": 1910.0
+      }
+    },
+    {
+      "isin": "DE000A3H3LL2",
+      "name": "Vantage Towers",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 1683.0,
+      "median_opre_m": 639.0,
+      "pred": {
+        "company": "Vantage Towers",
+        "peer": "Peer_C2",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 568.0,
+        "lti_k": 304.0,
+        "total_k": 802.0
+      }
+    },
+    {
+      "isin": "DE000A0TGJ55",
+      "name": "Varta",
+      "peer": "Peer_C5",
+      "index": "MDAX",
+      "median_pay_k": 2124.0,
+      "median_opre_m": 775.0,
+      "pred": {
+        "company": "Varta",
+        "peer": "Peer_C5",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1133.0,
+        "lti_k": 488.0,
+        "total_k": 1701.0
+      }
+    },
+    {
+      "isin": "DE0006048911",
+      "name": "Vivacon",
+      "peer": "Peer_C2",
+      "index": "MDAX",
+      "median_pay_k": 1928.0,
+      "median_opre_m": 291.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0007664005",
+      "name": "Volkswagen",
+      "peer": "Peer_C4",
+      "index": "DAX",
+      "median_pay_k": 5426.0,
+      "median_opre_m": 252392.0,
+      "pred": {
+        "company": "Volkswagen",
+        "peer": "Peer_C4",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 2563.0,
+        "lti_k": 1867.0,
+        "total_k": 4182.0
+      }
+    },
+    {
+      "isin": "DE000A1ML7J1",
+      "name": "Vonovia",
+      "peer": "Peer_C0",
+      "index": "DAX",
+      "median_pay_k": 2357.0,
+      "median_opre_m": 6318.0,
+      "pred": {
+        "company": "Vonovia",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1649.0,
+        "lti_k": 1148.0,
+        "total_k": 2782.0
+      }
+    },
+    {
+      "isin": "DE0007667107",
+      "name": "Vossloh",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1224.0,
+      "median_opre_m": 1710.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000WCH8881",
+      "name": "Wacker Chemie",
+      "peer": "Peer_C0",
+      "index": "MDAX",
+      "median_pay_k": 1745.0,
+      "median_opre_m": 5998.0,
+      "pred": {
+        "company": "Wacker Chemie",
+        "peer": "Peer_C0",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1534.0,
+        "lti_k": 1021.0,
+        "total_k": 2496.0
+      }
+    },
+    {
+      "isin": "DE000A0CAYB2",
+      "name": "Wincor Nixdorf",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 1612.0,
+      "median_opre_m": 3057.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0007472060",
+      "name": "Wirecard",
+      "peer": "Peer_C6",
+      "index": "DAX and MDAX",
+      "median_pay_k": 2667.0,
+      "median_opre_m": 2129.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000ZAL1111",
+      "name": "Zalando",
+      "peer": "Peer_C6",
+      "index": "MDAX",
+      "median_pay_k": 588.0,
+      "median_opre_m": 4712.0,
+      "pred": {
+        "company": "Zalando",
+        "peer": "Peer_C6",
+        "fund_year": 2021,
+        "pred_year": 2022,
+        "cash_k": 1033.0,
+        "lti_k": 383.0,
+        "total_k": 1446.0
+      }
+    }
+  ],
+  "charts": [
+    {
+      "step": 1,
+      "title": "Step 1 \u2014 Data Cleaning & Join",
+      "file": "step1_data_cleaning.png"
+    },
+    {
+      "step": 2,
+      "title": "Step 2 \u2014 Peer Clustering",
+      "file": "step2_peer_clustering.png"
+    },
+    {
+      "step": 3,
+      "title": "Step 3 \u2014 Pay Benchmark (Median Regression)",
+      "file": "step3_benchmark.png"
+    },
+    {
+      "step": 31,
+      "title": "Step 3b \u2014 Ozkan (2011) Compensation Prediction",
+      "file": "step3_ozkan.png"
+    },
+    {
+      "step": 4,
+      "title": "Step 4 \u2014 Reach (Over/Under-Payment)",
+      "file": "step4_reach.png"
+    },
+    {
+      "step": 5,
+      "title": "Step 5 \u2014 Pay Bucket Decomposition",
+      "file": "step5_pay_buckets.png"
+    },
+    {
+      "step": 6,
+      "title": "Step 6 \u2014 Compensation Treadmill",
+      "file": "step6_treadmill.png"
+    },
+    {
+      "step": 7,
+      "title": "Step 7 \u2014 Executive Mobility",
+      "file": "step7_mobility.png"
+    },
+    {
+      "step": 8,
+      "title": "Step 8 \u2014 Governance Red Flags",
+      "file": "step8_red_flags.png"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-# Aequitas: Executive Pay Governance (Agent Instructions)
+# PayAudit: Executive Pay Governance (Agent Instructions)
 
 ## 🤖 IMPORTANT: System Architecture & Normalization
 

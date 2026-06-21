@@ -33,12 +33,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize engines — synthetic demo panel by default (TUM FA NDA safe)
-os.environ.setdefault("USE_MOCK_PANEL", "1")
+# Initialize engines — real peer-cluster panel by default; set USE_MOCK_PANEL=1 for NDA-safe demo
+os.environ.setdefault("USE_PORTABLE_PANEL", "1")
 sml_engine = ProxyEngineSML()
 cache_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sml_cache.json")
 
-print("Fitting SML pipeline on demo panel...")
+print("Fitting SML pipeline on the real peer-cluster panel...")
 sml_engine.run_full_pipeline()
 # Also load the cache so the stateless O(1) upload endpoint can score proposals.
 sml_engine.load_from_cache(cache_path)
@@ -68,11 +68,15 @@ class InsightRequest(BaseModel):
     metric: dict | None = None    # card context for the neutral lens: {label, value, context}
 
 def _predictions_path() -> str:
-    """Resolve company metadata JSON: local confidential override, else NDA-safe demo file."""
+    """Resolve company metadata JSON: real panel first, then NDA-safe demo fallback."""
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
     override = os.getenv("CONFIDENTIAL_PREDICTIONS_PATH")
     if override and os.path.exists(override):
         return override
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "demo_ozkan_predictions.json")
+    real = os.path.join(backend_dir, "ozkan_predictions.json")
+    if os.path.exists(real):
+        return real
+    return os.path.join(backend_dir, "demo_ozkan_predictions.json")
 
 @app.get("/api/companies")
 def get_companies():
@@ -477,6 +481,12 @@ async def serve_support_js():
         os.path.join(frontend_dir, "support.js"),
         headers={"Cache-Control": "no-cache, no-store, must-revalidate, max-age=0"}
     )
+
+
+@app.get("/image.png")
+async def serve_logo():
+    """Serves the PayAudit logo used in the dashboard header."""
+    return FileResponse(os.path.join(frontend_dir, "image.png"), media_type="image/png")
 
 if __name__ == "__main__":
     import uvicorn

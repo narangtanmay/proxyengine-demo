@@ -34,7 +34,6 @@ def enforce_no_mock_fallback(request, monkeypatch):
 @pytest.fixture(scope="session")
 def shared_sml_engine():
     """Session-scoped fixture to fit and cache the SML engine once for the entire test run."""
-    os.environ.setdefault("USE_MOCK_PANEL", "1")
     print("\n--- Fitting shared SML pipeline for test run ---")
     engine = ProxyEngineSML()
     engine.run_full_pipeline()

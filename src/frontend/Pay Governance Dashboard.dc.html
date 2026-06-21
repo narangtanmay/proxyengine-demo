@@ -136,13 +136,7 @@
 						<img
 							src="image.png"
 							alt="PayAudit"
-							style="
-								width: 32px;
-								height: 32px;
-								border-radius: 9px;
-								object-fit: cover;
-								flex: none;
-							"
+							style="width: 32px; height: 32px; border-radius: 9px; object-fit: cover; flex: none"
 						/>
 						<div style="display: flex; flex-direction: column; line-height: 1.1">
 							<span
@@ -687,16 +681,39 @@
 								box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 							"
 						>
-							<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px">
+							<div
+								style="
+									display: flex;
+									align-items: center;
+									justify-content: space-between;
+									gap: 12px;
+									margin-bottom: 4px;
+								"
+							>
 								<div style="font-size: 13px; font-weight: 700">Remuneration Package Specification</div>
 								<label
-									style="display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;color:#2563eb;background:#eef2fb;border:1px solid #d6e0fb;border-radius:8px;padding:7px 12px;transition-property:transform,background-color;transition-duration:.15s"
+									style="
+										display: inline-flex;
+										align-items: center;
+										gap: 7px;
+										font: inherit;
+										font-size: 12px;
+										font-weight: 600;
+										cursor: pointer;
+										color: #2563eb;
+										background: #eef2fb;
+										border: 1px solid #d6e0fb;
+										border-radius: 8px;
+										padding: 7px 12px;
+										transition-property: transform, background-color;
+										transition-duration: 0.15s;
+									"
 									style-hover="background:#e2eafd"
 									style-active="transform:scale(0.97)"
 								>
-									<span style="font-size:13px">📄</span>
+									<span style="font-size: 13px">📄</span>
 									Upload PDF
-									<input type="file" accept="application/pdf" style="display:none" />
+									<input type="file" accept="application/pdf" style="display: none" />
 								</label>
 							</div>
 							<div style="font-size: 12px; color: #6b7280; margin-bottom: 16px; text-wrap: pretty"
@@ -763,29 +780,91 @@
 									>Total</span
 								>
 
-								<div style="position: relative; display: flex; align-items: center; gap: 9px; padding: 10px 0">
-									<span style="width: 4px; height: 30px; border-radius: 3px; background: var(--color-accent, #2563eb); flex: none"></span>
+								<div
+									style="
+										position: relative;
+										display: flex;
+										align-items: center;
+										gap: 9px;
+										padding: 10px 0;
+									"
+								>
+									<span
+										style="
+											width: 4px;
+											height: 30px;
+											border-radius: 3px;
+											background: var(--color-accent, #2563eb);
+											flex: none;
+										"
+									></span>
 									<button
 										onClick="{{ toggleBoardPicker }}"
-										style="flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;font:inherit;text-align:left;cursor:pointer;background:transparent;border:none;padding:0"
+										style="
+											flex: 1;
+											min-width: 0;
+											display: flex;
+											align-items: center;
+											justify-content: space-between;
+											gap: 8px;
+											font: inherit;
+											text-align: left;
+											cursor: pointer;
+											background: transparent;
+											border: none;
+											padding: 0;
+										"
 									>
-										<span style="line-height:1.2;min-width:0">
-											<span style="display:block;font-size:13.5px;font-weight:600;color:#1f2430">{{ boardPosition }}</span>
-											<span style="display:block;font-size:11px;color:#6b7280">{{ focal.exec }} · under review</span>
+										<span style="line-height: 1.2; min-width: 0">
+											<span
+												style="
+													display: block;
+													font-size: 13.5px;
+													font-weight: 600;
+													color: #1f2430;
+												"
+												>{{ boardPosition }}</span
+											>
+											<span style="display: block; font-size: 11px; color: #6b7280"
+												>{{ focal.exec }} · under review</span
+											>
 										</span>
-										<span style="font-size:9px;color:#6b7280;flex:none">▼</span>
+										<span style="font-size: 9px; color: #6b7280; flex: none">▼</span>
 									</button>
 									<sc-if value="{{ boardPickerOpen }}" hint-placeholder-val="{{ false }}">
-										<div onClick="{{ closeBoardPicker }}" style="position:fixed;inset:0;z-index:45"></div>
-										<div style="position:absolute;top:48px;left:0;z-index:46;width:250px;max-height:280px;overflow-y:auto;background:#fff;border:1px solid var(--color-border,#d9dce1);border-radius:11px;box-shadow:0 18px 40px rgba(16,24,40,.16);padding:6px;animation:mer-fade .14s ease both">
+										<div
+											onClick="{{ closeBoardPicker }}"
+											style="position: fixed; inset: 0; z-index: 45"
+										></div>
+										<div
+											style="
+												position: absolute;
+												top: 48px;
+												left: 0;
+												z-index: 46;
+												width: 250px;
+												max-height: 280px;
+												overflow-y: auto;
+												background: #fff;
+												border: 1px solid var(--color-border, #d9dce1);
+												border-radius: 11px;
+												box-shadow: 0 18px 40px rgba(16, 24, 40, 0.16);
+												padding: 6px;
+												animation: mer-fade 0.14s ease both;
+											"
+										>
 											<sc-for list="{{ boardPositions }}" as="bp" hint-placeholder-count="6">
 												<button
 													onClick="{{ bp.select }}"
 													style="display:flex;align-items:center;gap:9px;width:100%;font:inherit;text-align:left;cursor:pointer;background:{{ bp.bg }};border:none;border-radius:8px;padding:8px 9px;transition-property:background-color;transition-duration:.12s"
 													style-hover="background:#f3f5f8"
 												>
-													<span style="width:7px;height:7px;border-radius:50%;background:{{ bp.dot }};flex:none"></span>
-													<span style="font-size:12.5px;font-weight:600;color:#1f2430">{{ bp.label }}</span>
+													<span
+														style="width:7px;height:7px;border-radius:50%;background:{{ bp.dot }};flex:none"
+													></span>
+													<span style="font-size: 12.5px; font-weight: 600; color: #1f2430"
+														>{{ bp.label }}</span
+													>
 												</button>
 											</sc-for>
 										</div>
@@ -2711,7 +2790,7 @@
 												text-transform: uppercase;
 												color: #9aa1ad;
 											"
-											>Q5 · §286(5) HGB disclosure</div
+											>Q5 · §87a AktG remuneration system</div
 										>
 										<div
 											style="
@@ -2919,7 +2998,7 @@
 												text-transform: uppercase;
 												color: #9aa1ad;
 											"
-											>Q7 · ISS-ESG · DCGK G.1</div
+											>Q7 · ESG · DCGK G.1</div
 										>
 										<div
 											style="
@@ -3228,10 +3307,9 @@
 												<div
 													style="
 														display: grid;
-														grid-template-columns: minmax(0, 1.7fr) minmax(
-																0,
-																1.4fr
-															) 64px 86px;
+														grid-template-columns:
+															minmax(0, 1.7fr) minmax(0, 1.4fr)
+															64px 86px;
 														gap: 0;
 														align-items: center;
 														padding: 9px 8px;
@@ -3693,13 +3771,13 @@
 			    ZF:   { ticker: 'ZF', name: 'ZF Friedrichshafen', short: 'ZF', isin: '—  (private)', exec: 'Holger Klein', sector: 'Auto Supplier', opre: 46.6, roa: 1.1, base: 1.25, sti: 1.30, lti: 1.35, ratchet: false, secrecy: false, is_peer: true },
 			  };
 			  questionDefs = [
-			    { id: 'q1', code: 'ISS-MOM', title: 'Multiple of Median: Does total compensation exceed peer thresholds?', desc: 'Benchmarks proposed pay against the ISS-defined matched peer group median.' },
-			    { id: 'q2', code: 'ISS-RDA', title: 'Relative Degree of Alignment: Does pay exceed the size-fitted frontier?', desc: 'Tests pay against an SML quantile-regression frontier controlling for operational scale.' },
-			    { id: 'q3', code: 'ISS-PFL', title: 'Pay-for-Luck Asymmetry: Are there problematic incentive ratchets?', desc: 'Checks whether upside payout sensitivity exceeds downside sensitivity (market-tailwind capture).' },
-			    { id: 'q4', code: 'ISS-RPA', title: 'Relative Peer Assessment: Does firm scale justify the level?', desc: 'Quantifies the econometric size / reach premium relative to the European peer cluster.' },
-			    { id: 'q5', code: 'ISS-HGB', title: 'Transparency (§286(5) HGB): Is the package fully disclosed?', desc: 'Flags any individualized disclosure opt-outs contrary to ISS transparency expectations.' },
-			    { id: 'q6', code: 'ISS-LTI', title: 'Long-Term Alignment: Is the LTI ratio adequately rigorous?', desc: 'Assesses the Long-Term Incentive to base ratio and overall variable pay mix.' },
-			    { id: 'q7', code: 'ISS-ESG', title: 'ESG Linkage (DCGK G.1): Is variable pay tied to quantifiable ESG targets?', desc: 'Tests whether STI/LTI payouts are anchored to measurable, audited ESG / sustainability KPIs under DCGK Section G.1.' },
+			    { id: 'q1', code: 'MOM', title: 'Multiple of Median: Does total compensation exceed peer thresholds?', desc: 'Benchmarks proposed pay against the matched peer group median.' },
+			    { id: 'q2', code: 'RDA', title: 'Relative Degree of Alignment: Does pay exceed the size-fitted frontier?', desc: 'Tests pay against an SML quantile-regression frontier controlling for operational scale.' },
+			    { id: 'q3', code: 'PFL', title: 'Pay-for-Luck Asymmetry: Are there problematic incentive ratchets?', desc: 'Checks whether upside payout sensitivity exceeds downside sensitivity (market-tailwind capture).' },
+			    { id: 'q4', code: 'RPA', title: 'Relative Peer Assessment: Does firm scale justify the level?', desc: 'Quantifies the econometric size / reach premium relative to the European peer cluster.' },
+			    { id: 'q5', code: 'AKTG', title: 'System Clarity (§87a AktG): Is the pay system clearly and fully disclosed?', desc: 'Tests the §87a AktG requirement for a clear, comprehensible and fully disclosed remuneration system.' },
+			    { id: 'q6', code: 'LTI', title: 'Long-Term Alignment: Is the LTI ratio adequately rigorous?', desc: 'Assesses the Long-Term Incentive to base ratio and overall variable pay mix.' },
+			    { id: 'q7', code: 'ESG', title: 'ESG Linkage (DCGK G.1): Is variable pay tied to quantifiable ESG targets?', desc: 'Tests whether STI/LTI payouts are anchored to measurable, audited ESG / sustainability KPIs under DCGK Section G.1.' },
 			  ];
 			  C = { accent: '#1d4ed8', text: '#1f2430', muted: '#64748b', green: '#047857', amber: '#b45309', red: '#be123c', greenBg: '#ecfdf5', amberBg: '#fffbeb', redBg: '#fff1f2' };
 
@@ -4004,7 +4082,7 @@
 			    const f = this.state.focal, cl = this._cluster(); const median = this._median(cl.map(k => this._peerPay(k)));
 			    const pay = this.num(f.base) + this.num(f.sti) + this.num(f.lti), mom = pay / median;
 			    this.setState(s => ({ input: '', sending: true, msgs: { ...s.msgs, log: [...(s.msgs.log || []), { role: 'user', content: t }] } }));
-			    const prompt = `You are PayAudit, an executive-pay governance advisor. Firm ${f.name} (${f.isin}); executive ${f.exec}, FY${f.year}. Operating revenue €${f.opre}B, ROA ${f.roa}%. Proposed package: base €${f.base}M, short-term €${f.sti}M, long-term €${f.lti}M (total €${pay.toFixed(2)}M). Peer-median pay €${median.toFixed(2)}M, multiple-of-median ${mom.toFixed(2)}x. Pay-for-luck ratchet ${f.ratchet ? 'TRIGGERED' : 'not triggered'}, §286(5) HGB opt-out ${f.secrecy ? 'present' : 'absent'}. Answer in 2-4 concise sentences, professional governance tone, citing figures. Question: ${t}`;
+			    const prompt = `You are PayAudit, an executive-pay governance advisor. Firm ${f.name} (${f.isin}); executive ${f.exec}, FY${f.year}. Operating revenue €${f.opre}B, ROA ${f.roa}%. Proposed package: base €${f.base}M, short-term €${f.sti}M, long-term €${f.lti}M (total €${pay.toFixed(2)}M). Peer-median pay €${median.toFixed(2)}M, multiple-of-median ${mom.toFixed(2)}x. Pay-for-luck ratchet ${f.ratchet ? 'TRIGGERED' : 'not triggered'}, §87a AktG remuneration-system disclosure ${f.secrecy ? 'incomplete' : 'complete'}. Answer in 2-4 concise sentences, professional governance tone, citing figures. Question: ${t}`;
 			    const done = (a) => this.setState(s => ({ sending: false, msgs: { ...s.msgs, log: [...(s.msgs.log || []), { role: 'assistant', content: a }] } }));
 
 			    fetch("http://localhost:8000/api/chat", {
@@ -4143,7 +4221,7 @@
 			      q2: { label: 'SML Pay Premium', value: (premiumFrac >= 0 ? '+' : '') + (premiumFrac * 100).toFixed(0) + '%', detail: getLensDetail('q2', smlInsight), ...ic(premS) },
 			      q3: { label: 'Pay-for-Luck Ratchet', value: f.ratchet ? 'Triggered' : 'Clear', detail: getLensDetail('q3', f.ratchet ? 'Asymmetric payout sensitivity detected — upside not matched by downside.' : 'No asymmetric pay-for-luck sensitivity in the incentive design.'), ...ic(f.ratchet ? 'fail' : 'pass') },
 			      q4: { label: 'Size / Reach Premium', value: reachRatioBk.toFixed(2) + '×', detail: getLensDetail('q4', `Size-equivalent econometric reach is ${reachRatioBk.toFixed(2)}× — pay is consistent with a peer ${reachRatioBk.toFixed(1)}× this firm's operating scale, ${reachRatioBk > 1.5 ? 'a material size premium over' : 'broadly in line with'} the cluster.`), ...ic(reachRatioBk > 1.5 ? 'warn' : 'pass') },
-			      q5: { label: '§286(5) HGB Disclosure', value: f.secrecy ? 'Opt-out' : 'Full', detail: getLensDetail('q5', f.secrecy ? 'Individual disclosure opt-out invoked — reduces transparency.' : 'No disclosure opt-out — full transparency on the package.'), ...ic(f.secrecy ? 'fail' : 'pass') },
+			      q5: { label: '§87a AktG System', value: f.secrecy ? 'Partial' : 'Full', detail: getLensDetail('q5', f.secrecy ? 'Remuneration system not fully disclosed — falls short of the §87a AktG clarity and transparency requirements.' : 'Remuneration system clearly and comprehensibly disclosed, consistent with §87a AktG.'), ...ic(f.secrecy ? 'fail' : 'pass') },
 			      q6: { label: 'LTI vs Base Salary', value: ltiRatioN.toFixed(1) + '×', detail: getLensDetail('q6', `LTI weighting of ${ltiRatioN.toFixed(1)}× base ${ltiRatioN >= 2 ? 'aligns pay with long-horizon value' : 'is light on long-term alignment'}.`), ...ic(ltiRatioN >= 2 ? 'pass' : 'warn') },
 			      q7: { label: 'ESG Linkage (DCGK G.1)', value: 'Review', detail: getLensDetail('q7', 'Whether variable pay is anchored to quantifiable, audited ESG / sustainability KPIs is a disclosure-review item not captured in structured pay data — the dual-lens read assesses DCGK Section G.1 alignment qualitatively.'), ...ic('warn') },
 			    };
@@ -4181,7 +4259,7 @@
 			      word: recoV.word, sub: recoV.sub, color: recoV.color, bg: recoV.bg, border: recoV.border,
 			      summary: `${selFails} concern${selFails === 1 ? '' : 's'} · ${selWarns} caution${selWarns === 1 ? '' : 's'} across ${selectedInsights.length} tested criteria`,
 			      drivers: recoDrivers, driverCount: recoDrivers.length, allClear: recoDrivers.length === 0,
-			      note: 'Synthesized from the selected ISS criteria above. The statutory cap (§87a AktG) gauge is shown separately and is not part of ISS scoring.'
+			      note: 'Synthesized from the selected criteria above. The statutory cap (§87a AktG) gauge is shown separately and is not part of the scoring.'
 			    };
 
 			    // ---- per-question viz ----
@@ -4209,8 +4287,8 @@
 			      insight: 'Bars show revenue scale in cluster; headline reach is the SML size-equivalent residual.'
 			    };
 			    const disclosure = f.secrecy
-			      ? { status: 'Disclosure opt-out invoked', icon: '✕', color: C.red, bg: C.redBg, border: '#f2c2c2', score: '60%', scoreW: '60%', insight: 'Individual figures withheld under §286(5) HGB.' }
-			      : { status: 'Full individual disclosure', icon: '✓', color: C.green, bg: C.greenBg, border: '#bfe3cb', score: '100%', scoreW: '100%', insight: 'All package components individually disclosed.' };
+			      ? { status: 'Incomplete system disclosure', icon: '✕', color: C.red, bg: C.redBg, border: '#f2c2c2', score: '60%', scoreW: '60%', insight: 'Remuneration system not fully disclosed — short of the §87a AktG clarity requirements.' }
+			      : { status: 'Clear & comprehensible system', icon: '✓', color: C.green, bg: C.greenBg, border: '#bfe3cb', score: '100%', scoreW: '100%', insight: 'Remuneration system clearly disclosed and consistent with §87a AktG.' };
 			    const mix = { color: ltiRatioN >= 2 ? C.green : '#c77700', ltiShare: (pay ? lti / pay * 100 : 0).toFixed(0) + '%', insight: insightDefs.q6.detail };
 			    const esg = { status: 'Review', icon: insightDefs.q7.icon, color: insightDefs.q7.color, bg: insightDefs.q7.bg, border: '#f0d9a8', note: 'Structured panel data does not verify ESG KPI linkage; treat as disclosure review only.', insight: insightDefs.q7.detail };
 
@@ -4344,14 +4422,14 @@
 			      modelGauge, hasModelGauge: !!modelGauge,
 			      shadowRows,
 			      presets, pickerOpen: this.state.pickerOpen, profileNote: this.state.profileNote,
-      boardPosition: this.state.boardPosition, boardPickerOpen: this.state.boardPickerOpen,
-      boardPositions: ['Chair of Mgmt Board', 'Management Board Member', 'Chief Financial Officer', 'Chief Operating Officer', 'Chair of Supervisory Board', 'Supervisory Board Member'].map(p => ({ label: p, bg: p === this.state.boardPosition ? '#eef2fb' : 'transparent', dot: p === this.state.boardPosition ? C.accent : '#cdd2da', select: () => this.setState({ boardPosition: p, boardPickerOpen: false }) })),
+			   boardPosition: this.state.boardPosition, boardPickerOpen: this.state.boardPickerOpen,
+			   boardPositions: ['Chair of Mgmt Board', 'Management Board Member', 'Chief Financial Officer', 'Chief Operating Officer', 'Chair of Supervisory Board', 'Supervisory Board Member'].map(p => ({ label: p, bg: p === this.state.boardPosition ? '#eef2fb' : 'transparent', dot: p === this.state.boardPosition ? C.accent : '#cdd2da', select: () => this.setState({ boardPosition: p, boardPickerOpen: false }) })),
 			      messages, quicks, sending: this.state.sending, input: this.state.input, historyRef: this.historyRef,
 			      drawerX: drawerEff ? '0%' : '100%', scrimOp: drawerEff ? '1' : '0', scrimPE: drawerEff ? 'auto' : 'none',
 			      // handlers
 			      toggleLens: () => this.toggleLens(),
 			      togglePicker: () => this.setState(s => ({ pickerOpen: !s.pickerOpen })), closePicker: () => this.setState({ pickerOpen: false }),
-      toggleBoardPicker: () => this.setState(s => ({ boardPickerOpen: !s.boardPickerOpen })), closeBoardPicker: () => this.setState({ boardPickerOpen: false }),
+			   toggleBoardPicker: () => this.setState(s => ({ boardPickerOpen: !s.boardPickerOpen })), closeBoardPicker: () => this.setState({ boardPickerOpen: false }),
 			      goStep1: () => this.goStep(1), goStep2: () => this.goStep(2), submitCriteria: () => { if (selectedCount) this.goStep(3); },
 			      onName: e => this.setFocal('name', e.target.value), onIsin: e => this.setFocal('isin', e.target.value), onExec: e => this.setFocal('exec', e.target.value), onSector: e => this.setFocal('sector', e.target.value), onYear: e => this.setFocal('year', e.target.value), onOpre: e => this.setFocal('opre', e.target.value), onRoa: e => this.setFocal('roa', e.target.value), onBase: e => this.setFocal('base', e.target.value), onSti: e => this.setFocal('sti', e.target.value), onLti: e => this.setFocal('lti', e.target.value),
 			      onStatutoryCap: e => this.setFocal('statutoryCapM', e.target.value), onExpectedAmount: e => this.setFocal('expectedAmount', e.target.value),

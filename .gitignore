@@ -1,0 +1,37 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*/__pycache__
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+venv/
+.venv/
+
+# Caches / generated artifacts
+sml_cache.json
+src/backend/sml_cache.json
+.understand-anything/
+.playwright-mcp/
+
+# Confidential / proprietary data (TUM FA NDA — never commit)
+data/peer_cluster_*.csv
+data/2008-2021/
+data/ORBIS_*.csv
+data/cpi_germany.csv
+regression_analysis.pdf
+src/backend/ozkan_predictions.json
+
+# Frontend dependencies (install locally)
+src/frontend/node_modules/
+
+# Deprecated Implementation outputs that may embed panel data
+Implementation/outputs/index.html
+
+# OS / editor
+.DS_Store
+Thumbs.db

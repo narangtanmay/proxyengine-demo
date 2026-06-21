@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Predict Compensation — {{ port }}</title>
+  <style>{{ inline_css }}</style>
+</head>
+<body>
+  <header class="hero compact">
+    <div class="container">
+      <a href="{{ url_for('index') }}" class="back">← Dashboard</a>
+      <p class="eyebrow">Ozkan (2011) · Single Company</p>
+      <h1>Predict Next-Year Total Compensation</h1>
+      <p class="subtitle">Select one company — prediction uses its peer cluster model and latest fundamentals.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="step-card predict-form-card">
+      <form method="get" action="{{ url_for('predict') }}" class="predict-form">
+        <label for="company">Which company do you want to predict?</label>
+        <select id="company" name="company" required>
+          <option value="">— Choose a company —</option>
+          {% for c in companies %}
+          <option value="{{ c.isin }}" {% if selected_isin == c.isin %}selected{% endif %}>
+            {{ c.name }} ({{ c.peer_label }}{% if c.index != '—' %}, {{ c.index }}{% endif %})
+          </option>
+          {% endfor %}
+        </select>
+        <button type="submit">Predict compensation</button>
+      </form>
+      {% if not companies %}
+      <div class="missing" style="margin-top:1rem;">Run <code>python run_pipeline.py</code> to load companies.</div>
+      {% endif %}
+    </section>
+
+    {% if result %}
+    <section class="step-card">
+      {% if result.error %}
+      <div class="missing">{{ result.error }}</div>
+      {% else %}
+      <div class="step-header">
+        <span class="step-badge">Prediction</span>
+        <h2>{{ result.company }}</h2>
+        <p class="step-desc">{{ result.formula }}</p>
+      </div>
+
+      <div class="predict-meta">
+        <div><strong>ISIN</strong><span>{{ result.isin }}</span></div>
+        <div><strong>Peer cluster</strong><span>{{ result.peer_label }}</span></div>
+        <div><strong>Index</strong><span>{{ result.index_listing }}</span></div>
+        <div><strong>Fundamentals from</strong><span>{{ result.fundamental_year }}</span></div>
+        <div><strong>Predicting for</strong><span>{{ result.prediction_year }}</span></div>
+      </div>
+
+      <h3 class="sub-heading">Fundamentals used ({{ result.fundamental_year }})</h3>
+      <div class="predict-meta">
+        <div><strong>OPRE</strong><span>€{{ result.fundamentals.opre_m }}m</span></div>
+        <div><strong>ROA</strong><span>{{ result.fundamentals.roa_pct }}%</span></div>
+        <div><strong>GEAR</strong><span>{{ result.fundamentals.gear_pct }}%</span></div>
+        <div><strong>Board size</strong><span>{{ result.fundamentals.board_size }}</span></div>
+      </div>
+
+      <h3 class="sub-heading">Compensation forecast (real € thousands)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Last year ({{ result.fundamental_year }}) actual</th>
+              <th>Next year ({{ result.prediction_year }}) predicted</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cash (salary + STI)</td>
+              <td>{% if result.actual_last_year.cash_k is not none %}{{ result.actual_last_year.cash_k | int }}{% else %}—{% endif %}</td>
+              <td><strong>{% if result.predicted.get('cash') is not none %}{{ result.predicted.cash | int }}{% else %}—{% endif %}</strong></td>
+            </tr>
+            <tr>
+              <td>LTI</td>
+              <td>{% if result.actual_last_year.lti_k is not none %}{{ result.actual_last_year.lti_k | int }}{% else %}—{% endif %}</td>
+              <td><strong>{% if result.predicted.get('lti') is not none %}{{ result.predicted.lti | int }}{% else %}—{% endif %}</strong></td>
+            </tr>
+            <tr class="highlight-row">
+              <td><strong>Total direct compensation</strong></td>
+              <td>{% if result.actual_last_year.total_k is not none %}{{ result.actual_last_year.total_k | int }}{% else %}—{% endif %}</td>
+              <td><strong class="total-pred">{{ result.predicted_total_k | int }}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {% if result.peer_median_pay_k %}
+      <p class="step-desc" style="margin-top:1rem;">
+        Peer cluster median historical pay: <strong>{{ result.peer_median_pay_k | int }} €k</strong>
+        · Predicted vs peer median:
+        {% set diff = result.predicted_total_k - result.peer_median_pay_k %}
+        <strong>{% if diff > 0 %}+{% endif %}{{ diff | int }} €k</strong>
+      </p>
+      {% endif %}
+
+      <p class="step-desc" style="margin-top:0.75rem;">
+        Saved to <code>outputs/data/ozkan_single_company_prediction.csv</code>
+      </p>
+      {% endif %}
+    </section>
+    {% endif %}
+  </main>
+</body>
+</html>

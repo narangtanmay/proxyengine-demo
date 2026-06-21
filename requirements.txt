@@ -1,0 +1,28 @@
+# ProxyEngine Python dependencies
+# Core statistical / data stack (SML engine)
+pandas
+numpy
+scikit-learn
+statsmodels
+
+# Backend API
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+
+# Visualization (chart endpoint)
+matplotlib
+seaborn
+
+# PDF parsing + LLM translation layer
+# DeepSeek is OpenAI-API-compatible, so the `openai` SDK is the only client needed.
+PyPDF2
+python-dotenv
+openai
+
+# Optional UI / prototyping
+streamlit
+
+# Testing
+pytest

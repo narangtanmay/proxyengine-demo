@@ -1,0 +1,948 @@
+{
+  "summary": {
+    "firm_years": 300,
+    "firms": 100,
+    "join_pct": 100.0,
+    "movers": 0,
+    "note": "Synthetic demo data only \u2014 not TUM FA confidential panel"
+  },
+  "clusters": [
+    {
+      "peer": "Peer_C0",
+      "n": 9,
+      "median_pay_k": 958.0
+    },
+    {
+      "peer": "Peer_C1",
+      "n": 46,
+      "median_pay_k": 1942.0
+    },
+    {
+      "peer": "Peer_C2",
+      "n": 1,
+      "median_pay_k": 3872.8
+    },
+    {
+      "peer": "Peer_C3",
+      "n": 14,
+      "median_pay_k": 1451.1
+    },
+    {
+      "peer": "Peer_C4",
+      "n": 14,
+      "median_pay_k": 1221.5
+    },
+    {
+      "peer": "Peer_C5",
+      "n": 3,
+      "median_pay_k": 2043.4
+    },
+    {
+      "peer": "Peer_C6",
+      "n": 23,
+      "median_pay_k": 1571.0
+    }
+  ],
+  "companies": [
+    {
+      "isin": "DE0005439004",
+      "name": "Continental AG",
+      "peer": "Peer_C5",
+      "index": "DEMO",
+      "median_pay_k": 1937.9,
+      "median_opre_m": 40170.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0007164600",
+      "name": "SAP SE",
+      "peer": "Peer_C5",
+      "index": "DEMO",
+      "median_pay_k": 1997.7,
+      "median_opre_m": 31930.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE0007664005",
+      "name": "Volkswagen AG",
+      "peer": "Peer_C2",
+      "index": "DEMO",
+      "median_pay_k": 3872.8,
+      "median_opre_m": 257500.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE000BAY0017",
+      "name": "Bayer AG",
+      "peer": "Peer_C5",
+      "index": "DEMO",
+      "median_pay_k": 2051.9,
+      "median_opre_m": 48410.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100000",
+      "name": "Peer_Firm_1",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1652.0,
+      "median_opre_m": 15579.7,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100001",
+      "name": "Peer_Firm_2",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1718.7,
+      "median_opre_m": 17037.9,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100002",
+      "name": "Peer_Firm_3",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1382.9,
+      "median_opre_m": 9497.1,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100003",
+      "name": "Peer_Firm_4",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1889.7,
+      "median_opre_m": 16357.2,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100004",
+      "name": "Peer_Firm_5",
+      "peer": "Peer_C0",
+      "index": "DEMO",
+      "median_pay_k": 950.3,
+      "median_opre_m": 2291.5,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100005",
+      "name": "Peer_Firm_6",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 1279.1,
+      "median_opre_m": 5068.5,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100006",
+      "name": "Peer_Firm_7",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1872.1,
+      "median_opre_m": 14920.3,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100007",
+      "name": "Peer_Firm_8",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 1254.0,
+      "median_opre_m": 3569.9,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100008",
+      "name": "Peer_Firm_9",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2237.2,
+      "median_opre_m": 17283.5,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100009",
+      "name": "Peer_Firm_10",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 1302.8,
+      "median_opre_m": 3334.1,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100010",
+      "name": "Peer_Firm_11",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 1491.8,
+      "median_opre_m": 4955.4,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100011",
+      "name": "Peer_Firm_12",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1874.2,
+      "median_opre_m": 18527.8,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100012",
+      "name": "Peer_Firm_13",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2355.4,
+      "median_opre_m": 20801.2,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100013",
+      "name": "Peer_Firm_14",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2167.4,
+      "median_opre_m": 16064.7,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100014",
+      "name": "Peer_Firm_15",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1473.1,
+      "median_opre_m": 10492.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100015",
+      "name": "Peer_Firm_16",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2095.3,
+      "median_opre_m": 20358.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100016",
+      "name": "Peer_Firm_17",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 1352.3,
+      "median_opre_m": 5135.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100017",
+      "name": "Peer_Firm_18",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1748.2,
+      "median_opre_m": 13030.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100018",
+      "name": "Peer_Firm_19",
+      "peer": "Peer_C3",
+      "index": "DEMO",
+      "median_pay_k": 1795.7,
+      "median_opre_m": 7783.4,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100019",
+      "name": "Peer_Firm_20",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2035.7,
+      "median_opre_m": 17158.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100020",
+      "name": "Peer_Firm_21",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2091.0,
+      "median_opre_m": 18372.7,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100021",
+      "name": "Peer_Firm_22",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1527.9,
+      "median_opre_m": 10577.3,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100022",
+      "name": "Peer_Firm_23",
+      "peer": "Peer_C0",
+      "index": "DEMO",
+      "median_pay_k": 898.1,
+      "median_opre_m": 1788.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100023",
+      "name": "Peer_Firm_24",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1626.7,
+      "median_opre_m": 12375.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100024",
+      "name": "Peer_Firm_25",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2035.3,
+      "median_opre_m": 13987.3,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100025",
+      "name": "Peer_Firm_26",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2683.3,
+      "median_opre_m": 16502.1,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100026",
+      "name": "Peer_Firm_27",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2063.7,
+      "median_opre_m": 16858.2,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100027",
+      "name": "Peer_Firm_28",
+      "peer": "Peer_C3",
+      "index": "DEMO",
+      "median_pay_k": 1394.1,
+      "median_opre_m": 7474.2,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100028",
+      "name": "Peer_Firm_29",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 896.9,
+      "median_opre_m": 4631.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100029",
+      "name": "Peer_Firm_30",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1822.9,
+      "median_opre_m": 19602.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100030",
+      "name": "Peer_Firm_31",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 964.5,
+      "median_opre_m": 3529.2,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100031",
+      "name": "Peer_Firm_32",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1936.0,
+      "median_opre_m": 15503.4,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100032",
+      "name": "Peer_Firm_33",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 1052.2,
+      "median_opre_m": 5180.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100033",
+      "name": "Peer_Firm_34",
+      "peer": "Peer_C0",
+      "index": "DEMO",
+      "median_pay_k": 920.4,
+      "median_opre_m": 2638.8,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100034",
+      "name": "Peer_Firm_35",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1399.6,
+      "median_opre_m": 10537.8,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100035",
+      "name": "Peer_Firm_36",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 960.7,
+      "median_opre_m": 4924.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100036",
+      "name": "Peer_Firm_37",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2121.0,
+      "median_opre_m": 14476.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100037",
+      "name": "Peer_Firm_38",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1754.9,
+      "median_opre_m": 15925.8,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100038",
+      "name": "Peer_Firm_39",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1539.6,
+      "median_opre_m": 10106.5,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100039",
+      "name": "Peer_Firm_40",
+      "peer": "Peer_C3",
+      "index": "DEMO",
+      "median_pay_k": 1346.5,
+      "median_opre_m": 6764.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100040",
+      "name": "Peer_Firm_41",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1835.5,
+      "median_opre_m": 13346.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100041",
+      "name": "Peer_Firm_42",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2268.3,
+      "median_opre_m": 20097.4,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100042",
+      "name": "Peer_Firm_43",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1351.5,
+      "median_opre_m": 10446.2,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100043",
+      "name": "Peer_Firm_44",
+      "peer": "Peer_C3",
+      "index": "DEMO",
+      "median_pay_k": 1266.8,
+      "median_opre_m": 9099.9,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100044",
+      "name": "Peer_Firm_45",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1651.8,
+      "median_opre_m": 15294.5,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100045",
+      "name": "Peer_Firm_46",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1718.8,
+      "median_opre_m": 18927.7,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100046",
+      "name": "Peer_Firm_47",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 1142.0,
+      "median_opre_m": 4839.8,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100047",
+      "name": "Peer_Firm_48",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1622.9,
+      "median_opre_m": 17864.2,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100048",
+      "name": "Peer_Firm_49",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1894.6,
+      "median_opre_m": 9799.9,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100049",
+      "name": "Peer_Firm_50",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1828.1,
+      "median_opre_m": 11294.4,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100050",
+      "name": "Peer_Firm_51",
+      "peer": "Peer_C0",
+      "index": "DEMO",
+      "median_pay_k": 642.9,
+      "median_opre_m": 1034.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100051",
+      "name": "Peer_Firm_52",
+      "peer": "Peer_C3",
+      "index": "DEMO",
+      "median_pay_k": 1557.4,
+      "median_opre_m": 5319.1,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100052",
+      "name": "Peer_Firm_53",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1836.4,
+      "median_opre_m": 14757.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100053",
+      "name": "Peer_Firm_54",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1601.9,
+      "median_opre_m": 19754.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100054",
+      "name": "Peer_Firm_55",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1613.7,
+      "median_opre_m": 17899.2,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100055",
+      "name": "Peer_Firm_56",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1747.4,
+      "median_opre_m": 13218.3,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100056",
+      "name": "Peer_Firm_57",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1162.8,
+      "median_opre_m": 8413.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100057",
+      "name": "Peer_Firm_58",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1547.5,
+      "median_opre_m": 9448.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100058",
+      "name": "Peer_Firm_59",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1827.1,
+      "median_opre_m": 19385.1,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100059",
+      "name": "Peer_Firm_60",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1995.6,
+      "median_opre_m": 18906.5,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100060",
+      "name": "Peer_Firm_61",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 2168.8,
+      "median_opre_m": 10438.8,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100061",
+      "name": "Peer_Firm_62",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2045.9,
+      "median_opre_m": 15079.1,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100062",
+      "name": "Peer_Firm_63",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1947.9,
+      "median_opre_m": 19650.7,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100063",
+      "name": "Peer_Firm_64",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1607.6,
+      "median_opre_m": 14192.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100064",
+      "name": "Peer_Firm_65",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1433.1,
+      "median_opre_m": 15170.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100065",
+      "name": "Peer_Firm_66",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1626.3,
+      "median_opre_m": 12238.8,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100066",
+      "name": "Peer_Firm_67",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2050.3,
+      "median_opre_m": 15554.3,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100067",
+      "name": "Peer_Firm_68",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2067.0,
+      "median_opre_m": 15871.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100068",
+      "name": "Peer_Firm_69",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1859.4,
+      "median_opre_m": 19734.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100069",
+      "name": "Peer_Firm_70",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 1247.2,
+      "median_opre_m": 4210.4,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100070",
+      "name": "Peer_Firm_71",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2355.3,
+      "median_opre_m": 17906.9,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100071",
+      "name": "Peer_Firm_72",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1441.8,
+      "median_opre_m": 10291.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100072",
+      "name": "Peer_Firm_73",
+      "peer": "Peer_C3",
+      "index": "DEMO",
+      "median_pay_k": 1807.7,
+      "median_opre_m": 7483.7,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100073",
+      "name": "Peer_Firm_74",
+      "peer": "Peer_C0",
+      "index": "DEMO",
+      "median_pay_k": 1394.4,
+      "median_opre_m": 2783.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100074",
+      "name": "Peer_Firm_75",
+      "peer": "Peer_C3",
+      "index": "DEMO",
+      "median_pay_k": 1555.8,
+      "median_opre_m": 7882.5,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100075",
+      "name": "Peer_Firm_76",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1647.9,
+      "median_opre_m": 14164.9,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100076",
+      "name": "Peer_Firm_77",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1692.8,
+      "median_opre_m": 20514.3,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100077",
+      "name": "Peer_Firm_78",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1381.9,
+      "median_opre_m": 13370.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100078",
+      "name": "Peer_Firm_79",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 2058.5,
+      "median_opre_m": 13696.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100079",
+      "name": "Peer_Firm_80",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1982.3,
+      "median_opre_m": 15669.5,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100080",
+      "name": "Peer_Firm_81",
+      "peer": "Peer_C3",
+      "index": "DEMO",
+      "median_pay_k": 1040.0,
+      "median_opre_m": 7763.9,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100081",
+      "name": "Peer_Firm_82",
+      "peer": "Peer_C3",
+      "index": "DEMO",
+      "median_pay_k": 1738.7,
+      "median_opre_m": 7288.6,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100082",
+      "name": "Peer_Firm_83",
+      "peer": "Peer_C0",
+      "index": "DEMO",
+      "median_pay_k": 1029.7,
+      "median_opre_m": 2118.3,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100083",
+      "name": "Peer_Firm_84",
+      "peer": "Peer_C0",
+      "index": "DEMO",
+      "median_pay_k": 1154.8,
+      "median_opre_m": 2226.9,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100084",
+      "name": "Peer_Firm_85",
+      "peer": "Peer_C3",
+      "index": "DEMO",
+      "median_pay_k": 1743.7,
+      "median_opre_m": 7984.1,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100085",
+      "name": "Peer_Firm_86",
+      "peer": "Peer_C0",
+      "index": "DEMO",
+      "median_pay_k": 921.4,
+      "median_opre_m": 2053.9,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100086",
+      "name": "Peer_Firm_87",
+      "peer": "Peer_C0",
+      "index": "DEMO",
+      "median_pay_k": 958.0,
+      "median_opre_m": 2232.3,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100087",
+      "name": "Peer_Firm_88",
+      "peer": "Peer_C3",
+      "index": "DEMO",
+      "median_pay_k": 1571.6,
+      "median_opre_m": 6554.2,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100088",
+      "name": "Peer_Firm_89",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1653.0,
+      "median_opre_m": 9753.9,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100089",
+      "name": "Peer_Firm_90",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1246.6,
+      "median_opre_m": 14204.0,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100090",
+      "name": "Peer_Firm_91",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1966.9,
+      "median_opre_m": 17043.4,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100091",
+      "name": "Peer_Firm_92",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 1637.1,
+      "median_opre_m": 16467.4,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100092",
+      "name": "Peer_Firm_93",
+      "peer": "Peer_C6",
+      "index": "DEMO",
+      "median_pay_k": 1564.4,
+      "median_opre_m": 11454.3,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100093",
+      "name": "Peer_Firm_94",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 1524.1,
+      "median_opre_m": 4994.9,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100094",
+      "name": "Peer_Firm_95",
+      "peer": "Peer_C1",
+      "index": "DEMO",
+      "median_pay_k": 2071.3,
+      "median_opre_m": 17743.4,
+      "pred": {}
+    },
+    {
+      "isin": "DE00100095",
+      "name": "Peer_Firm_96",
+      "peer": "Peer_C4",
+      "index": "DEMO",
+      "median_pay_k": 1157.8,
+      "median_opre_m": 5109.7,
+      "pred": {}
+    }
+  ]
+}

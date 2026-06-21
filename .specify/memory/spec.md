@@ -30,7 +30,7 @@ The architecture is structured sequentially to prevent data dredging and halluci
 1. **Data Layer:** `opre`, `roa`, `gear`, `total_comp`. 
 2. **Math Layer:** Isolated execution of K-Means and Quantile regressions. Outputs the "EvidenceTrace".
 3. **LLM Translation Layer:** Only ingests the EvidenceTrace JSON. Uses specific system prompts for the Dual-Lens interface.
-4. **UI Layer:** A Streamlit/React frontend providing the "Wargaming Toggle" (Auditor vs Compliance) and visualizing the Reach scatterplot.
+4. **UI Layer:** A Streamlit/React frontend providing the "Dual-Lens Toggle" (Auditor vs Compliance) and visualizing the Reach scatterplot.
 
 ## 4. Interfaces & Data Flow
 **EvidenceTrace Schema:**

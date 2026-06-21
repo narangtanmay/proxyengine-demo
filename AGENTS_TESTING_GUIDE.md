@@ -1,49 +1,109 @@
 # ProxyEngine: Test Suite & Ground Truth Benchmarks (Agent Guide)
 
-## 🤖 Attention AI Agents & Developers
-This document explains the rationale, data sourcing, and execution strategy for the ProxyEngine test suite. When running, debugging, or extending the tests in the `tests/` directory, use this document as your primary domain knowledge context.
+## Attention AI Agents & Developers
+
+This document explains the rationale, data sourcing, and execution strategy for the ProxyEngine test suite. When running, debugging, or extending tests in `tests/`, use this document as your primary domain context.
 
 ---
 
-## 1. The Validation Strategy (Ground Truth)
-In corporate finance, "fairness" is subjective. To mathematically validate the ProxyEngine Statistical Machine Learning (SML) pipeline without introducing bias, we use **historical Annual General Meeting (AGM) voting results** as our objective ground truth. 
+## 1. Validation Strategy (Ground Truth)
 
-Under the German implementation of **ARUG II (EU Shareholder Rights Directive II)**, listed companies must submit their remuneration reports to an annual shareholder vote ("Say-on-Pay"). If a package is rejected (typically driven by "Vote Against" recommendations from proxy advisors like ISS and Glass Lewis), it indicates a severe, mathematically provable governance anomaly. 
+In corporate finance, "fairness" is subjective. To mathematically validate the ProxyEngine Statistical Machine Learning (SML) pipeline without introducing bias, we use **historical Annual General Meeting (AGM) voting results** as objective ground truth.
 
-Our tests inject the financial profiles of these historical scandals into the SML engine to verify that our algorithms flag the *exact same anomalies* that caused the real-world shareholder revolts.
+Under the German implementation of **ARUG II (EU Shareholder Rights Directive II)**, listed companies must submit their remuneration reports to an annual shareholder vote ("Say-on-Pay"). When a package is rejected (typically driven by "Vote Against" recommendations from proxy advisors like ISS and Glass Lewis), it indicates a severe, mathematically provable governance anomaly.
 
----
-
-## 2. The Test Cases & Sourcing
-
-### Test 1: Bayer AG (2020) - The Asymmetric Ratchet
-*   **Sourced From:** 2020 Bayer AG Annual General Meeting results and subsequent ISS proxy voting recommendations.
-*   **The Historical Reality:** Shareholders delivered a historic rebuke, with over 75% voting *against* the remuneration report. The board paid out high bonuses despite the disastrous Monsanto acquisition destroying billions in market capitalization (plummeting ROA and TSR).
-*   **What the Agent Tests:** `test_bayer_2020_asymmetric_ratchet` validates the SML Panel Regression. It ensures the model outputs `ratchet_triggered: True` when it detects that executive pay remained insulated while firm performance (ROA) severely contracted.
-
-### Test 2: Software AG (2022) - The "Reach" Anomaly
-*   **Sourced From:** 2022 Software AG AGM results and governance backlash reports.
-*   **The Historical Reality:** Shareholders rejected the remuneration report due to outsized Long-Term Incentive (LTI) packages and complex target setting that misaligned with the company's mid-cap (MDAX/TecDAX) scale.
-*   **What the Agent Tests:** `test_software_ag_2022_reach_anomaly` validates the Lasso-Regularized Quantile Regression. It proves the engine calculates a massive `reach_ratio` (e.g., > 2.0x), mathematically demonstrating to the LLM that the CEO was being paid like a firm twice its actual operating revenue.
-
-### Test 3: The Secrecy Premium (DCGK Compliance)
-*   **Sourced From:** DCGK (German Corporate Governance Code) guidelines regarding individual disclosure of board compensation.
-*   **The Historical Reality:** Companies that legally opt out of individualized disclosure (using the `opting_out` reporting loophole) face automatic proxy advisor scrutiny and lowered governance scores.
-*   **What the Agent Tests:** `test_secrecy_premium_flag` ensures the data ingestion pipeline successfully passes the `opting_out` boolean through the SML engine into the final `EvidenceTrace` JSON, guaranteeing the LLM triggers a compliance warning.
+Our tests inject the financial profiles of these historical scandals into the SML engine and verify that the algorithms flag the **same anomaly types** that caused real-world shareholder revolts.
 
 ---
 
-## 3. Execution & Extension Instructions for Agents
+## 2. Historical Ground-Truth Test Cases
 
-**Running the Test Suite:**
-Agents should run the following command to verify the SML pipeline's integrity before pushing code changes:
+These live in [`tests/test_historical_revolts.py`](tests/test_historical_revolts.py).
+
+### Test 1: Allianz SE (2025) — LTI Structural Imbalance
+
+*   **Sourced from:** 2025 Allianz SE AGM / ISS proxy voting recommendations on Agenda Item 7 (remuneration policy).
+*   **Historical reality:** ISS recommended AGAINST the remuneration policy due to an excessive LTI target multiplier relative to fixed base salary, breaching DCGK G.1 guidance.
+*   **What the test validates:** `test_allianz_2025_lti_structural_imbalance` injects an Allianz 2025 profile (LTI = €8M, base salary = €1.8M) into the panel and asserts `lti_vs_salary_ratio > 4.0` in the returned `EvidenceTrace`.
+
+### Test 2: DHL Group (2024) — Pay-for-Performance Disconnect
+
+*   **Sourced from:** 2024 DHL Group AGM pushback on the remuneration report (Agenda Item 7).
+*   **Historical reality:** Shareholders objected to STI payout increases while ROA contracted materially year-over-year.
+*   **What the test validates:** `test_dhl_2024_pay_performance_disconnect` injects a 2023–2024 two-year panel (STI up, ROA down) and asserts `ratchet_triggered is True`.
+
+---
+
+## 3. Full Test Suite Map
+
+Always use the virtualenv interpreter from [`CLAUDE.md`](CLAUDE.md):
+
 ```bash
-python3 -m pytest tests/test_historical_revolts.py -v
+# Primary regression suite (historical AGM cases)
+/home/tanmay/Desktop/science_hack/proxyengine/venv/bin/pytest tests/test_historical_revolts.py -v
+
+# Full suite
+/home/tanmay/Desktop/science_hack/proxyengine/venv/bin/pytest tests/ -v
 ```
 
-**Adding New Tests:**
-If new ARUG II proxy data becomes available, agents should:
-1. Identify a company that received a severe "Say-on-Pay" rejection.
-2. Extract their `opre` (Operating Revenue), `roa` (Return on Assets), `gear` (Leverage), and `total_comp` for the year of the vote and the preceding year.
-3. Inject the data into the `generate_background_market_data()` mock panel.
-4. Assert that the SML engine triggers the correct mathematical anomaly (Reach, Ratchet, or Hidden Stretch) matching the real-world proxy advisor complaint.
+| File | Focus | Key tests |
+|------|-------|-----------|
+| [`tests/test_historical_revolts.py`](tests/test_historical_revolts.py) | AGM ground-truth benchmarks | Allianz 2025 LTI ratio, DHL 2024 ratchet |
+| [`tests/test_proxy_engine.py`](tests/test_proxy_engine.py) | Pipeline integrity, PDF fallback, dual-lens reports, K-Means quality, chat routing | `test_sml_engine_pipeline`, `test_dual_lens_report_generation`, `test_kmeans_shadow_peer_quality` |
+| [`tests/test_llm_prompt_filtering.py`](tests/test_llm_prompt_filtering.py) | NDA-safe LLM prompt allowlist | Strips `opre`, `actual_pay`, `proposed_salary` etc. before prompts |
+| [`tests/test_treadmill_decomposition.py`](tests/test_treadmill_decomposition.py) | Oaxaca-Blinder treadmill math | `test_treadmill_oaxaca_decomposition` |
+| [`tests/test_stateless_parity.py`](tests/test_stateless_parity.py) | Cached vs live SML scoring parity | `test_sml_stateless_parity` |
+
+Shared fixtures are defined in [`tests/conftest.py`](tests/conftest.py):
+
+*   `shared_sml_engine` — session-scoped; fits the full SML pipeline once per test run.
+*   `shared_dual_lens` — session-scoped `ProxyEngineDualLens` instance.
+
+---
+
+## 4. LLM Guardrails & Prompt Filtering
+
+The dual-lens LLM layer must **never** receive raw proprietary euro amounts. Filtering is enforced in [`src/llm_wrapper.py`](src/llm_wrapper.py) via:
+
+*   **`TRACE_ALLOWLIST`** — derived ratios and flags only (`reach_ratio`, `multiple_of_median`, `ratchet_triggered`, `lti_vs_salary_ratio`, etc.). Raw fields like `opre`, `actual_pay`, and `isin` are stripped.
+*   **`PROPOSAL_ALLOWLIST`** — `company_name`, `exec_id`, `esg_linked`, `agenda_item` only. Raw `proposed_salary`, `proposed_sti`, `proposed_lti` are stripped.
+
+[`tests/test_llm_prompt_filtering.py`](tests/test_llm_prompt_filtering.py) verifies:
+
+1. Raw trace fields do not appear in filtered output.
+2. Derived trace fields are preserved.
+3. Raw proposal euro amounts do not appear in filtered output.
+4. Built insight prompt strings exclude raw dollar values entirely.
+
+### Wizard-of-Oz fallback guardrail
+
+[`tests/conftest.py`](tests/conftest.py) installs an **autouse** fixture that **fails any test** that silently hits an offline LLM mock fallback unless explicitly marked:
+
+```python
+@pytest.mark.allow_fallback_mock
+def test_something_that_uses_fallback():
+    ...
+```
+
+This prevents integration tests from passing while the LLM layer degrades to local templates without notice.
+
+---
+
+## 5. Execution & Extension Instructions
+
+### Before pushing SML or LLM changes
+
+```bash
+/home/tanmay/Desktop/science_hack/proxyengine/venv/bin/pytest tests/test_historical_revolts.py -v
+/home/tanmay/Desktop/science_hack/proxyengine/venv/bin/pytest tests/test_llm_prompt_filtering.py -v
+```
+
+### Adding a new historical revolt test
+
+1. Identify a company that received a severe Say-on-Pay rejection under ARUG II.
+2. Extract `opre`, `roa`, `gear`, `salary`, `sti`, `lti`, and `total_comp` for the vote year (and prior year if testing ratchets).
+3. Append rows to a copy of `shared_sml_engine.data` via `pd.concat`, instantiate a fresh `ProxyEngineSML(df_combined)`, and call `run_full_pipeline()`.
+4. Assert the correct flag in `engine.get_evidence_trace(isin, year)` — e.g. `reach_ratio`, `ratchet_triggered`, or `lti_vs_salary_ratio`.
+5. Add the test to `tests/test_historical_revolts.py` with a docstring citing the AGM ground truth.
+
+Do **not** reference removed helpers such as `generate_background_market_data()` — they are not part of this codebase.

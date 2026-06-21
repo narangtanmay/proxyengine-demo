@@ -451,12 +451,18 @@ async def serve_dashboard():
     """Serves the standalone Pay Governance Dashboard. Must be accessed via this server
     (not opened as a local file) since the dashboard's fetch calls are hardcoded to
     http://localhost:8000."""
-    return FileResponse(os.path.join(frontend_dir, "Pay Governance Dashboard.dc.html"))
+    return FileResponse(
+        os.path.join(frontend_dir, "Pay Governance Dashboard.dc.html"),
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate, max-age=0"}
+    )
 
 
 @app.get("/support.js")
 async def serve_support_js():
-    return FileResponse(os.path.join(frontend_dir, "support.js"))
+    return FileResponse(
+        os.path.join(frontend_dir, "support.js"),
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate, max-age=0"}
+    )
 
 if __name__ == "__main__":
     import uvicorn

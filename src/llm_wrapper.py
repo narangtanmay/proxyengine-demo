@@ -15,6 +15,25 @@ class ProxyEngineDualLens:
         """
         pass
 
+    # Fields safe to send to a third-party LLM API: abstract, derived ratios/flags only.
+    # Raw proprietary figures (opre, actual_pay, isin, _traceability_map) and raw proposed
+    # dollar amounts (proposed_salary, proposed_sti, proposed_lti) must never leave this process.
+    TRACE_ALLOWLIST = {
+        "company", "exec_id", "year", "cluster_id", "multiple_of_median",
+        "pay_premium", "reach_ratio", "ratchet_triggered", "secrecy_premium_flag",
+        "lti_vs_salary_ratio", "roa", "gear", "sector", "salary_benchmark",
+        "sti_benchmark", "lti_benchmark", "hidden_stretch", "hidden_stretch_variance",
+        "internal_concentration_ratio", "concentration_ratchet_triggered",
+    }
+    PROPOSAL_ALLOWLIST = {"company_name", "exec_id", "esg_linked", "agenda_item"}
+
+    @staticmethod
+    def _filter_for_llm(trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> tuple:
+        """Strip raw proprietary fields before any data is serialized into an LLM prompt."""
+        filtered_trace = {k: v for k, v in (trace or {}).items() if k in ProxyEngineDualLens.TRACE_ALLOWLIST}
+        filtered_proposal = {k: v for k, v in (proposal_data or {}).items() if k in ProxyEngineDualLens.PROPOSAL_ALLOWLIST}
+        return filtered_trace, filtered_proposal
+
     def _deepseek_chat(self, system_prompt: str, user_content: str, max_tokens: int = None) -> str:
         """
         Single DeepSeek Chat Completions call. Returns "" on any miss (no key, network
@@ -91,13 +110,15 @@ class ProxyEngineDualLens:
         Returns "" so callers fall back to deterministic templates when DeepSeek is unavailable.
         """
         system_prompt = self.NARRATIVE_SYSTEM_PROMPTS.get(mode, self.NARRATIVE_SYSTEM_PROMPTS["auditor"])
+        # Strip raw proprietary fields before anything is serialized into the prompt.
+        filtered_trace, filtered_proposal = self._filter_for_llm(trace, proposal_data)
         query_line = f"The user asks: \"{user_query}\". Answer this directly.\n\n" if user_query else ""
         user_content = (
             f"{query_line}"
-            f"Company: {trace.get('company', proposal_data.get('company_name', 'the company'))}\n"
-            f"Executive scope: {trace.get('exec_id', 'Executive Board')}\n\n"
-            f"Deterministic SML evidence trace:\n{json.dumps(trace, indent=2)}\n\n"
-            f"Remuneration proposal details:\n{json.dumps(proposal_data, indent=2)}"
+            f"Company: {filtered_trace.get('company', filtered_proposal.get('company_name', 'the company'))}\n"
+            f"Executive scope: {filtered_trace.get('exec_id', 'Executive Board')}\n\n"
+            f"Deterministic SML evidence trace:\n{json.dumps(filtered_trace, indent=2)}\n\n"
+            f"Remuneration proposal details:\n{json.dumps(filtered_proposal, indent=2)}"
         )
         return self._deepseek_chat(system_prompt, user_content)
 
@@ -164,12 +185,14 @@ class ProxyEngineDualLens:
     def _build_insight_user_content(self, criterion: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
         """Assemble the grounded prompt payload sent to the model for a single criterion."""
         focus = self.CRITERION_GUIDE.get(criterion, criterion)
+        # Strip raw proprietary fields before anything is serialized into the prompt.
+        filtered_trace, filtered_proposal = self._filter_for_llm(trace, proposal_data)
         return (
-            f"Company: {trace.get('company', proposal_data.get('company_name', 'the company'))}\n"
-            f"Executive scope: {trace.get('exec_id', 'Executive Board')}\n\n"
+            f"Company: {filtered_trace.get('company', filtered_proposal.get('company_name', 'the company'))}\n"
+            f"Executive scope: {filtered_trace.get('exec_id', 'Executive Board')}\n\n"
             f"Focus your analysis ONLY on: {focus}\n\n"
-            f"Deterministic SML evidence trace:\n{json.dumps(trace, indent=2)}\n\n"
-            f"Remuneration proposal details:\n{json.dumps(proposal_data, indent=2)}"
+            f"Deterministic SML evidence trace:\n{json.dumps(filtered_trace, indent=2)}\n\n"
+            f"Remuneration proposal details:\n{json.dumps(filtered_proposal, indent=2)}"
         )
 
     def _generate_with_deepseek(self, criterion: str, lens: str, trace: Dict[str, Any], proposal_data: Dict[str, Any]) -> str:
@@ -214,7 +237,9 @@ class ProxyEngineDualLens:
         label = metric.get("label", "this metric")
         value = metric.get("value", "")
         context = metric.get("context", "")
-        company = (trace or {}).get("company", "the company")
+        # Only allowlisted trace fields may be referenced (the card grounding comes from `metric`).
+        filtered_trace, _ = self._filter_for_llm(trace or {}, {})
+        company = filtered_trace.get("company", "the company")
         user_content = (
             f"Company: {company}\n"
             f"Metric: {label} = {value}\n"

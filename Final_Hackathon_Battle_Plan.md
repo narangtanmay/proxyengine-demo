@@ -6,7 +6,7 @@
 **The Pitch:**
 "Before launching a proxy fight over executive compensation, institutional investors need mathematically bulletproof evidence of rent extraction and the ability to anticipate the corporate board's legal defense. 
 
-We built **ProxyEngine**, an Adversarial AI platform for 'Say-on-Pay' wargaming. It ingests German corporate data, uses regularized econometric models to define expected compensation, and mathematically isolates executive rent extraction (e.g., 'Portable Rent', 'Asymmetric Ratchets'). Finally, an NDA-compliant LLM translates these complex statistical flags into an adversarial wargame: generating both the investor's attack thesis and the board's DCGK compliance defense."
+We built **ProxyEngine**, an Adversarial AI platform for Say-on-Pay governance analysis. It ingests German corporate data, uses regularized econometric models to define expected compensation, and mathematically isolates executive rent extraction (e.g., 'Portable Rent', 'Asymmetric Ratchets'). Finally, an NDA-compliant LLM translates these complex statistical flags into a dual-lens adversarial brief: generating both the investor's attack thesis and the board's DCGK compliance defense."
 
 ## 2. The Architecture & Econometric Pipeline
 *A unified, dependency-driven pipeline. Output of Step A feeds Step B.*
@@ -34,9 +34,9 @@ We built **ProxyEngine**, an Adversarial AI platform for 'Say-on-Pay' wargaming.
     *   *Relative Degree of Alignment (RDA):* Pay Percentile Rank vs TSR Percentile Rank over 3 years.
 *   **Flag 4: Portable Rent (The Stretch Goal):** Use the `exec_id` in the person-year panel to track executives moving across companies. Prove mathematically that their "Reach" premium travels with them.
 
-## 3. The LLM Translation Layer & UI (Deterministic Wargaming)
+## 3. The LLM Translation Layer & UI (Deterministic Dual-Lens Analysis)
 *   **The Rule:** The LLM cannot hallucinate. It is restricted to a pure natural language templating engine reading from deterministic SML outputs.
-*   **The UI Concept:** A single dashboard with an **"Adversarial Wargaming Toggle"**. 
+*   **The UI Concept:** A single dashboard with a **Dual-Lens Toggle** (Activist Auditor vs Compliance Board). 
 *   **The Execution:** Both modes read from the *exact same* underlying ML math (Reach, Ratchets). The system prompt swaps to simulate the boardroom fight.
 *   **Mode 1: The Attack (Investor Lens):**
     * *System Prompt:* "You are an activist investor. Use these mathematical flags to write a ruthless voting recommendation against the board."
@@ -48,6 +48,6 @@ We built **ProxyEngine**, an Adversarial AI platform for 'Say-on-Pay' wargaming.
 ## 4. The Day 1 Execution Plan (The "One Thing to Do First")
 **Friday Morning Protocol:**
 1.  **Mikhail & Shivani (Data/Math):** Hand-pick THREE high-profile executives (e.g., VW, Bayer). Force those rows through the join, the regression, and the residual calculation. **Do not attempt to process 3,750 rows until the math is validated on three.**
-2.  **Tanmay (Backend/LLM):** Set up the FastAPI server. Write the two adversarial LLM prompt templates that ingest the JSON flags and output the wargaming narratives.
-3.  **Saket (UI):** Build the "Wargaming" dashboard. The UI must visualize the "Reach" scatterplot and highlight the specific flags the LLM is reading from.
+2.  **Tanmay (Backend/LLM):** Set up the FastAPI server. Write the two adversarial LLM prompt templates that ingest the JSON flags and output the dual-lens narratives.
+3.  **Saket (UI):** Build the governance dashboard. The UI must visualize the "Reach" scatterplot and highlight the specific flags the LLM is reading from.
 4.  **Liam (Domain):** Vet the ORBIS variables to ensure they map to ISS guidelines. Write the exact DCGK defense arguments for the LLM's "Defender Mode" prompt.

@@ -12,6 +12,10 @@ __pycache__/
 venv/
 .venv/
 
+# Caches / generated artifacts
+sml_cache.json
+.understand-anything/
+
 # OS / editor
 .DS_Store
 Thumbs.db
